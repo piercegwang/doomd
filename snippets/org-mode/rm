@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: Latex rm
+# key: rm
+# condition: (org-inside-LaTeX-fragment-p)
+# --
+\rm $0

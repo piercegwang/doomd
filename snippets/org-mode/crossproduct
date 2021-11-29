@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: Cross Product lav
+# key: cross
+# condition: (org-inside-LaTeX-fragment-p)
+# --
+\vec{$1} \times \vec{$2}$0

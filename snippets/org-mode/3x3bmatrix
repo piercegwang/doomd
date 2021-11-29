@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: 3x3 Latex bMatrix
+# key: 3x3b
+# condition: (org-inside-LaTeX-fragment-p)
+# --
+\begin{bmatrix} $0 &  &  \\\\  &  &  \\\\  &  &  \end{bmatrix} 

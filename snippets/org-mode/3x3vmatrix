@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: 3x3 Latex vMatrix
+# key: 3x3v
+# condition: (org-inside-LaTeX-fragment-p)
+# --
+\begin{vmatrix} $0 &  &  \\\\  &  &  \\\\  &  &  \end{vmatrix} 

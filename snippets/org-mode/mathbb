@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: Latex mathbb
+# key: bb
+# condition: (org-inside-LaTeX-fragment-p)
+# --
+\mathbb{$0}

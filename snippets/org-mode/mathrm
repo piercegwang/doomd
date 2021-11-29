@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: Latex \mathrm{}
+# key: mrm
+# condition: (org-inside-LaTeX-fragment-p)
+# --
+\mathrm{$0}

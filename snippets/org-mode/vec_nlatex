@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: vec not in LaTeX
+# key: vec
+# condition: (not (org-inside-LaTeX-fragment-p))
+# --
+\\(\vec{$0}\\)

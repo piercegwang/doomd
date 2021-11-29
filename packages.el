@@ -56,7 +56,8 @@
 (package! treemacs-magit)
 (package! mixed-pitch)
 (package! darkroom)
-(package! bufler)
+;; (package! bufler)
+(package! doom-snippets :ignore t)
 (package! rotate)
 (package! org-roam)
 (package! 2048-game)
@@ -67,3 +68,6 @@
 (package! org-drill)
 (package! doct)
 (package! darkroom)
+(package! lsp-pyright)
+(package! ox-awesomecv
+  :recipe (:host gitlab :repo "Titan-C/org-cv"))

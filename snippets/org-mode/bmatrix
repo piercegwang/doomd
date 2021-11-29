@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: Latex bMatrix
+# key: matb
+# --
+\begin{bmatrix} $0 \end{bmatrix}

@@ -56,6 +56,10 @@
       "C-<right>"      #'+evil/window-move-right)
 ;; Windows:4 ends here
 
+;; [[file:config.org::*Allow Local Variables][Allow Local Variables:1]]
+(setq-default enable-local-variables t)
+;; Allow Local Variables:1 ends here
+
 ;; [[file:config.org::*Bookmarks][Bookmarks:1]]
   (global-set-key (kbd "C-x r D") 'bookmark-delete)
 ;; Bookmarks:1 ends here
@@ -320,67 +324,13 @@
   (use-package! ztree)
 ;; ztree (Tool for diffing and merging directories):1 ends here
 
-;; [[file:config.org::*Set default font and configure font resizing][Set default font and configure font resizing:1]]
-  ;; (cond ((memq system-type '(gnu/linux gnu))
-  ;;        (setq pgw/default-font "Monoid"))
-  ;;       ((memq system-type '(darwin))
-  ;;        (setq pgw/default-font "Menlo")))
-  (setq pgw/default-font "Monoid")
-  (setq pgw/default-font-size 12)
-  (setq pgw/current-font-size pgw/default-font-size)
-
-  (setq pgw/font-change-increment 1.1)
-
-  (defun pgw/font-code ()
-    "Return a string representing the current font (like \"Inconsolata-14\")."
-    (concat pgw/default-font "-" (number-to-string pgw/current-font-size)))
-
-  (defun pgw/set-font-size ()
-    "Set the font to `pgw/default-font' at `pgw/current-font-size'.
-  Set that for the current frame, and also make it the default for
-  other, future frames."
-    (interactive)
-    (let ((font-code (pgw/font-code)))
-      (if (assoc 'font default-frame-alist)
-          (setcdr (assoc 'font default-frame-alist) font-code)
-        (add-to-list 'default-frame-alist (cons 'font font-code)))
-      (set-frame-font font-code)))
-
-  (defun pgw/reset-font-size ()
-    "Change font size back to `pgw/default-font-size'."
-    (interactive)
-    (setq pgw/current-font-size pgw/default-font-size)
-    (pgw/set-font-size))
-
-  (defun pgw/increase-font-size ()
-    "Increase current font size by a factor of `pgw/font-change-increment'."
-    (interactive)
-    (setq pgw/current-font-size
-          (ceiling (* pgw/current-font-size pgw/font-change-increment)))
-    (pgw/set-font-size))
-
-  (defun pgw/decrease-font-size ()
-    "Decrease current font size by a factor of `pgw/font-change-increment', down to a minimum size of 1."
-    (interactive)
-    (setq pgw/current-font-size
-          (max 1
-               (floor (/ pgw/current-font-size pgw/font-change-increment))))
-    (pgw/set-font-size))
-
-  (define-key global-map (kbd "C-)") 'pgw/reset-font-size)
-  (define-key global-map (kbd "C-H-0") 'pgw/set-font-size)
-  (define-key global-map (kbd "C-+") 'pgw/increase-font-size)
-  (define-key global-map (kbd "C-=") 'pgw/increase-font-size)
-  (define-key global-map (kbd "C-_") 'pgw/decrease-font-size)
-  (define-key global-map (kbd "C--") 'pgw/decrease-font-size)
-
-  (add-hook! 'emacs-startup-hook
-            (lambda () (interactive) (pgw/reset-font-size)))
-;; Set default font and configure font resizing:1 ends here
-
-;; [[file:config.org::*Variable Pitch Default Font][Variable Pitch Default Font:1]]
-  (set-face-attribute 'variable-pitch nil :family "Avenir Next")
-;; Variable Pitch Default Font:1 ends here
+;; [[file:config.org::*Doom fonts][Doom fonts:1]]
+(setq doom-font (font-spec :family "Ubuntu Mono" :size 14 :height 1.0)
+      doom-big-font (font-spec :family "Ubuntu Mono" :size 26)
+      doom-variable-pitch-font (font-spec :family "Open Sans" :size 12)
+      doom-unicode-font (font-spec :family "Ubuntu Mono")
+      doom-serif-font (font-spec :family "Ubuntu"))
+;; Doom fonts:1 ends here
 
 ;; [[file:config.org::*Mixed Pitch][Mixed Pitch:1]]
   (use-package! mixed-pitch
@@ -388,8 +338,9 @@
     ;; (set-face-attribute 'variable-pitch :height 160)
     (dolist (face '(line-number line-number-current-line org-list-dt org-link)) (add-to-list 'mixed-pitch-fixed-pitch-faces face))
     ;; (add-hook! 'text-mode-hook 'mixed-pitch-mode)
-    (global-set-key (kbd "C-x v f") 'mixed-pitch-mode)
-    )
+    (map! :leader
+          :n "t m" 'mixed-pitch-mode)
+    (set-face-attribute 'variable-pitch nil :height 0.8))
 ;; Mixed Pitch:1 ends here
 
 ;; [[file:config.org::*GPG][GPG:1]]
@@ -407,14 +358,20 @@
   (line-number-mode -1)
 ;; Other Configuration:1 ends here
 
-;; [[file:config.org::*Org-mode][Org-mode:1]]
+;; [[file:config.org::#org][Org-mode:1]]
 (after! org
+  (map! :leader
+        :map org-mode-map
+        :n "m b t t" 'org-table-toggle-column-width
+        :nv "m b y" 'org-table-copy-region
+        :nv "m b p" 'org-table-paste-rectangle
+        :nv "m b d y" 'org-table-cut-region)
   (setq org-directory "~/Dropbox/org"
         org-default-notes-file (concat org-directory "/inbox.org")
         org-use-property-inheritance t
         org-log-done 'time
         org-list-allow-alphabetical t
-        org-export-in-background t
+        org-export-in-background nil
         org-catch-invisible-edits 'smart
         org-export-with-sub-superscripts '{}
         org-babel-default-header-args
@@ -427,80 +384,75 @@
           (:tangle . "no")
           (:comments . "link")))
   (use-package! org-roam
-      :hook (after-init . org-roam-mode)
-      :config
-      (map! :leader
-            (:prefix-map ("r" . "Roam")
-             :desc "Roam" "l" #'org-roam
-             :desc "Roam Find File" "f" #'org-roam-find-file
-             :desc "Roam Graph" "g" #'org-roam-graph
-             :desc "Roam Capture" "c" #'org-roam-capture
-             :desc "Roam Refresh" "!" #'pgw/org-roam-refresh
-             :desc "Roam Insert" "i" #'org-roam-insert
-             (:prefix ("d" . "Dailies")
-              :desc "Capture Today" "." #'org-roam-dailies-capture-today
-              :desc "Capture Yesterday" "h" #'org-roam-dailies-capture-yesterday
-              :desc "Capture Tomorrow" "l" #'org-roam-dailies-capture-tomorrow
-              :desc "Capture Date" "d" #'org-roam-dailies-capture-date
-              :desc "Find Date" "/" #'org-roam-dailies-find-date
-              :desc "Find Next Note" "L" #'org-roam-dailies-find-next-note
-              :desc "Find Prev Note" "H" #'org-roam-dailies-find-previous-note)))
-      (setq org-roam-directory "~/Dropbox/org-roam/"
-            org-roam-db-location "~/Dropbox/org-roam/org-roam.db"
-            org-roam-dailies-directory "daily/"
-            org-roam-db-update-method 'immediate ;; could change later if it gets slow
-            org-roam-tag-sources '(prop vanilla)
-            org-roam-encrypt-files t
-            org-roam-graph-viewer "/Applications/Firefox.app/Contents/MacOS/firefox-bin"
-            org-roam-dailies-capture-templates
-            '(("j" "Journal" entry
-               #'org-roam-capture--get-point
-               "* %?\n:PROPERTIES:\n:LOGGED: %U\n:END:"
-               :file-name "daily/daily-%<%Y-%m-%d>"
-               :head "#+roam_tags:
-  #+category:
-  #+title: [%<%Y-%m-%d %a>]\n\n")
-              ("s" "Sermon" plain
-               #'org-roam-capture--get-point
-               "* %? :sermon:faith:\n:PROPERTIES:\n:CATEGORY: faith\n:PASSAGE: \n:END:"
-               :file-name "daily/daily-%<%Y-%m-%d>"
-               :head "#+roam_tags:
-  #+category:
-  #+title: [%<%Y-%m-%d %a>]\n\n")
-              ("c" "Conducting Lesson" plain
-               #'org-roam-capture--get-point
-               "* %? :conducting:"
-               :file-name "daily/daily-%<%Y-%m-%d>"
-               :head "#+title: [%<%Y-%m-%d>]\n\n")
-              ("v" "Violin" entry
-               #'org-roam-capture--get-point
-               "* %?\n:PROPERTIES:\n:CATEGORY: %^{Category}\n:END:"
-               :file-name "daily/daily-%<Y-%m-%d>"
-               :head "#+title: [%<%Y-%m-%d>]\n\n"
-               :olp ("Violin")))
-            org-roam-capture-templates
-            '(("d" "Default" plain
-               #'org-roam-capture--get-point
-               "%?"
-               :file-name "%<%Y%m%d%H%M%S>-${slug}"
-               :head "#+title: ${title}\n#+roam_tags:\n#+category: \n"
-               :unnarrowed t)
-              ("t" "Temporary" plain
-               (function org-roam-capture--get-point)
-               :file-name "temporary/%<%Y%m%d%H%M%S>-${slug}"
-               :head "#+title: ${title}\n#+author: %(concat user-full-name)\n#+email: %(concat user-mail-address)\nn#+created: %(format-time-string \"[%Y-%m-%d %H:%M]\")\n#+roam_tags:\n\n%?")
-              ("e" "Entry" entry
-               #'org-roam-capture--get-point
-               "* %?\n%U\n"
-               :file-name "%<%Y%m%d%H%M%S>-${slug}"
-               :head "#+roam_tags:
-  #+title: ${title}\n#+category: \n"
-               :unnarrowed t)))
-      (org-roam-mode 1)
-      (defun pgw/org-roam-refresh ()
-        (interactive)
-        (org-roam-db-build-cache :force)
-        (org-roam-buffer--update-maybe :redisplay)))
+    :hook (after-init . org-roam-mode)
+    :config
+    (map! :leader
+          (:prefix-map ("r" . "Roam")
+           :desc "Roam" "l" #'org-roam
+           :desc "Roam Find File" "f" #'org-roam-find-file
+           :desc "Roam Graph" "g" #'org-roam-graph
+           :desc "Roam Capture" "c" #'org-roam-capture
+           :desc "Roam Refresh" "!" #'pgw/org-roam-refresh
+           :desc "Roam Insert" "i" #'org-roam-insert
+           (:prefix ("d" . "Dailies")
+            :desc "Capture Today" "." #'org-roam-dailies-capture-today
+            :desc "Capture Yesterday" "h" #'org-roam-dailies-capture-yesterday
+            :desc "Capture Tomorrow" "l" #'org-roam-dailies-capture-tomorrow
+            :desc "Capture Date" "d" #'org-roam-dailies-capture-date
+            :desc "Find Date" "/" #'org-roam-dailies-find-date
+            :desc "Find Next Note" "L" #'org-roam-dailies-find-next-note
+            :desc "Find Prev Note" "H" #'org-roam-dailies-find-previous-note)))
+    (setq org-roam-directory "~/Dropbox/org-roam/"
+          org-roam-db-location "~/Dropbox/org-roam/org-roam.db"
+          org-roam-dailies-directory "daily/"
+          org-roam-db-update-method 'immediate ;; could change later if it gets slow
+          org-roam-tag-sources '(prop vanilla)
+          org-roam-encrypt-files nil
+          org-roam-graph-viewer "/Applications/Firefox.app/Contents/MacOS/firefox-bin"
+          org-roam-dailies-capture-templates
+          '(("j" "Journal" entry
+             #'org-roam-capture--get-point
+             "* %? :journal:\n:PROPERTIES:\n:LOGGED: %U\n:END:"
+             :file-name "daily/daily-%<%Y-%m-%d>"
+             :head "#+title: [%<%Y-%m-%d %a>]\n\n")
+            ("s" "Sermon" plain
+             #'org-roam-capture--get-point
+             "* %? :sermon:faith:\n:PROPERTIES:\n:CATEGORY: faith\n:PASSAGE: \n:END:"
+             :file-name "daily/daily-%<%Y-%m-%d>"
+             :head "#+roam_tags: \n#+category: \n#+title: [%<%Y-%m-%d %a>]\n\n")
+            ("c" "Conducting Lesson" plain
+             #'org-roam-capture--get-point
+             "* %? :conducting:"
+             :file-name "daily/daily-%<%Y-%m-%d>"
+             :head "#+title: [%<%Y-%m-%d>]\n\n")
+            ("v" "Violin" entry
+             #'org-roam-capture--get-point
+             "* %?\n:PROPERTIES:\n:CATEGORY: %^{Category}\n:END:"
+             :file-name "daily/daily-%<Y-%m-%d>"
+             :head "#+title: [%<%Y-%m-%d>]\n\n"
+             :olp ("Violin")))
+          org-roam-capture-templates
+          '(("d" "Default" plain
+             #'org-roam-capture--get-point
+             "%?"
+             :file-name "%<%Y%m%d%H%M%S>-${slug}"
+             :head "#+title: ${title}\n#+roam_tags:\n#+category: \n"
+             :unnarrowed t)
+            ("t" "Temporary" plain
+             (function org-roam-capture--get-point)
+             :file-name "temporary/%<%Y%m%d%H%M%S>-${slug}"
+             :head "#+title: ${title}\n#+author: %(concat user-full-name)\n#+email: %(concat user-mail-address)\n#+created: %(format-time-string \"[%Y-%m-%d %H:%M]\")\n#+roam_tags:\n\n%?")
+            ("e" "Entry" entry
+             #'org-roam-capture--get-point
+             "* %?\n%U\n"
+             :file-name "%<%Y%m%d%H%M%S>-${slug}"
+             :head "#+roam_tags: \n#+title: ${title}\n#+category: \n"
+             :unnarrowed t)))
+    (org-roam-mode 1)
+    (defun pgw/org-roam-refresh ()
+      (interactive)
+      (org-roam-db-build-cache :force)
+      (org-roam-buffer--update-maybe :redisplay)))
     (setq org-todo-keywords
           '((sequence "NEXT(n)" "TODO(t)" "IN-PROGRESS(i)" "WAITING(w)" "|" "DONE(d)" "CANCELLED(c)" "DELEGATED(g)")))
   (setq org-tag-persistent-alist '(("noexport" . ?N))
@@ -513,50 +465,46 @@
   (setq org-refile-use-outline-path 'file)
   (setq org-outline-path-complete-in-steps nil)
   (setq org-refile-allow-creating-parent-nodes 'confirm)
-    ;; org-agenda-auto-exclude-function
-    ;; (defun pgw/org-my-auto-exclude-function (tag)
-    ;;   (if
-    ;;       (string= tag "officehours")
-    ;;       (concat "-" tag)))
-    ;; (setq org-agenda-auto-exclude-function 'pgw/org-my-auto-exclude-function)
+  ;; org-agenda-auto-exclude-function
+  ;; (defun pgw/org-my-auto-exclude-function (tag)
+  ;;   (if
+  ;;       (string= tag "officehours")
+  ;;       (concat "-" tag)))
+  ;; (setq org-agenda-auto-exclude-function 'pgw/org-my-auto-exclude-function)
   
-    ;(setq org-agenda-overriding-columns-format "%28ITEM %TODO %SCHEDULED %DEADLINE %TAGS")
+  ;(setq org-agenda-overriding-columns-format "%28ITEM %TODO %SCHEDULED %DEADLINE %TAGS")
   
-    ;; Re-align tags when window shape changes
-    (add-hook! 'org-agenda-mode-hook
-              (lambda () (add-hook! 'window-configuration-change-hook 'org-agenda-align-tags nil t)))
+  ;; Re-align tags when window shape changes
+  (add-hook! 'org-agenda-mode-hook
+            (lambda () (add-hook! 'window-configuration-change-hook 'org-agenda-align-tags nil t)))
   
-    ;(add-hook! 'org-agenda-finalize-hook
-    ;   'org-agenda-align-tags)
+  ;(add-hook! 'org-agenda-finalize-hook
+  ;   'org-agenda-align-tags)
   
-    (setq org-deadline-warning-days 7)
+  (setq org-deadline-warning-days 7)
   
-    (add-hook! 'org-agenda-finalize-hook
-              (lambda ()
-                (display-line-numbers-mode -1)
-                ))
+  (add-hook! 'org-agenda-finalize-hook
+            (lambda ()
+              (display-line-numbers-mode -1)
+              ))
   
-    ;; Org entries
-    (setq org-agenda-max-entries nil)
+  ;; Org entries
+  (setq org-agenda-max-entries nil)
+  
+  
+  (after! org
+    (map! :map evil-org-agenda-mode-map "SPC m l" #'org-agenda-log-mode))
     (setq org-agenda-custom-commands
-          '(("o" . "OHS")
-            ("oA" "OHS/General Tasks (-roam)" agenda ""
-             ((org-agenda-span 1)
-              (org-agenda-files (append (file-expand-wildcards "~/Dropbox/org/*.org")
-                                        (file-expand-wildcards "~/Dropbox/org/calendars/*.org")))))
-            ("of" . "OHS Friend Schedules")
-            ("ofa" "Audrey's Schedule" agenda ""
+          '(("c" . "Columbia")
+            ("cf" . "Columbia Friend Schedules")
+            ("cfe" "Ellie's Schedule" agenda ""
              ((org-agenda-span 7)
               (org-agenda-files
-               (file-expand-wildcards "~/Dropbox/org/notes/OHS/202021/audrey_classes.org"))))
-            ("ofj" "Josie's Schedule" agenda ""
+               (file-expand-wildcards "~/Dropbox/org/notes/columbia/2021_fall/calendar/2021_fall_ellie.org"))))
+            ("cfk" "Kaeon's Schedule" agenda ""
              ((org-agenda-span 7)
               (org-agenda-files
-               (file-expand-wildcards "~/Dropbox/org/notes/OHS/202021/josie_classes.org"))))
-            ("ofA" "Ariana Schedule" agenda ""
-             ((org-agenda-span 7)
-              (org-agenda-files
-               (file-expand-wildcards "~/Dropbox/org/notes/OHS/202021/ariana_classes.org"))))
+               (file-expand-wildcards "~/Dropbox/org/notes/columbia/2021_fall/calendar/2021_fall_kaeon.org"))))
             ("l" "Logging View" agenda ""
              ((org-agenda-span 1)
               (org-agenda-files
@@ -603,10 +551,7 @@
     (let ((searchresults (search-forward (format-time-string "[%Y-%m-%d %a]") nil t)))
       (if searchresults
           'searchresults
-        (error "Not found! Use Vc to create today's practice first.")
-        )
-      )
-    )
+        (error "Not found! Use Vc to create today's practice first."))))
   (setq org-capture-templates
         (doct '(("Inboxes" :keys "i"
                  :file "~/Dropbox/org/inbox.org"
@@ -630,35 +575,59 @@
                  :children (("Credit Card Transaction" :keys "c"
                              :headline "Nordstrom Card"
                              :type table-line
-                             :template ("* %?"))))
+                             :table-line-pos "III-1"
+                             :template ("| | %? | |"))))
                 ("Events" :keys "e"
                  :type entry
                  :children (("Emacs Entry (Not Synced)" :keys "f"
                              :file "~/Dropbox/org/events.org")
                             ("Emacs Calendar" :keys "e"
-                             :file "~/Dropbox/org/calendar/cal_emacs.org"
+                             :file "~/Dropbox/org/calendars/cal_emacs.org"
                              :template ("* %^{Title of event}"
                                         "SCHEDULED: %^{Scheduled time + duration}T"
                                         ":PROPERTIES:"
                                         ":calendar-id: ihfv2u5n9uf5ksj5484vbe7mj4@group.calendar.google.com"
                                         ":END:"
-                                        "org-gcal:%?"
+                                        ":org-gcal:%?"
                                         ":END:"))
                             ("Emacs Calendar" :keys "g"
-                             :file "~/Dropbox/org/calendar/cal_gmail.org"
+                             :file "~/Dropbox/org/calendars/cal_gmail.org"
                              :template ("* %^{Title of event}"
                                         "SCHEDULED: %^{Scheduled time + duration}T"
                                         ":PROPERTIES:"
                                         ":calendar-id: pierce.g.wang@gmail.com"
                                         ":END:"
-                                        "org-gcal:%?"
+                                        ":org-gcal:%?"
                                         ":END:"))))
                 ("Stuff and Things" :keys "s"
                  :file "~/Dropbox/org/notes/stuff_and_things/organizing_temp.org"
                  :children (("Database Entry" :keys "i"
                              :type entry
                              :template ("* DECIDE %?"
-                             "%U")))))))
+                             "%U"))
+                            ("Packing for College" :keys "p"
+                             :type entry
+                             :file "~/Dropbox/org-roam/temporary/20210805114431-packing_for_college.org"
+                             :contexts (:in-file "20210805114431-packing_for_college.org")
+                             :template ("* DONE Item"
+                                        "%^{TYPE}p"
+                                        "%^{QUANTITY}p"
+                                        "%^{COLOR}p"
+                                        "%^{FIT}p"
+                                        "%^{NOTES}p")
+                             :children (("Shirts" :keys "s"
+                                         :headline "Shirts")
+                                        ("Pants" :keys "p"
+                                         :headline "Pants")
+                                        ("Other" :keys "o"
+                                         :headline "Other")))
+                            ("Violin Repertoire" :keys "m"
+                             :type entry
+                             :id "e48fe999-3716-425b-8445-fce296c7635a"
+                             :contexts (:in-file "repertoire.org")
+                             :template ("* - %?"
+                                        "%^{COMPOSER}p"
+                                        "%^{ARRANGEMENT}p")))))))
   
     ;; Set to the name of the file where new notes will be stored
     (setq org-mobile-inbox-for-pull "~/Dropbox/Apps/MobileOrg/index.org")
@@ -696,11 +665,14 @@
       :after org
       :config
       (add-hook! 'org-mode-hook #'org-cdlatex-mode)
+      (map! :map org-cdlatex-mode-map
+      :i "TAB" #'cdlatex-tab
+      :i "M-TAB" #'cdlatex-tab)
       )
     (setq org-format-latex-options
           ;; '(:foreground "#000000" :background default ;; light theme
           '(:foreground "#d6d6d4" :background default ;; dark theme
-                        :scale 1.4
+                        :scale 1.1
                         :html-foreground "Black" :html-background "Transparent"
                         :html-scale 1.0
                         :matchers ("begin" "$1" "$" "$$" "\\(" "\\[")))
@@ -752,8 +724,9 @@
     :config
     (setq org-gcal-client-id pgw/org-gcal-client-id
           org-gcal-client-secret pgw/org-gcal-client-secret
-          org-gcal-file-alist pgw/org-gcal-file-alist)
-    (setq org-gcal-notify-p nil)
+          org-gcal-file-alist pgw/org-gcal-file-alist
+          org-gcal-local-timezone "America/New_York"
+          org-gcal-notify-p nil)
     (setq org-gcal-remove-api-cancelled-events t))
     (setq org-reveal-root "file:///Users/piercewang/Documents/projects/revealjs/reveal.js-4.1.0")
     (use-package! darkroom)
@@ -771,10 +744,15 @@
   :config
   (setq org-gcal-client-id pgw/org-gcal-client-id
         org-gcal-client-secret pgw/org-gcal-client-secret
-        org-gcal-file-alist pgw/org-gcal-file-alist)
-  (setq org-gcal-notify-p nil)
+        org-gcal-file-alist pgw/org-gcal-file-alist
+        org-gcal-local-timezone "America/New_York"
+        org-gcal-notify-p nil)
   (setq org-gcal-remove-api-cancelled-events t))
 ;; org-gcal: Calendar Integration:1 ends here
+
+;; [[file:config.org::*Company mode][Company mode:1]]
+(setq company-idle-delay nil) ;; original 0.2
+;; Company mode:1 ends here
 
 ;; [[file:config.org::*LaTeX][LaTeX:1]]
   (setq TeX-engine 'xetex)
@@ -879,6 +857,19 @@
             )
 ;; Image Mode:1 ends here
 
+;; [[file:config.org::*Flyspell mode][Flyspell mode:1]]
+  (defun pgw/turn-on-flyspell-hook ()
+    (if (or (string-match "^/Users/piercewang/Google Drive/OHS/" (if (eq buffer-file-name nil) "" buffer-file-name))
+            (string-match "^/Users/piercewang/Dropbox/org/notes/college/" (if (eq buffer-file-name nil) "" buffer-file-name)))
+        (flyspell-mode 1)))
+
+  (add-hook! 'org-mode-hook 'turn-on-flyspell)
+;; Flyspell mode:1 ends here
+
+;; [[file:config.org::*Calc][Calc:1]]
+(evil-set-initial-state 'calc-mode 'emacs)
+;; Calc:1 ends here
+
 ;; [[file:config.org::*Tetris][Tetris:1]]
 (use-package! tetris
   :bind (:map tetris-mode-map
@@ -930,8 +921,13 @@
   (which-key-mode)
   (setq which-key-popup-type 'side-window)
   (setq which-key-side-window-location 'bottom)
-  (setq which-key-idle-delay 5.0))
+  (setq which-key-idle-delay 2.5))
 ;; which-key:1 ends here
+
+;; [[file:config.org::*Line Moving][Line Moving:1]]
+(map! :n "j" 'next-line
+      :n "k" 'previous-line)
+;; Line Moving:1 ends here
 
 ;; [[file:config.org::*Hydra for Resizing Windows][Hydra for Resizing Windows:1]]
   (defhydra hydra-windowmanage (global-map "H-c ^")
@@ -949,83 +945,6 @@
 (setq user-full-name "Pierce Wang"
       user-mail-address "pierce.g.wang@gmail.com")
 ;; User Configuration:1 ends here
-
-;; [[file:config.org::*Bufler - Alphapapa][Bufler - Alphapapa:1]]
-  (use-package! bufler
-    :bind (("C-x C-b" . bufler))
-           ;; ("C-x b" . bufler-switch-buffer))
-    :config
-    (setf bufler-groups
-          (bufler-defgroups
-            (group
-             ;; Subgroup collecting all named workspaces.
-             (auto-workspace))
-            (group
-             ;; Subgroup collecting all `help-mode' and `info-mode' buffers.
-             (group-or "*Help/Info*"
-                       (mode-match "*Help*" (rx bos "help-"))
-                       (mode-match "*Info*" (rx bos "info-"))))
-            (group
-             ;; Subgroup collecting all special buffers (i.e. ones that are not
-             ;; file-backed), except `magit-status-mode' buffers (which are allowed to fall
-             ;; through to other groups, so they end up grouped with their project buffers).
-             (group-and "*Special*"
-                        (lambda (buffer)
-                          (unless (or (funcall (mode-match "Magit" (rx bos "magit-status"))
-                                               buffer)
-                                      (funcall (mode-match "Dired" (rx bos "dired"))
-                                               buffer)
-                                      (funcall (auto-file) buffer))
-                            "*Special*")))
-             (group
-              ;; Subgroup collecting these "special special" buffers
-              ;; separately for convenience.
-              (name-match "**Special**"
-                          (rx bos "*" (or "Messages" "Warnings" "scratch" "Backtrace") "*")))
-             (group
-              ;; Subgroup collecting all other Magit buffers, grouped by directory.
-              (mode-match "*Magit* (non-status)" (rx bos (or "magit" "forge") "-"))
-              (auto-directory))
-             ;; Remaining special buffers are grouped automatically by mode.
-             (auto-mode))
-            ;; All buffers under "~/.emacs.d" (or wherever it is).
-            (dir doom-emacs-dir)
-            (group
-             ;; Subgroup collecting buffers in `org-directory' (or "~/org" if
-             ;; `org-directory' is not yet defined).
-             (dir (if (bound-and-true-p org-directory)
-                      org-directory
-                    "~/org"))
-             (dir "~/Dropbox/org/notes/")
-             (dir "~/Dropbox/org/notes/college/essays/" 1)
-             (group
-              ;; Subgroup collecting indirect Org buffers, grouping them by file.
-              ;; This is very useful when used with `org-tree-to-indirect-buffer'.
-              (auto-indirect)
-              (auto-file))
-             ;; Group remaining buffers by whether they're file backed, then by mode.
-             (group-not "*special*" (auto-file))
-             (auto-mode))
-            (group
-             ;; Subgroup for OHS things
-             (dir "~/Google Drive/OHS/")
-             (dir "~/Google Drive/OHS/12th Grade/Classes/" 1)
-             (dir "~/Google Drive/OHS/11th Grade/" 2)
-             ;; Group remaining buffers by whether they're file backed, then by mode.
-             (group-not "*special*" (auto-file))
-             (auto-mode))
-            (dir "/Volumes/" 1)
-            (group
-             ;; Subgroup collecting buffers in a projectile project.
-             (auto-projectile))
-            (group
-             ;; Subgroup collecting buffers in a version-control project,
-             ;; grouping them by directory.
-             (auto-project))
-            ;; Group remaining buffers by directory, then major mode.
-            (auto-directory)
-            (auto-mode))))
-;; Bufler - Alphapapa:1 ends here
 
 ;; [[file:config.org::*Dired][Dired:1]]
   (setq delete-by-moving-to-trash t)
@@ -1059,7 +978,7 @@
   (setq browse-url-firefox-program "/Applications/Firefox.app/Contents/MacOS/firefox-bin")
 ;; browse-url-firefox-program:1 ends here
 
-;; [[file:config.org::*Generate OHS Class Calendar][Generate OHS Class Calendar:1]]
+;; [[file:config.org::*Generate Class Calendar][Generate Class Calendar:1]]
 (defun pgw/date-block (absolute y1 m1 d1 y2 m2 d2)
   "Block date entry. An adapted version of the `diary-block'
 function from the diary-lib."
@@ -1074,83 +993,55 @@ function from the diary-lib."
   "Check for equality of date"
   (equal absolute (calendar-absolute-from-gregorian (diary-make-date year month day))))
 
-(defun pgw/check-ohs-class (absolute classname semesters days times fallstart fallend springstart mononfri springend holidays noclasses)
+(defun pgw/check-ohs-class (absolute classname semesters days times fallstart fallend springstart springend noclasses)
   "Returns a list with formatted strings: (classname curdate
 headline). These can then be used to create the headline. The curdate
 is in the form of a list"
   (let* ((dayname (calendar-day-of-week (calendar-gregorian-from-absolute absolute)))
          (curdate (calendar-gregorian-from-absolute absolute))
-         (periods '("06:00-07:15"
-                    "07:15-08:30"
-                    "08:30-09:45"
-                    "09:45-11:00"
-                    "11:00-12:15"
-                    "12:15-13:30"
-                    "13:30-14:45"
-                    "14:45-16:00"
-                    "16:00-17:15"
-                    "17:15-18:30"
-                    "18:30-19:45"
-                    "19:45-21:00"
-                    "21:00-22:15"))
-         (time (if (equal (type-of times) 'integer) ;; Checks if the times argument is an integer or list of times as strings
-                   (nth (1- times) periods)
-               (nth (- (length days) (length (memq dayname days))) times))))
-    (when (and (cond ((equal days '(1 3)) (or (memq dayname '(1 3)) (pgw/date-date absolute (nth 0 mononfri) (nth 1 mononfri) (nth 2 mononfri)))) ;; Account for MLK Monday on Friday
-                     (t (memq dayname days)))
+         (time (nth (- (length days) (length (memq dayname days))) times)))
+    (when (and (memq dayname days) ;; Account for MLK Monday on Friday
                (or (if (memq 1 semesters) (pgw/date-block absolute (nth 0 fallstart) (nth 1 fallstart) (nth 2 fallstart)
                                                          (nth 0 fallend) (nth 1 fallend) (nth 2 fallend)))
                    (if (memq 2 semesters) (pgw/date-block absolute (nth 0 springstart) (nth 1 springstart) (nth 2 springstart)
                                                           (nth 0 springend) (nth 1 springend) (nth 2 springend)))))
-      (if (equal (type-of times) 'integer) ;; Classes will always be in periods, OH and other events will not
-          (when (and (not (memq 't
-                                (mapcar (lambda (holiday) (if (> (length holiday) 3)
-                                                              (pgw/date-block absolute (nth 0 holiday) (nth 1 holiday) (nth 2 holiday) (nth 3 holiday) (nth 4 holiday) (nth 5 holiday))
-                                                            (pgw/date-date absolute (nth 0 holiday) (nth 1 holiday) (nth 2 holiday))))
-                                        holidays)))
-                     (not (memq 't
-                                (mapcar (lambda (noclass) (if (> (length noclass) 3)
-                                                              (pgw/date-block absolute (nth 0 noclass) (nth 1 noclass) (nth 2 noclass) (nth 3 noclass) (nth 4 noclass) (nth 5 noclass))
-                                                            (pgw/date-date absolute (nth 0 noclass) (nth 1 noclass) (nth 2 noclass))))
-                                        noclasses))))
-            (list classname curdate time))
-        (when (not (memq 't
-                         (mapcar (lambda (holiday) (if (> (length holiday) 3)
-                                                       (pgw/date-block absolute (nth 0 holiday) (nth 1 holiday) (nth 2 holiday) (nth 3 holiday) (nth 4 holiday) (nth 5 holiday))
-                                                     (pgw/date-date absolute (nth 0 holiday) (nth 1 holiday) (nth 2 holiday))))
-                                 holidays)))
-          (list classname curdate time))))))
+      (when (not (memq 't
+                           (mapcar (lambda (noclass) (if (> (length noclass) 3)
+                                                          (pgw/date-block absolute (nth 0 noclass) (nth 1 noclass) (nth 2 noclass) (nth 3 noclass) (nth 4 noclass) (nth 5 noclass))
+                                                        (pgw/date-date absolute (nth 0 noclass) (nth 1 noclass) (nth 2 noclass))))
+                                noclasses)))
+            (list classname curdate time)))))
 
-(defun pgw/create-entry (classname semesters days times &optional desc)
+(defun pgw/create-entry (classname semesters days times &optional desc custom-dates)
   "Creates headlines for class schedule.
 CLASSNAME: a string with the class name (to appear on agenda)
+
 SEMESTERS: a list of integers. e.g. for both just a first semester:
 '(1) or for both semesters '(1 2)
+
 DAYS: the days of the class. Normally it will be M/W or T/Th but in
 order to have flexibility, the function takes an input of another list
 of integers representing days of the week. Monday starts on 1 and
 Sunday is 0
-TIMES: Either an integer with the period number or a cons list
-containing a list of the times which should be the same length as the
-list of days
+
+TIMES: a cons list containing a list of the times which should be
+the same length as the list of days
 
 optional DESC: string containing a description for the event
 
-This function uses the variable `pgw/ohs-schoolyear-dates' for the value of holidays"
-  (let ((current (calendar-absolute-from-gregorian (diary-make-date 2020 8 19)))
+This function uses the variable `pgw/schoolyear-dates' for the value of holidays"
+  (let ((current (calendar-absolute-from-gregorian (diary-make-date 2021 9 9)))
         (desc (if desc (setq desc (format "\n%s\n" desc)) (setq desc "")))
-        (fallstart (gethash "fallstart" pgw/ohs-schoolyear-dates))
-        (fallend (gethash "fallend" pgw/ohs-schoolyear-dates))
-        (springstart (gethash "springstart" pgw/ohs-schoolyear-dates))
-        (mononfri (gethash "mononfri" pgw/ohs-schoolyear-dates))
-        (springend (gethash "springend" pgw/ohs-schoolyear-dates))
-        (holidays (gethash "holidays" pgw/ohs-schoolyear-dates))
-        (noclasses (gethash "noclasses" pgw/ohs-schoolyear-dates)))
+        (fallstart (gethash "fallstart" pgw/schoolyear-dates))
+        (fallend (gethash "fallend" pgw/schoolyear-dates))
+        (springstart (gethash "springstart" pgw/schoolyear-dates))
+        (springend (gethash "springend" pgw/schoolyear-dates))
+        (noclasses (gethash "noclasses" pgw/schoolyear-dates)))
     (goto-char (point-max))
     (insert (format "\n* %s" classname))
     (while (pgw/date-block current (nth 0 fallstart) (nth 1 fallstart) (nth 2 fallstart)
                            (nth 0 springend) (nth 1 springend) (nth 2 springend)) ; Make sure we're within starting and ending dates of school
-      (let ((info (pgw/check-ohs-class current classname semesters days times fallstart fallend springstart mononfri springend holidays noclasses)))
+      (let ((info (pgw/check-ohs-class current classname semesters days times fallstart fallend springstart springend noclasses)))
         (when info
           (let* ((headline (nth 0 info))
                  (days-of-week '("Sun" "Mon" "Tue" "Wed" "Thu" "Fri" "Sat"))
@@ -1167,46 +1058,53 @@ This function uses the variable `pgw/ohs-schoolyear-dates' for the value of holi
                             headline year month day dayofweek time desc)))))
       (setq current (+ current 1)))))
 
-(setq pgw/ohs-schoolyear-dates
+;; (setq pgw/schoolyear-dates
+;;       #s(hash-table
+;;          size 5
+;;          test equal
+;;          data ("fallstart" (2021 9 9)
+;;                "fallend" (2021 12 13)
+;;                "springstart" (2022 1 18)
+;;                "springend" (2022 5 2)
+;;                "noclasses" ((2021 9 6) ;; Labor Day
+;;                             (2021 11 1) ;; No Classes
+;;                             (2021 11 2) ;; Election Day, University Holiday
+;;                             (2021 11 24 2021 11 26) ;; No Classes
+;;                             (2021 11 25) ;; Thanksgiving, University Holiday
+;;                             (2022 1 17)            ;; Martin Luther King Jr. Day, University Holiday
+;;                             (2022 3 14 2022 3 18))  ;; Spring Break
+;;                             )))
+
+(setq pgw/schoolyear-dates
       #s(hash-table
-         size 7
+         size 5
          test equal
-         data ("fallstart" (2020 8 19)
-               "fallend" (2020 12 19)
-               "springstart" (2021 1 4)
-               "mononfri" (2021 1 19)
-               "springend" (2021 5 13)
-               "holidays" ((2020 9 7 2020 9 8) ;; Labor Day
-                           (2020 11 25 2020 11 27) ;; Thanksgiving Holiday
-                           (2020 12 19 2021 1 3) ;; Winter Closure
-                           (2021 1 18 2021 1 19) ;; MLK Holiday
-                           (2021 2 15) ;; Presidents Day
-                           (2021 2 16) ;; Reading Day (No classes)
-                           (2021 3 22 2021 3 26) ;; Spring Break
-                           (2021 5 31 2021 6 1)) ;; Memorial Day Holiday
-               "noclasses" ((2020 10 28 2020 10 30) ;; Parent-Teacher Conferences (no classes)
-                            (2020 12 9 2020 12 11) ;; Study Days (no classes)
-                            (2020 12 14 2020 12 19) ;; Fall Semester Finals
-                            (2021 1 4 2021 1 8) ;; Reading Week
-                            (2021 5 17 2021 5 19) ;; Study Days
-                            (2021 5 20 2021 5 21) ;; Spring Semester Finals
-                            (2021 5 24 2021 5 27) ;; Spring Semester Finals
-                            ))))
-;; Generate OHS Class Calendar:1 ends here
+         data ("fallstart" (2021 08 30)
+               "fallend" (2021 12 17)
+               "springstart" (2022 1 10)
+               "springend" (2022 5 13)
+               "noclasses" ((2021 9 6) ;; Labor Day
+                            (2021 11 1) ;; No Classes
+                            (2021 11 2) ;; Election Day, University Holiday
+                            (2021 11 24 2021 11 26) ;; No Classes
+                            (2021 11 25) ;; Thanksgiving, University Holiday
+                            (2022 1 17)  ;; Martin Luther King Jr. Day, University Holiday
+                            (2022 3 14 2022 3 18))  ;; Spring Break
+                            )))
+;; Generate Class Calendar:1 ends here
 
 ;; [[file:config.org::*Sync gcal Bash Script][Sync gcal Bash Script:1]]
-  (defun pgw/sync-ohs-cal ()
+  (defun pgw/sync-canvas-cal ()
     (interactive)
-    (start-process-shell-command "Running ~/QScripts/syncgcal.sh" nil "bash ~/QScripts/syncgcal.sh"))
+    (start-process-shell-command "Running ~/QScripts/canvcal_org.sh" nil "bash ~/QScripts/canvcal_org.sh"))
 
-  (global-set-key (kbd "C-c s-g o") 'pgw/sync-ohs-cal)
+  (global-set-key (kbd "C-c s-g o") 'pgw/sync-canvas-cal)
 ;; Sync gcal Bash Script:1 ends here
 
-;; [[file:config.org::*Flyspell mode][Flyspell mode:1]]
-  (defun pgw/turn-on-flyspell-hook ()
-    (if (or (string-match "^/Users/piercewang/Google Drive/OHS/" (if (eq buffer-file-name nil) "" buffer-file-name))
-            (string-match "^/Users/piercewang/Dropbox/org/notes/college/" (if (eq buffer-file-name nil) "" buffer-file-name)))
-        (flyspell-mode 1)))
-
-  (add-hook! 'org-mode-hook 'turn-on-flyspell)
-;; Flyspell mode:1 ends here
+;; [[file:config.org::*Python][Python:1]]
+(use-package! lsp-pyright
+  :ensure t
+  :hook (python-mode . (lambda ()
+                          (require 'lsp-pyright)
+                          (lsp))))  ; or lsp-deferred
+;; Python:1 ends here
