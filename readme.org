@@ -1,0 +1,82 @@
+#+TITLE:   Doom Configuration
+#+STARTUP: inlineimages nofold
+
+* Introduction & My Journey in Emacs
+
+My first journal entry in Emacs:
+
+#+begin_quote
+I had no idea this existed! This is my first diary entry on emacs. I just discovered this (emacs) yesterday. This has gone above and beyond my expectations! I'm hoping to use emacs to take care of at least to-do lists in the future. The rest of tonight will be spent on learning about emacs as well as working on my FRQ2 (AP Bio) for tomorrow. — [2018-09-22 Sat]
+#+end_quote
+
+From that moment on, Emacs has been a constant throughout everything I pursue in life. I used it from that year on to take notes in school, organize school todos (using [[https://github.com/piercegwang/org_canvas_parser][my org_canvas_parser]]) and life todos, and have since used it to organize really everything else in my life. This repository contains the latest iteration of my configuration, and is a culmination of everything I've put together to make the best workflow for myself. It is still very much a work in progress, and there are plenty of things I'm still not totally satisfied with, especially after the switch to Doom Emacs. However, I'm rather content with the state of the configuration as it is, and given the lack of free time due to other activities I must unfortunately put aside solving those small kinks until a later date.
+
+* History of this Configuration
+
+This configuration was initially developed for a completely vanilla Emacs install. However, some time during this past summer, I decided to give Doom Emacs a try (for the second time), and have since stuck with that decision. It was a somewhat long transition process, but overall it has been a rather smooth one, and I have certainly been enjoying some of the conveniences of the pre-configured Doom layer.
+
+* Viewing this Configuration
+
+
+
+* Module Template Given by Doom :noexport:
+** Table of Contents :TOC_3:noexport:
+- [[#introduction--my-journey-in-emacs][Introduction & My Journey in Emacs]]
+- [[#history-of-this-configuration][History of this Configuration]]
+- [[#viewing-this-configuration][Viewing this Configuration]]
+
+** Description
+# A summary of what this module does.
+
++ If possible, include a brief list of feature highlights here
++ Like code completion, syntax checking or available snippets
++ Include links to packages & external things where possible
+
+*** Maintainers
++ @username_linked_to_gihub (Author)
++ @username_linked_to_gihub
++ @username_linked_to_gihub
+
+# If this module has no maintainers, then...
+This module has no dedicated maintainers.
+
+*** Module Flags
++ =+flag1= A short description of what this flag does and what it might need
+  when enabled.
++ =+flag2= A short description of what this flag does and what it might need
+  when enabled.
++ =+flag3= A short description of what this flag does and what it might need
+  when enabled.
+
+# If this module has no flags, then...
+This module provides no flags.
+
+*** Plugins
+# A list of linked plugins
++ [[https://orgmode.org/][org-plus-contrib]]
++ [[https://github.com/sabof/org-bullets][org-bullets]]
++ [[https://github.com/TobiasZawada/org-yt][org-yt]]
++ [[https://github.com/sebastiencs/company-box][company-box]]* (=+childframe=)
++ =:lang crystal=
+  + [[https://github.com/brantou/ob-crystal][ob-crystal]]
++ =:lang go=
+  + [[https://github.com/pope/ob-go][ob-go]]
++ =+present=
+  + [[https://github.com/anler/centered-window-mode][centered-window]]
+  + [[https://github.com/takaxp/org-tree-slide][org-tree-slide]]
+  + [[https://gitlab.com/oer/org-re-reveal][org-re-reveal]]
+
+*** Hacks
+# A list of internal modifications to included packages; omit if unneeded
+
+** Prerequisites
+This module has no prerequisites.
+
+** Features
+# An in-depth list of features, how to use them, and their dependencies.
+
+** Configuration
+# How to configure this module, including common problems and how to address them.
+
+** Troubleshooting
+# Common issues and their solution, or places to look for help.

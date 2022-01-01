@@ -1,12 +1,11 @@
 #+title: Doom configuration
 #+author: Pierce Wang
 #+html_head: <link rel='shortcut icon' type='image/png' href='https://www.gnu.org/software/emacs/favicon.png'>
+#+HTML_HEAD: <link rel="stylesheet" href="https://vanillacss.com/vanilla.css">
 #+property: header-args:emacs-lisp :tangle yes :comments link
 #+property: header-args:elisp :exports code
 #+property: header-args:shell :tangle "setup.sh"
 #+property: header-args :tangle no :results silent :eval no-export
-#+TITLE: Emacs Configuration File
-#+AUTHOR: Pierce Wang
 #+BABEL: :cache yes
 #+PROPERTY: header-args :tangle yes :results silent
 #+STARTUP: content indent
@@ -68,6 +67,9 @@ This helps get rid of =functions might not be defined at runtime= warnings. See 
 :PROPERTIES:
 :header-args:emacs-lisp: :tangle yes :comments yes
 :END:
+
+All configurations here get "tangled" into the main ~config.el~ file.
+
 ** Better defaults
 *** Simple Settings
 
@@ -1043,9 +1045,7 @@ Custom commands, testing sorting strategy variable
     :after org
     :config
     (add-hook! 'org-mode-hook #'org-cdlatex-mode)
-    (map! :map org-cdlatex-mode-map
-    :i "TAB" #'cdlatex-tab
-    :i "M-TAB" #'cdlatex-tab)
+    (add-to-list 'org-tab-first-hook 'org-try-cdlatex-tab)
     )
 #+end_src
 
@@ -1116,9 +1116,11 @@ Fix color handling in org-preview-latex-fragment
   (setq org-html-validation-link nil)
 #+end_src
 
-*** org-noter: PDF Annotation
+*** DISABLED org-noter: PDF Annotation
+CLOSED: [2021-11-29 Mon 16:54]
+Obsolete because of PDF reader in Doom.
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
   (use-package! org-noter
     :after org
     :ensure t
@@ -1890,14 +1892,17 @@ the same length as the list of days
 
 optional DESC: string containing a description for the event
 
-This function uses the variable `pgw/schoolyear-dates' for the value of holidays"
-  (let ((current (calendar-absolute-from-gregorian (diary-make-date 2021 9 9)))
-        (desc (if desc (setq desc (format "\n%s\n" desc)) (setq desc "")))
-        (fallstart (gethash "fallstart" pgw/schoolyear-dates))
-        (fallend (gethash "fallend" pgw/schoolyear-dates))
-        (springstart (gethash "springstart" pgw/schoolyear-dates))
-        (springend (gethash "springend" pgw/schoolyear-dates))
-        (noclasses (gethash "noclasses" pgw/schoolyear-dates)))
+This function uses the variable `pgw/schoolyear-dates' for the value of holidays
+unless custom-dates is specified"
+
+  (let* ((current (calendar-absolute-from-gregorian (diary-make-date 2021 9 9)))
+         (desc (if desc (setq desc (format "\n%s\n" desc)) (setq desc "")))
+         (schoolyear-dates (if custom-dates custom-dates (setq schoolyear-dates pgw/schoolyear-dates)))
+         (fallstart (gethash "fallstart" schoolyear-dates))
+         (fallend (gethash "fallend" schoolyear-dates))
+         (springstart (gethash "springstart" schoolyear-dates))
+         (springend (gethash "springend" schoolyear-dates))
+         (noclasses (gethash "noclasses" schoolyear-dates)))
     (goto-char (point-max))
     (insert (format "\n* %s" classname))
     (while (pgw/date-block current (nth 0 fallstart) (nth 1 fallstart) (nth 2 fallstart)
@@ -1942,7 +1947,7 @@ This function uses the variable `pgw/schoolyear-dates' for the value of holidays
          test equal
          data ("fallstart" (2021 08 30)
                "fallend" (2021 12 17)
-               "springstart" (2022 1 10)
+               "springstart" (2022 1 18)
                "springend" (2022 5 13)
                "noclasses" ((2021 9 6) ;; Labor Day
                             (2021 11 1) ;; No Classes
@@ -1950,9 +1955,27 @@ This function uses the variable `pgw/schoolyear-dates' for the value of holidays
                             (2021 11 24 2021 11 26) ;; No Classes
                             (2021 11 25) ;; Thanksgiving, University Holiday
                             (2022 1 17)  ;; Martin Luther King Jr. Day, University Holiday
-                            (2022 3 14 2022 3 18))  ;; Spring Break
+                            (2022 3 14 2022 3 18)  ;; Spring Break
+                            (2022 5 3 2022 5 13)) ; Reading and Exam Days
                             )))
 
+(setq pgw/juilliard-schoolyear-dates
+      #s(hash-table
+         size 5
+         test equal
+         data ("fallstart" (2021 08 30)
+               "fallend" (2021 12 17)
+               "springstart" (2022 1 10)
+               "springend" (2022 5 13)
+               "noclasses" ((2021 9 6) ;; Labor Day
+                            (2021 11 1) ;; No Classes
+                            (2021 11 2) ;; Election Day, University Holiday
+                            (2021 11 24 2021 11 28) ;; No Classes
+                            (2021 11 25) ;; Thanksgiving, University Holiday
+                            (2022 1 17)  ;; Martin Luther King Jr. Day, University Holiday
+                            (2022 2 26 2022 3 13)) ;; Midterm Recess
+                            ;; (2022 5 3 2022 5 6)) ;; Jury week
+                            )))
 
 #+end_src
 
@@ -1962,6 +1985,9 @@ Example usage (run in a dedicated file)
 #+begin_src emacs-lisp :tangle no
   (pgw/create-entry "COMSW3134_001_2021_3" '(1) '(1 3) '("14:40-15:55" "14:40-15:55") "417 Int'l Affair")
 #+end_src
+
+#+begin_comment
+Juilliard Schedule:
 
 Aug 30 (Mon) 	Fall Semester Classes Begin
 Sept 1 (Wed) 	Convocation, 4pm
@@ -1978,6 +2004,7 @@ Feb 26 – Mar 13 (Sat – Sun) 	Midterm Recess
 May 3 – May 6 (Tue – Fri) 	Jury Week (Music)
 May 13 (Fri) 	Spring Semester Ends
 May 20 (Fri) 	117th Commencement
+#+end_comment
 
 
 *** Sync gcal Bash Script
@@ -2011,6 +2038,8 @@ See [[https://github.com/piercegwang/ohsics_to_org][https://github.com/piercegwa
 :PROPERTIES:
 :header-args:emacs-lisp: :tangle no :comments no
 :END:
+
+All configurations here get "tangled" into the ~init.el~ file, telling Doom Emacs which modules I want to load.
 
 #+begin_src emacs-lisp :tangle "init.el" :noweb no-export :results silent
 ;;; init.el -*- lexical-binding: t; -*-
@@ -2274,6 +2303,8 @@ See [[https://github.com/piercegwang/ohsics_to_org][https://github.com/piercegwa
 :header-args:emacs-lisp: :tangle "packages.el" :comments no
 :END:
 
+Everything in this section gets "tangled" into the ~packages.el~ file which allows me to load custom packages and declare explicitly which packages I want to be loaded in order for my ~config.org~ to work.
+
 #+begin_src emacs-lisp
 ;; -*- no-byte-compile: t; -*-
 ;;; $DOOMDIR/packages.el
@@ -2336,9 +2367,8 @@ See [[https://github.com/piercegwang/ohsics_to_org][https://github.com/piercegwa
 ;; (package! bufler)
 (package! doom-snippets :ignore t)
 (package! rotate)
-(package! org-roam)
+;; (package! org-roam)
 (package! 2048-game)
-(package! org-noter)
 (package! org-superstar)
 (package! counsel)
 (package! ztree)

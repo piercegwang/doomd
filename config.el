@@ -665,9 +665,7 @@
       :after org
       :config
       (add-hook! 'org-mode-hook #'org-cdlatex-mode)
-      (map! :map org-cdlatex-mode-map
-      :i "TAB" #'cdlatex-tab
-      :i "M-TAB" #'cdlatex-tab)
+      (add-to-list 'org-tab-first-hook 'org-try-cdlatex-tab)
       )
     (setq org-format-latex-options
           ;; '(:foreground "#000000" :background default ;; light theme
@@ -1029,14 +1027,17 @@ the same length as the list of days
 
 optional DESC: string containing a description for the event
 
-This function uses the variable `pgw/schoolyear-dates' for the value of holidays"
-  (let ((current (calendar-absolute-from-gregorian (diary-make-date 2021 9 9)))
-        (desc (if desc (setq desc (format "\n%s\n" desc)) (setq desc "")))
-        (fallstart (gethash "fallstart" pgw/schoolyear-dates))
-        (fallend (gethash "fallend" pgw/schoolyear-dates))
-        (springstart (gethash "springstart" pgw/schoolyear-dates))
-        (springend (gethash "springend" pgw/schoolyear-dates))
-        (noclasses (gethash "noclasses" pgw/schoolyear-dates)))
+This function uses the variable `pgw/schoolyear-dates' for the value of holidays
+unless custom-dates is specified"
+
+  (let* ((current (calendar-absolute-from-gregorian (diary-make-date 2021 9 9)))
+         (desc (if desc (setq desc (format "\n%s\n" desc)) (setq desc "")))
+         (schoolyear-dates (if custom-dates custom-dates (setq schoolyear-dates pgw/schoolyear-dates)))
+         (fallstart (gethash "fallstart" schoolyear-dates))
+         (fallend (gethash "fallend" schoolyear-dates))
+         (springstart (gethash "springstart" schoolyear-dates))
+         (springend (gethash "springend" schoolyear-dates))
+         (noclasses (gethash "noclasses" schoolyear-dates)))
     (goto-char (point-max))
     (insert (format "\n* %s" classname))
     (while (pgw/date-block current (nth 0 fallstart) (nth 1 fallstart) (nth 2 fallstart)
@@ -1081,7 +1082,7 @@ This function uses the variable `pgw/schoolyear-dates' for the value of holidays
          test equal
          data ("fallstart" (2021 08 30)
                "fallend" (2021 12 17)
-               "springstart" (2022 1 10)
+               "springstart" (2022 1 18)
                "springend" (2022 5 13)
                "noclasses" ((2021 9 6) ;; Labor Day
                             (2021 11 1) ;; No Classes
@@ -1089,7 +1090,26 @@ This function uses the variable `pgw/schoolyear-dates' for the value of holidays
                             (2021 11 24 2021 11 26) ;; No Classes
                             (2021 11 25) ;; Thanksgiving, University Holiday
                             (2022 1 17)  ;; Martin Luther King Jr. Day, University Holiday
-                            (2022 3 14 2022 3 18))  ;; Spring Break
+                            (2022 3 14 2022 3 18)  ;; Spring Break
+                            (2022 5 3 2022 5 13)) ; Reading and Exam Days
+                            )))
+
+(setq pgw/juilliard-schoolyear-dates
+      #s(hash-table
+         size 5
+         test equal
+         data ("fallstart" (2021 08 30)
+               "fallend" (2021 12 17)
+               "springstart" (2022 1 10)
+               "springend" (2022 5 13)
+               "noclasses" ((2021 9 6) ;; Labor Day
+                            (2021 11 1) ;; No Classes
+                            (2021 11 2) ;; Election Day, University Holiday
+                            (2021 11 24 2021 11 28) ;; No Classes
+                            (2021 11 25) ;; Thanksgiving, University Holiday
+                            (2022 1 17)  ;; Martin Luther King Jr. Day, University Holiday
+                            (2022 2 26 2022 3 13)) ;; Midterm Recess
+                            ;; (2022 5 3 2022 5 6)) ;; Jury week
                             )))
 ;; Generate Class Calendar:1 ends here
 
