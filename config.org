@@ -1,5 +1,5 @@
 #+title: Doom configuration
-#+author: Pierce Wang
+#+author: Pierie Wang
 #+html_head: <link rel='shortcut icon' type='image/png' href='https://www.gnu.org/software/emacs/favicon.png'>
 #+HTML_HEAD: <link rel="stylesheet" href="https://vanillacss.com/vanilla.css">
 #+property: header-args:emacs-lisp :tangle yes :comments link
@@ -152,11 +152,16 @@ navigation/swapping commands.
 #+begin_src emacs-lisp
 (setq-default enable-local-variables t)
 #+end_src
-
-
 ** Bookmarks
 #+begin_src emacs-lisp
   (global-set-key (kbd "C-x r D") 'bookmark-delete)
+#+end_src
+
+** Tramp
+#+begin_src emacs-lisp
+;; Tramp setup
+
+(setq tramp-default-method "ssh")
 #+end_src
 
 ** =tab-bar-mode=
@@ -393,12 +398,15 @@ https://stackoverflow.com/questions/2540997/create-more-than-one-eshell-instance
 *** Doom Theme
 Favorite themes:
 
-1. outrun-electric
-2. challenger-deep
-3. snazzy
-4. molokai
-5. solarized-dark
+1. acario-dark
+2. outrun-electric
+3. challenger-deep
+4. snazzy
+5. molokai
+6. solarized-dark
 
+
++ laserwave
 Light themes:
 - solarized-light
 - doom-acario-light
@@ -413,7 +421,8 @@ Light themes:
 
     ;; Load the theme (doom-one, doom-molokai, etc); keep in mind that each theme
     ;; may have their own settings.
-    (load-theme 'doom-snazzy t)
+    (load-theme 'doom-acario-dark t)
+    ;; (load-theme 'doom-snazzy t)
     ;; (load-theme 'modus-operandi)
 
     ;; Enable flashing mode-line on errors
@@ -689,22 +698,6 @@ CLOSED: [2020-11-29 Sun 11:30]
 (use-package! org-roam
   :hook (after-init . org-roam-mode)
   :config
-  (map! :leader
-        (:prefix-map ("r" . "Roam")
-         :desc "Roam" "l" #'org-roam
-         :desc "Roam Find File" "f" #'org-roam-find-file
-         :desc "Roam Graph" "g" #'org-roam-graph
-         :desc "Roam Capture" "c" #'org-roam-capture
-         :desc "Roam Refresh" "!" #'pgw/org-roam-refresh
-         :desc "Roam Insert" "i" #'org-roam-insert
-         (:prefix ("d" . "Dailies")
-          :desc "Capture Today" "." #'org-roam-dailies-capture-today
-          :desc "Capture Yesterday" "h" #'org-roam-dailies-capture-yesterday
-          :desc "Capture Tomorrow" "l" #'org-roam-dailies-capture-tomorrow
-          :desc "Capture Date" "d" #'org-roam-dailies-capture-date
-          :desc "Find Date" "/" #'org-roam-dailies-find-date
-          :desc "Find Next Note" "L" #'org-roam-dailies-find-next-note
-          :desc "Find Prev Note" "H" #'org-roam-dailies-find-previous-note)))
   (setq org-roam-directory "~/Dropbox/org-roam/"
         org-roam-db-location "~/Dropbox/org-roam/org-roam.db"
         org-roam-dailies-directory "daily/"
@@ -751,6 +744,22 @@ CLOSED: [2020-11-29 Sun 11:30]
            :file-name "%<%Y%m%d%H%M%S>-${slug}"
            :head "#+roam_tags: \n#+title: ${title}\n#+category: \n"
            :unnarrowed t)))
+  (map! :leader
+        (:prefix-map ("r" . "Roam")
+         :desc "Roam" "l" #'org-roam
+         :desc "Roam Find File" "f" #'org-roam-find-file
+         :desc "Roam Graph" "g" #'org-roam-graph
+         :desc "Roam Capture" "c" #'org-roam-capture
+         :desc "Roam Refresh" "!" #'pgw/org-roam-refresh
+         :desc "Roam Insert" "i" #'org-roam-insert
+         (:prefix ("d" . "Dailies")
+          :desc "Capture Today" "." #'org-roam-dailies-capture-today
+          :desc "Capture Yesterday" "h" #'org-roam-dailies-capture-yesterday
+          :desc "Capture Tomorrow" "l" #'org-roam-dailies-capture-tomorrow
+          :desc "Capture Date" "d" #'org-roam-dailies-capture-date
+          :desc "Find Date" "/" #'org-roam-dailies-find-date
+          :desc "Find Next Note" "L" #'org-roam-dailies-find-next-note
+          :desc "Find Prev Note" "H" #'org-roam-dailies-find-previous-note)))
   (org-roam-mode 1)
   (defun pgw/org-roam-refresh ()
     (interactive)
@@ -758,7 +767,7 @@ CLOSED: [2020-11-29 Sun 11:30]
     (org-roam-buffer--update-maybe :redisplay)))
 #+end_src
 
-*** Todo keywords
+*** ​Todo keywords
 
 #+begin_src emacs-lisp
   (setq org-todo-keywords
@@ -831,11 +840,11 @@ Custom commands, testing sorting strategy variable
           ("cfe" "Ellie's Schedule" agenda ""
            ((org-agenda-span 7)
             (org-agenda-files
-             (file-expand-wildcards "~/Dropbox/org/notes/columbia/2021_fall/calendar/2021_fall_ellie.org"))))
+             (file-expand-wildcards "/Users/piercewang/Dropbox/org/notes/columbia/2022_Spring/calendar/2022_spring_ellie/2022_spring_ellie.org"))))
           ("cfk" "Kaeon's Schedule" agenda ""
            ((org-agenda-span 7)
             (org-agenda-files
-             (file-expand-wildcards "~/Dropbox/org/notes/columbia/2021_fall/calendar/2021_fall_kaeon.org"))))
+             (file-expand-wildcards "/Users/piercewang/Dropbox/org/notes/columbia/2022_Spring/calendar/2022_spring_kaeon/2022_spring_kaeon.org"))))
           ("l" "Logging View" agenda ""
            ((org-agenda-span 1)
             (org-agenda-files
@@ -858,13 +867,15 @@ Custom commands, testing sorting strategy variable
 #+begin_src emacs-lisp
 (setq org-agenda-files (append (file-expand-wildcards "~/Dropbox/org/*.org")
                                (file-expand-wildcards "~/Dropbox/org/*.org.gpg")
-                               (file-expand-wildcards "~/Dropbox/org/calendars/*.org")))
+                               (file-expand-wildcards "~/Dropbox/org/calendars/*.org")
+                               '("/Users/piercewang/Dropbox/org/notes/columbia/2022_Spring/calendar/2022_spring_calendar.org")))
 
 (defun pgw/org-agenda-reload-files ()
   (interactive)
   (setq org-agenda-files (append (file-expand-wildcards "~/Dropbox/org/*.org")
                                  (file-expand-wildcards "~/Dropbox/org/*.org.gpg")
-                                 (file-expand-wildcards "~/Dropbox/org/calendars/*.org"))))
+                                 (file-expand-wildcards "~/Dropbox/org/calendars/*.org")
+                                 '("/Users/piercewang/Dropbox/org/notes/columbia/2022_Spring/calendar/2022_spring_calendar.org"))))
 #+end_src
 
 **** Time Grid Variable
@@ -934,20 +945,20 @@ Custom commands, testing sorting strategy variable
                           ("Emacs Calendar" :keys "e"
                            :file "~/Dropbox/org/calendars/cal_emacs.org"
                            :template ("* %^{Title of event}"
-                                      "SCHEDULED: %^{Scheduled time + duration}T"
                                       ":PROPERTIES:"
                                       ":calendar-id: ihfv2u5n9uf5ksj5484vbe7mj4@group.calendar.google.com"
                                       ":END:"
-                                      ":org-gcal:%?"
+                                      ":org-gcal:"
+                                      "%^{Scheduled time + duration}T%?"
                                       ":END:"))
                           ("Emacs Calendar" :keys "g"
                            :file "~/Dropbox/org/calendars/cal_gmail.org"
                            :template ("* %^{Title of event}"
-                                      "SCHEDULED: %^{Scheduled time + duration}T"
                                       ":PROPERTIES:"
                                       ":calendar-id: pierce.g.wang@gmail.com"
                                       ":END:"
-                                      ":org-gcal:%?"
+                                      ":org-gcal:"
+                                      "%^{Scheduled time + duration}T%?"
                                       ":END:"))))
               ("Stuff and Things" :keys "s"
                :file "~/Dropbox/org/notes/stuff_and_things/organizing_temp.org"
@@ -1024,6 +1035,7 @@ Custom commands, testing sorting strategy variable
   (with-eval-after-load 'org
     (org-babel-do-load-languages 'org-babel-load-languages
                                  '((python . t)
+                                   (c . t)
                                    )))
 #+end_src
 
@@ -1056,8 +1068,8 @@ Custom commands, testing sorting strategy variable
 #+begin_src emacs-lisp
   (setq org-format-latex-options
         ;; '(:foreground "#000000" :background default ;; light theme
-        '(:foreground "#d6d6d4" :background default ;; dark theme
-                      :scale 1.1
+        '(:foreground "#d6d6d4" :background default ;; dark tieme
+                      :scale 1.0
                       :html-foreground "Black" :html-background "Transparent"
                       :html-scale 1.0
                       :matchers ("begin" "$1" "$" "$$" "\\(" "\\[")))
@@ -1092,7 +1104,7 @@ Fix color handling in org-preview-latex-fragment
         '(("pages-notes"
            :base-directory "~/Dropbox/org_publish/"
            :base-extension "org"
-           :publishing-directory "~/Documents/Projects/Github/github_pages/"
+           :publishing-directory "~/Documents/github/github_pages/"
            :recursive t
            :publishing-function org-html-publish-to-html
            :headline-levels 4             ; Just the default for this project.
@@ -1101,8 +1113,8 @@ Fix color handling in org-preview-latex-fragment
            )
           ("pages-static"
            :base-directory "~/Dropbox/org_publish/"
-           :base-extension "css\\|js\\|png\\|jpg\\|gif\\|pdf\\|mp3\\|ogg\\|swf\\|jpeg"
-           :publishing-directory "~/Documents/Projects/Github/github_pages/"
+           :base-extension "css\\|js\\|png\\|jpg\\|gif\\|pdf\\|mp3\\|ogg\\|swf\\|jpeg\\|txt\\|json"
+           :publishing-directory "~/Documents/github/github_pages/"
            :recursive t
            :publishing-function org-publish-attachment
            )
@@ -1194,6 +1206,16 @@ Disable automatic completion from company--slows everything down a bit.
                  ("\\subsection{%s}" . "\\subsection*{%s}")
                  ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
                  ("\\paragraph{%s}" . "\\paragraph*{%s}")
+                 ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
+  (add-to-list 'org-latex-classes
+               '("COMSW3203"
+                 "\\documentclass{article}
+\\usepackage{amsmath}
+\\usepackage{amsfonts}"
+                 ("\\section{%s}" . "\\section*{%s}")
+                 ("\\subsection{%s}" . "\\subsection*{%s}")
+                 ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
+                 ("\\paragraph{%s}" . "\\paragraph*{%s}")
                  ("\\subparagraph{%s}" . "\\subparagraph*{%s}"))))
 #+end_src
 
@@ -1215,6 +1237,15 @@ Disable automatic completion from company--slows everything down a bit.
                     (remove-hook 'minibuffer-setup-hook query))))
       (unless (string= "" input) (insert input))))
   (global-set-key "\C-xQ" 'my-macro-query)
+#+end_src
+
+** Mac OS
+
+*** exec-path-from-shell
+
+#+begin_src emacs-lisp
+(when IS-MAC
+  (use-package! exec-path-from-shell))
 #+end_src
 
 ** Magit
@@ -1247,6 +1278,7 @@ Disable automatic completion from company--slows everything down a bit.
 For files changed by dropbox and also dired buffers.
 #+begin_src emacs-lisp
   (global-auto-revert-mode 1)
+  (add-hook! 'after-revert-hook 'org-element-cache-reset)
 #+end_src
 
 ** Calendar
@@ -1313,8 +1345,8 @@ I love Emacs Tetris!
 #+begin_src emacs-lisp
 (use-package! tetris
   :bind (:map tetris-mode-map
-         ("z" . tetris-rotate-prev)
-         ("x" . tetris-rotate-next)
+         ("z" . tetris-rotate-next)
+         ("x" . tetris-rotate-prev)
          ("k" . tetris-move-bottom)
          ("h" . tetris-move-left)
          ("j" . tetris-move-down)
@@ -2017,9 +2049,17 @@ See [[https://github.com/piercegwang/ohsics_to_org][https://github.com/piercegwa
 #+begin_src emacs-lisp :results silent
   (defun pgw/sync-canvas-cal ()
     (interactive)
-    (start-process-shell-command "Running ~/QScripts/canvcal_org.sh" nil "bash ~/QScripts/canvcal_org.sh"))
+    (start-process-shell-command "Running syncgcal.sh" nil "bash ~/Documents/github/org_canvas_parser/syncgcal.sh"))
 
   (global-set-key (kbd "C-c s-g o") 'pgw/sync-canvas-cal)
+#+end_src
+
+** ~vterm~
+
+#+begin_src emacs-lisp
+(after! vterm
+  (add-hook! vterm-mode
+             (evil-emacs-state 1)))
 #+end_src
 
 ** Languages
@@ -2027,11 +2067,28 @@ See [[https://github.com/piercegwang/ohsics_to_org][https://github.com/piercegwa
 *** Python
 
 #+begin_src emacs-lisp
+(add-hook! python-mode
+             (add-to-list 'python-shell-completion-native-disabled-interpreters "python3"))
+
+#+end_src
+
+#+begin_src emacs-lisp :tangle no
 (use-package! lsp-pyright
   :ensure t
   :hook (python-mode . (lambda ()
                           (require 'lsp-pyright)
                           (lsp))))  ; or lsp-deferred
+#+end_src
+
+** nov - for reading epub
+
+#+begin_src emacs-lisp
+(add-to-list 'auto-mode-alist '("\\.epub\\'" . nov-mode))
+
+;; (defun my-nov-font-setup ()
+;;   (face-remap-add-relative 'variable-pitch :family "Avenir Next"
+;;                                            :height 1.0))
+;; (add-hook 'nov-mode-hook 'my-nov-font-setup)
 #+end_src
 
 * Doom Modules
@@ -2375,7 +2432,9 @@ Everything in this section gets "tangled" into the ~packages.el~ file which allo
 (package! org-drill)
 (package! doct)
 (package! darkroom)
-(package! lsp-pyright)
 (package! ox-awesomecv
   :recipe (:host gitlab :repo "Titan-C/org-cv"))
+(when IS-MAC
+  (package! exec-path-from-shell))
+(package! nov)
 #+end_src

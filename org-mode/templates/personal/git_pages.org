@@ -17,7 +17,6 @@
 #+html_link_home:
 #+html_link_up:
 #+html_mathjax:
-#+html_head: <link rel="stylesheet" type="text/css" href="css/style.css"/>
 #+html_head_extra:
 #+subtitle:
 #+infojs_opt:

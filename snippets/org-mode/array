@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: Array
+# key: arr
+# condition: (org-inside-LaTeX-fragment-p)
+# --
+\begin{array} {l} $0 \\\\ \cline{1-1}  \end{array}
