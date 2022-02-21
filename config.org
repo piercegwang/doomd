@@ -1128,6 +1128,12 @@ Fix color handling in org-preview-latex-fragment
   (setq org-html-validation-link nil)
 #+end_src
 
+**** ODT
+
+#+begin_src emacs-lisp
+(setq org-odt-styles-file "~/.doom.d/odt/mla.ott")
+#+end_src
+
 *** DISABLED org-noter: PDF Annotation
 CLOSED: [2021-11-29 Mon 16:54]
 Obsolete because of PDF reader in Doom.

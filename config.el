@@ -64,6 +64,12 @@
   (global-set-key (kbd "C-x r D") 'bookmark-delete)
 ;; Bookmarks:1 ends here
 
+;; [[file:config.org::*Tramp][Tramp:1]]
+;; Tramp setup
+
+(setq tramp-default-method "ssh")
+;; Tramp:1 ends here
+
 ;; [[file:config.org::*=tab-bar-mode=][=tab-bar-mode=:1]]
   ;; (tab-bar-mode 1)
   (setq tab-bar-show nil)
@@ -278,7 +284,8 @@
 
     ;; Load the theme (doom-one, doom-molokai, etc); keep in mind that each theme
     ;; may have their own settings.
-    (load-theme 'doom-snazzy t)
+    (load-theme 'doom-acario-dark t)
+    ;; (load-theme 'doom-snazzy t)
     ;; (load-theme 'modus-operandi)
 
     ;; Enable flashing mode-line on errors
@@ -386,22 +393,6 @@
   (use-package! org-roam
     :hook (after-init . org-roam-mode)
     :config
-    (map! :leader
-          (:prefix-map ("r" . "Roam")
-           :desc "Roam" "l" #'org-roam
-           :desc "Roam Find File" "f" #'org-roam-find-file
-           :desc "Roam Graph" "g" #'org-roam-graph
-           :desc "Roam Capture" "c" #'org-roam-capture
-           :desc "Roam Refresh" "!" #'pgw/org-roam-refresh
-           :desc "Roam Insert" "i" #'org-roam-insert
-           (:prefix ("d" . "Dailies")
-            :desc "Capture Today" "." #'org-roam-dailies-capture-today
-            :desc "Capture Yesterday" "h" #'org-roam-dailies-capture-yesterday
-            :desc "Capture Tomorrow" "l" #'org-roam-dailies-capture-tomorrow
-            :desc "Capture Date" "d" #'org-roam-dailies-capture-date
-            :desc "Find Date" "/" #'org-roam-dailies-find-date
-            :desc "Find Next Note" "L" #'org-roam-dailies-find-next-note
-            :desc "Find Prev Note" "H" #'org-roam-dailies-find-previous-note)))
     (setq org-roam-directory "~/Dropbox/org-roam/"
           org-roam-db-location "~/Dropbox/org-roam/org-roam.db"
           org-roam-dailies-directory "daily/"
@@ -448,6 +439,22 @@
              :file-name "%<%Y%m%d%H%M%S>-${slug}"
              :head "#+roam_tags: \n#+title: ${title}\n#+category: \n"
              :unnarrowed t)))
+    (map! :leader
+          (:prefix-map ("r" . "Roam")
+           :desc "Roam" "l" #'org-roam
+           :desc "Roam Find File" "f" #'org-roam-find-file
+           :desc "Roam Graph" "g" #'org-roam-graph
+           :desc "Roam Capture" "c" #'org-roam-capture
+           :desc "Roam Refresh" "!" #'pgw/org-roam-refresh
+           :desc "Roam Insert" "i" #'org-roam-insert
+           (:prefix ("d" . "Dailies")
+            :desc "Capture Today" "." #'org-roam-dailies-capture-today
+            :desc "Capture Yesterday" "h" #'org-roam-dailies-capture-yesterday
+            :desc "Capture Tomorrow" "l" #'org-roam-dailies-capture-tomorrow
+            :desc "Capture Date" "d" #'org-roam-dailies-capture-date
+            :desc "Find Date" "/" #'org-roam-dailies-find-date
+            :desc "Find Next Note" "L" #'org-roam-dailies-find-next-note
+            :desc "Find Prev Note" "H" #'org-roam-dailies-find-previous-note)))
     (org-roam-mode 1)
     (defun pgw/org-roam-refresh ()
       (interactive)
@@ -500,11 +507,11 @@
             ("cfe" "Ellie's Schedule" agenda ""
              ((org-agenda-span 7)
               (org-agenda-files
-               (file-expand-wildcards "~/Dropbox/org/notes/columbia/2021_fall/calendar/2021_fall_ellie.org"))))
+               (file-expand-wildcards "/Users/piercewang/Dropbox/org/notes/columbia/2022_Spring/calendar/2022_spring_ellie/2022_spring_ellie.org"))))
             ("cfk" "Kaeon's Schedule" agenda ""
              ((org-agenda-span 7)
               (org-agenda-files
-               (file-expand-wildcards "~/Dropbox/org/notes/columbia/2021_fall/calendar/2021_fall_kaeon.org"))))
+               (file-expand-wildcards "/Users/piercewang/Dropbox/org/notes/columbia/2022_Spring/calendar/2022_spring_kaeon/2022_spring_kaeon.org"))))
             ("l" "Logging View" agenda ""
              ((org-agenda-span 1)
               (org-agenda-files
@@ -523,13 +530,15 @@
                                       (concat org-directory "/links.org_archive")))))))
   (setq org-agenda-files (append (file-expand-wildcards "~/Dropbox/org/*.org")
                                  (file-expand-wildcards "~/Dropbox/org/*.org.gpg")
-                                 (file-expand-wildcards "~/Dropbox/org/calendars/*.org")))
+                                 (file-expand-wildcards "~/Dropbox/org/calendars/*.org")
+                                 '("/Users/piercewang/Dropbox/org/notes/columbia/2022_Spring/calendar/2022_spring_calendar.org")))
   
   (defun pgw/org-agenda-reload-files ()
     (interactive)
     (setq org-agenda-files (append (file-expand-wildcards "~/Dropbox/org/*.org")
                                    (file-expand-wildcards "~/Dropbox/org/*.org.gpg")
-                                   (file-expand-wildcards "~/Dropbox/org/calendars/*.org"))))
+                                   (file-expand-wildcards "~/Dropbox/org/calendars/*.org")
+                                   '("/Users/piercewang/Dropbox/org/notes/columbia/2022_Spring/calendar/2022_spring_calendar.org"))))
     (setq org-agenda-time-grid '((daily today require-timed)
                                  (600 800 1000 1200 1400 1600 1800 2000 2200)
                                  "......" "----------------"))
@@ -584,20 +593,20 @@
                             ("Emacs Calendar" :keys "e"
                              :file "~/Dropbox/org/calendars/cal_emacs.org"
                              :template ("* %^{Title of event}"
-                                        "SCHEDULED: %^{Scheduled time + duration}T"
                                         ":PROPERTIES:"
                                         ":calendar-id: ihfv2u5n9uf5ksj5484vbe7mj4@group.calendar.google.com"
                                         ":END:"
-                                        ":org-gcal:%?"
+                                        ":org-gcal:"
+                                        "%^{Scheduled time + duration}T%?"
                                         ":END:"))
                             ("Emacs Calendar" :keys "g"
                              :file "~/Dropbox/org/calendars/cal_gmail.org"
                              :template ("* %^{Title of event}"
-                                        "SCHEDULED: %^{Scheduled time + duration}T"
                                         ":PROPERTIES:"
                                         ":calendar-id: pierce.g.wang@gmail.com"
                                         ":END:"
-                                        ":org-gcal:%?"
+                                        ":org-gcal:"
+                                        "%^{Scheduled time + duration}T%?"
                                         ":END:"))))
                 ("Stuff and Things" :keys "s"
                  :file "~/Dropbox/org/notes/stuff_and_things/organizing_temp.org"
@@ -657,6 +666,7 @@
     (with-eval-after-load 'org
       (org-babel-do-load-languages 'org-babel-load-languages
                                    '((python . t)
+                                     (c . t)
                                      )))
     ;;; org-drill
     (use-package! org-drill)
@@ -669,8 +679,8 @@
       )
     (setq org-format-latex-options
           ;; '(:foreground "#000000" :background default ;; light theme
-          '(:foreground "#d6d6d4" :background default ;; dark theme
-                        :scale 1.1
+          '(:foreground "#d6d6d4" :background default ;; dark tieme
+                        :scale 1.0
                         :html-foreground "Black" :html-background "Transparent"
                         :html-scale 1.0
                         :matchers ("begin" "$1" "$" "$$" "\\(" "\\[")))
@@ -688,7 +698,7 @@
           '(("pages-notes"
              :base-directory "~/Dropbox/org_publish/"
              :base-extension "org"
-             :publishing-directory "~/Documents/Projects/Github/github_pages/"
+             :publishing-directory "~/Documents/github/github_pages/"
              :recursive t
              :publishing-function org-html-publish-to-html
              :headline-levels 4             ; Just the default for this project.
@@ -697,14 +707,15 @@
              )
             ("pages-static"
              :base-directory "~/Dropbox/org_publish/"
-             :base-extension "css\\|js\\|png\\|jpg\\|gif\\|pdf\\|mp3\\|ogg\\|swf\\|jpeg"
-             :publishing-directory "~/Documents/Projects/Github/github_pages/"
+             :base-extension "css\\|js\\|png\\|jpg\\|gif\\|pdf\\|mp3\\|ogg\\|swf\\|jpeg\\|txt\\|json"
+             :publishing-directory "~/Documents/github/github_pages/"
              :recursive t
              :publishing-function org-publish-attachment
              )
             ("pages" :components ("pages-notes" "pages-static"))
             ))
     (setq org-html-validation-link nil)
+  (setq org-odt-styles-file "~/.doom.d/odt/mla.ott")
     (use-package! org-noter
       :after org
       :ensure t
@@ -777,6 +788,16 @@
                  ("\\subsection{%s}" . "\\subsection*{%s}")
                  ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
                  ("\\paragraph{%s}" . "\\paragraph*{%s}")
+                 ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
+  (add-to-list 'org-latex-classes
+               '("COMSW3203"
+                 "\\documentclass{article}
+\\usepackage{amsmath}
+\\usepackage{amsfonts}"
+                 ("\\section{%s}" . "\\section*{%s}")
+                 ("\\subsection{%s}" . "\\subsection*{%s}")
+                 ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
+                 ("\\paragraph{%s}" . "\\paragraph*{%s}")
                  ("\\subparagraph{%s}" . "\\subparagraph*{%s}"))))
 ;; Classes - Adding Academic XeTeX Times New Roman Class:1 ends here
 
@@ -796,6 +817,11 @@
       (unless (string= "" input) (insert input))))
   (global-set-key "\C-xQ" 'my-macro-query)
 ;; Macro Query:1 ends here
+
+;; [[file:config.org::*exec-path-from-shell][exec-path-from-shell:1]]
+(when IS-MAC
+  (use-package! exec-path-from-shell))
+;; exec-path-from-shell:1 ends here
 
 ;; [[file:config.org::*Magit][Magit:1]]
   (use-package! magit
@@ -822,6 +848,7 @@
 
 ;; [[file:config.org::*Revert Mode][Revert Mode:1]]
   (global-auto-revert-mode 1)
+  (add-hook! 'after-revert-hook 'org-element-cache-reset)
 ;; Revert Mode:1 ends here
 
 ;; [[file:config.org::*Calendar][Calendar:1]]
@@ -871,8 +898,8 @@
 ;; [[file:config.org::*Tetris][Tetris:1]]
 (use-package! tetris
   :bind (:map tetris-mode-map
-         ("z" . tetris-rotate-prev)
-         ("x" . tetris-rotate-next)
+         ("z" . tetris-rotate-next)
+         ("x" . tetris-rotate-prev)
          ("k" . tetris-move-bottom)
          ("h" . tetris-move-left)
          ("j" . tetris-move-down)
@@ -1116,15 +1143,27 @@ unless custom-dates is specified"
 ;; [[file:config.org::*Sync gcal Bash Script][Sync gcal Bash Script:1]]
   (defun pgw/sync-canvas-cal ()
     (interactive)
-    (start-process-shell-command "Running ~/QScripts/canvcal_org.sh" nil "bash ~/QScripts/canvcal_org.sh"))
+    (start-process-shell-command "Running syncgcal.sh" nil "bash ~/Documents/github/org_canvas_parser/syncgcal.sh"))
 
   (global-set-key (kbd "C-c s-g o") 'pgw/sync-canvas-cal)
 ;; Sync gcal Bash Script:1 ends here
 
+;; [[file:config.org::*~vterm~][~vterm~:1]]
+(after! vterm
+  (add-hook! vterm-mode
+             (evil-emacs-state 1)))
+;; ~vterm~:1 ends here
+
 ;; [[file:config.org::*Python][Python:1]]
-(use-package! lsp-pyright
-  :ensure t
-  :hook (python-mode . (lambda ()
-                          (require 'lsp-pyright)
-                          (lsp))))  ; or lsp-deferred
+(add-hook! python-mode
+             (add-to-list 'python-shell-completion-native-disabled-interpreters "python3"))
 ;; Python:1 ends here
+
+;; [[file:config.org::*nov - for reading epub][nov - for reading epub:1]]
+(add-to-list 'auto-mode-alist '("\\.epub\\'" . nov-mode))
+
+;; (defun my-nov-font-setup ()
+;;   (face-remap-add-relative 'variable-pitch :family "Avenir Next"
+;;                                            :height 1.0))
+;; (add-hook 'nov-mode-hook 'my-nov-font-setup)
+;; nov - for reading epub:1 ends here

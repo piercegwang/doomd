@@ -67,6 +67,8 @@
 (package! org-drill)
 (package! doct)
 (package! darkroom)
-(package! lsp-pyright)
 (package! ox-awesomecv
   :recipe (:host gitlab :repo "Titan-C/org-cv"))
+(when IS-MAC
+  (package! exec-path-from-shell))
+(package! nov)
