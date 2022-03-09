@@ -845,6 +845,10 @@ Custom commands, testing sorting strategy variable
            ((org-agenda-span 7)
             (org-agenda-files
              (file-expand-wildcards "/Users/piercewang/Dropbox/org/notes/columbia/2022_Spring/calendar/2022_spring_kaeon/2022_spring_kaeon.org"))))
+          ("cfE" "Elaine's Schedule" agenda ""
+           ((org-agenda-span 7)
+            (org-agenda-files
+             (file-expand-wildcards "/Users/piercewang/Dropbox/org/notes/columbia/2022_Spring/calendar/2022_spring_elaine/2022_spring_elaine.org"))))
           ("l" "Logging View" agenda ""
            ((org-agenda-span 1)
             (org-agenda-files
@@ -1374,7 +1378,7 @@ I love Emacs Tetris!
 #+begin_src emacs-lisp
   (setq erc-log-channels-directory "~/logs/")
   (setq erc-save-buffer-on-part t)
-  (global-set-key (kbd "H-M-e") (lambda () (interactive) (erc :server "irc.freenode.net" :port 6667 :nick "tesrodome" :password passwords_ERC)))
+  (map! :leader "e e" (lambda () (interactive) (erc :server "irc.freenode.net" :port 6667 :nick "tesrodome" :password passwords_ERC)))
 #+end_src
 
 ** Keybinds
