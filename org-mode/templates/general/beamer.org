@@ -4,10 +4,6 @@
 #+CREATOR: Emacs 26.1 (Org mode 9.1.9)
 #+LATEX_CLASS: beamer
 #+COLUMNS: %45ITEM %10BEAMER_env(Env) %10BEAMER_act(Act) %4BEAMER_col(Col) %8BEAMER_opt(Opt)
-#+BEAMER_FONT_THEME:
-#+BEAMER_INNER_THEME:
-#+BEAMER_OUTER_THEME:
-#+BEAMER_HEADER:
 #+OPTIONS: ':nil *:t -:t ::t <:t H:2 \n:t ^:{} arch:headline
 #+OPTIONS: author:t broken-links:nil c:nil creator:nil
 #+OPTIONS: d:(not "LOGBOOK") date:t e:t email:nil f:t inline:t num:t
