@@ -2108,6 +2108,16 @@ See [[https://github.com/piercegwang/ohsics_to_org][https://github.com/piercegwa
                           (lsp))))  ; or lsp-deferred
 #+end_src
 
+** Mu MUD Client
+
+#+begin_src emacs-lisp
+(use-package! mu
+  :config
+  (autoload 'mu-open "mu" "Play on MUSHes and MUDs" t)
+  (add-hook 'mu-connection-mode-hook 'ansi-color-for-comint-mode-on)
+  (setq mu-worlds '(["EmpireMUD" "empiremud.net" 4000 "tesrodome" "skid-sanctity-ivy"]
+                    ["Nanvaent" "nanvaent.org" 23 "tesrodome" "KY@zsF3y"])))
+#+end_src
 
 ** nov - for reading epub
 
@@ -2466,4 +2476,6 @@ Everything in this section gets "tangled" into the ~packages.el~ file which allo
 (when IS-MAC
   (package! exec-path-from-shell))
 (package! nov)
+(package! mu
+  :recipe (:host github :repo "piercegwang/mu"))
 #+end_src

@@ -1,2 +1,4 @@
 config.el
+init.el
+packages.el
 /.DS_Store
