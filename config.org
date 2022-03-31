@@ -1010,27 +1010,28 @@ Custom commands, testing sorting strategy variable
 *** Crypt
 
 #+begin_src emacs-lisp :tangle no
-  (use-package! org-crypt
-    :config
-    (org-crypt-use-before-save-magic)
-    (setq org-tags-exclude-from-inheritance (quote ("crypt")))
+(use-package! org-crypt
+  :config
+  (org-crypt-use-before-save-magic)
+  (setq org-tags-exclude-from-inheritance (quote ("crypt")))
 
-    (setq org-crypt-key "3C44F187958295E4")
-    ;; GPG key to use for encryption
-    ;; Either the Key ID or set to nil to use symmetric encryption.
+  (setq org-crypt-key "pierce.g.wang@gmail.com")
+  ;; GPG key to use for encryption
+  ;; Either the Key ID or set to nil to use symmetric encryption.
 
-    (setq auto-save-default nil)
-    ;; Auto-saving does not cooperate with org-crypt.el: so you need
-    ;; to turn it off if you plan to use org-crypt.el quite often.
-    ;; Otherwise, you'll get an (annoying) message each time you
-    ;; start Org.
+  (setq auto-save-default nil)
+  ;; Auto-saving does not cooperate with org-crypt.el: so you need
+  ;; to turn it off if you plan to use org-crypt.el quite often.
+  ;; Otherwise, you'll get an (annoying) message each time you
+  ;; start Org.
 
-    ;; To turn it off only locally, you can insert this:
-    ;;
-    ;; # -*- buffer-auto-save-file-name: nil; -*-
-    :bind (("C-c s-d e" . org-encrypt-entry)
-           ("C-c s-d d" . org-decrypt-entry))
-    )
+  ;; To turn it off only locally, you can insert this:
+  ;;
+  ;; # -*- buffer-auto-save-file-name: nil; -*-
+  (map! :leader
+        (:prefix-map ("k" . "org-crypt")
+         :desc "Org Encrypt Entry" "e" #'org-encrypt-entry
+         :desc "Org Decrypt Entry" "d" #'org-decrypt-entry)))
 #+end_src
 
 *** Babel
@@ -2115,8 +2116,7 @@ See [[https://github.com/piercegwang/ohsics_to_org][https://github.com/piercegwa
   :config
   (autoload 'mu-open "mu" "Play on MUSHes and MUDs" t)
   (add-hook 'mu-connection-mode-hook 'ansi-color-for-comint-mode-on)
-  (setq mu-worlds '(["EmpireMUD" "empiremud.net" 4000 "tesrodome" "skid-sanctity-ivy"]
-                    ["Nanvaent" "nanvaent.org" 23 "tesrodome" "KY@zsF3y"])))
+  (map! :leader "o m" 'mu-open))
 #+end_src
 
 ** nov - for reading epub
@@ -2129,6 +2129,43 @@ See [[https://github.com/piercegwang/ohsics_to_org][https://github.com/piercegwa
 ;;                                            :height 1.0))
 ;; (add-hook 'nov-mode-hook 'my-nov-font-setup)
 #+end_src
+
+** Passwords :crypt:
+
+-----BEGIN PGP MESSAGE-----
+
+hQGMAw/LnjL7EsekAQwAgzrmjE1uN5br3/HJUZS41tADh2EH8/cnlai4pGvf5f52
+ytCyN2JrE6JfmZxTT1lxpNf3w7U9AOy4lG0+WHsUhTYOoP+PdQYxOAvUl7RpJjwd
+qMJb/hrGZodokPevfl7nPbCQy/R0jbr4dyte/hVcXsRyO0EEobuW9q6Cz6mJClCy
++bFUAdla6VwWHFw+1RggCcOBu81F3Bbu88YldU277NtMOe0+EK+mkoVju21itssX
+gkKjrN9BmJC4d90vyRHNz4BqMo8HG8dKHgPMDntttxK9YDUyisgs3En1Q6JDSlGU
+LCIdcDhfXPYBiQIts7LbUVlVouxRyn9POOoDD4PQnpdL8hBiBcwhwm4LrN6dhX7i
+qpCOZDGWL0MTNYdD4GApufKO60ePubm/VHLHN5XildZ10mBkMYoUzn2V7vyNAWGH
+HzpVNLYn4jQ7QeiT00zvmnwhNrgh6VyVAVZsn0SKz3i5/k3viUXaW0SzKT5yuO0R
+SNWpG1wQODknP1XLrdz10ukBP7xg/J/EhDEJTKJSSGgGLFD1/p45apzKVYUcNHrW
+rBmVFkmUO6NXFK9iKw+SFjG5e+7ZV0sEUc0dqjvmFBu6nLM0j5NAkJONIQQi1B55
+dfBWthnjuCyr7TLqGo4eO4WGsgAVKCYmXdqfEIve/baEpnNSsVyvFVBUpuxXRT5T
+EZsytvTClh7R2u4b4klUrctLkqJy0GBc3VsLuuPfUay54n0KG2lrQakcCIAiHO7J
+TTvf4EK1Hh2VLQeOnKZ3po1QKlbTmqzL/rMpvY1PaHRJLNlgXPhLicFx0+pUiScH
+/eQ03PWFsIGYOuJrhT9i5eZKBD9nZbRJASuZiFthova1vCFy+v687IXbyqgRDh8d
+BUhWnFQPG155Hm46idgmmk3j3n4u6bTxivHf6sWYdh1t2tPPl4O+CUjzOK/JP8LM
+//+t3GiliB5EufojWApURtOFRSpK7j28DqzbRV89Q3oqon4mL0ATr+tf/3TC6J5y
+NBkSIK7HQgrxn1QwPfxnMjJd8ePL3TIu/i/ivAbJz1oHl5xWFDQdk0EDPjiKGWVL
+9JYBxtNgpAqCUIrJM0BSeDosN/fQ2IPVlBvxPI6+fWqnlcYOuVK/QnHPN0ED38pv
+puEEp5jjxn7/2RaXMUgZE63em6taw45sgr09nxjAEIpEZJmkZ1d1doeODVRW4l9j
+A8EkovreED8FQfZmw55TFhrDCDf6rs4X54ylPsjNxYo1xDIyUgcVBTuEzSRjoVDR
+MdUB0WHk3UjM7juByT/9OaUIeMcxVGljw4PB81MYtesmKO7vEp4pBO6AK39dnbOk
+NArCA9OPmmnI6jUWIxXrgm0H5IrhEWKsoZO9Fi4unqqbUoHlCHoQ7JyrkBTkYv86
+RPhbeXA3tsO59WqDsMCo7u23WoXrCMzjMUyH3X1EQ+E416XugMwXHb5nLVQeLPKc
+23RR9/b1PHS4CrqRIw2N8zTRtyJ1SJwXqOfWtyJYMFn9sMxGRP47XNwWO6/dCH1z
+0fxeXGHSMAlUcte2TIkfcVXZDb8sy/N40CNOEQXo3WCymtCCRLr5OgjN/wEDTwMk
+1IoXKTGiwe6Fx4CWFQdPzhDKYgvAQPv8o2ebQvOTt/FwfxLdB0LBCyLQMOFs0Hhg
+00vjrE35cftycuQROH5EYpS+cMPo8tK9RVjSKiZrtRyzbOrnl5gvOUd7o1C30V4x
+UFhzgK2o+867kB5KuLdVjX0vTmQWQfqKPSEqo0u43xuMitupMAiixHTGAl1C/aST
+skBLKRmTCAz4iSlnXK9mby501dTgN5He17i7jtC3FNq9q3RSXk6T2ZvlJpsAs0r4
+fwfI2iBKZg==
+=ejsz
+-----END PGP MESSAGE-----
 
 * Doom Modules
 :PROPERTIES:
@@ -2454,7 +2491,7 @@ Everything in this section gets "tangled" into the ~packages.el~ file which allo
 ;(unpin! t)
 
 (package! org-pdftools)
-;; (package! org-crypt)
+(package! org-crypt)
 (package! treemacs)
 (package! treemacs-evil)
 (package! treemacs-magit)
