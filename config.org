@@ -1041,6 +1041,7 @@ Custom commands, testing sorting strategy variable
     (org-babel-do-load-languages 'org-babel-load-languages
                                  '((python . t)
                                    (c . t)
+                                   (ditaa . t)
                                    )))
 #+end_src
 
