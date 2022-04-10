@@ -1318,8 +1318,6 @@ Set date style to ISO
 (calendar-set-date-style 'iso)
 #+end_src
 
-** vterm
-
 ** Artist Mode
 
 Artist mode is amazing! Configure some quick keybinds...
@@ -2087,9 +2085,9 @@ See [[https://github.com/piercegwang/ohsics_to_org][https://github.com/piercegwa
 #+begin_src emacs-lisp
 (after! vterm
   (add-hook! vterm-mode
-             (evil-emacs-state 1)))
-
-(setq vterm-shell "zsh")
+             (evil-emacs-state 1))
+  (add-to-list 'vterm-tramp-shells '("sshx" "/bin/bash"))
+  (setq vterm-shell "zsh"))
 #+end_src
 
 ** Languages
@@ -2112,11 +2110,13 @@ See [[https://github.com/piercegwang/ohsics_to_org][https://github.com/piercegwa
 
 ** Mu MUD Client
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
 (use-package! mu
   :config
   (autoload 'mu-open "mu" "Play on MUSHes and MUDs" t)
   (add-hook 'mu-connection-mode-hook 'ansi-color-for-comint-mode-on)
+  (add-hook 'mu-input-mode-hook (lambda ()
+                                  (electric-pair-mode 0)))
   (map! :leader "o m" 'mu-open))
 #+end_src
 
@@ -2133,39 +2133,41 @@ See [[https://github.com/piercegwang/ohsics_to_org][https://github.com/piercegwa
 
 ** Passwords :crypt:
 
+
 -----BEGIN PGP MESSAGE-----
 
-hQGMAw/LnjL7EsekAQwAgzrmjE1uN5br3/HJUZS41tADh2EH8/cnlai4pGvf5f52
-ytCyN2JrE6JfmZxTT1lxpNf3w7U9AOy4lG0+WHsUhTYOoP+PdQYxOAvUl7RpJjwd
-qMJb/hrGZodokPevfl7nPbCQy/R0jbr4dyte/hVcXsRyO0EEobuW9q6Cz6mJClCy
-+bFUAdla6VwWHFw+1RggCcOBu81F3Bbu88YldU277NtMOe0+EK+mkoVju21itssX
-gkKjrN9BmJC4d90vyRHNz4BqMo8HG8dKHgPMDntttxK9YDUyisgs3En1Q6JDSlGU
-LCIdcDhfXPYBiQIts7LbUVlVouxRyn9POOoDD4PQnpdL8hBiBcwhwm4LrN6dhX7i
-qpCOZDGWL0MTNYdD4GApufKO60ePubm/VHLHN5XildZ10mBkMYoUzn2V7vyNAWGH
-HzpVNLYn4jQ7QeiT00zvmnwhNrgh6VyVAVZsn0SKz3i5/k3viUXaW0SzKT5yuO0R
-SNWpG1wQODknP1XLrdz10ukBP7xg/J/EhDEJTKJSSGgGLFD1/p45apzKVYUcNHrW
-rBmVFkmUO6NXFK9iKw+SFjG5e+7ZV0sEUc0dqjvmFBu6nLM0j5NAkJONIQQi1B55
-dfBWthnjuCyr7TLqGo4eO4WGsgAVKCYmXdqfEIve/baEpnNSsVyvFVBUpuxXRT5T
-EZsytvTClh7R2u4b4klUrctLkqJy0GBc3VsLuuPfUay54n0KG2lrQakcCIAiHO7J
-TTvf4EK1Hh2VLQeOnKZ3po1QKlbTmqzL/rMpvY1PaHRJLNlgXPhLicFx0+pUiScH
-/eQ03PWFsIGYOuJrhT9i5eZKBD9nZbRJASuZiFthova1vCFy+v687IXbyqgRDh8d
-BUhWnFQPG155Hm46idgmmk3j3n4u6bTxivHf6sWYdh1t2tPPl4O+CUjzOK/JP8LM
-//+t3GiliB5EufojWApURtOFRSpK7j28DqzbRV89Q3oqon4mL0ATr+tf/3TC6J5y
-NBkSIK7HQgrxn1QwPfxnMjJd8ePL3TIu/i/ivAbJz1oHl5xWFDQdk0EDPjiKGWVL
-9JYBxtNgpAqCUIrJM0BSeDosN/fQ2IPVlBvxPI6+fWqnlcYOuVK/QnHPN0ED38pv
-puEEp5jjxn7/2RaXMUgZE63em6taw45sgr09nxjAEIpEZJmkZ1d1doeODVRW4l9j
-A8EkovreED8FQfZmw55TFhrDCDf6rs4X54ylPsjNxYo1xDIyUgcVBTuEzSRjoVDR
-MdUB0WHk3UjM7juByT/9OaUIeMcxVGljw4PB81MYtesmKO7vEp4pBO6AK39dnbOk
-NArCA9OPmmnI6jUWIxXrgm0H5IrhEWKsoZO9Fi4unqqbUoHlCHoQ7JyrkBTkYv86
-RPhbeXA3tsO59WqDsMCo7u23WoXrCMzjMUyH3X1EQ+E416XugMwXHb5nLVQeLPKc
-23RR9/b1PHS4CrqRIw2N8zTRtyJ1SJwXqOfWtyJYMFn9sMxGRP47XNwWO6/dCH1z
-0fxeXGHSMAlUcte2TIkfcVXZDb8sy/N40CNOEQXo3WCymtCCRLr5OgjN/wEDTwMk
-1IoXKTGiwe6Fx4CWFQdPzhDKYgvAQPv8o2ebQvOTt/FwfxLdB0LBCyLQMOFs0Hhg
-00vjrE35cftycuQROH5EYpS+cMPo8tK9RVjSKiZrtRyzbOrnl5gvOUd7o1C30V4x
-UFhzgK2o+867kB5KuLdVjX0vTmQWQfqKPSEqo0u43xuMitupMAiixHTGAl1C/aST
-skBLKRmTCAz4iSlnXK9mby501dTgN5He17i7jtC3FNq9q3RSXk6T2ZvlJpsAs0r4
-fwfI2iBKZg==
-=ejsz
+hQGMAw/LnjL7EsekAQv/eAC0GniXNNVp7j9sXGyZulV9ErmvF5eWUbVZ8ZLWGsM9
+vT5rLyOALn4Y7e9W/KHKD6qmInz6Dad9RqW1Q0s0pLpxJoZhn0sCwD7GlPSTAW7w
+WafQEtgYCCFrcEtgwALRVxr7OW7IYqmg7On8+aHsUq2v56he4BmVBR2f7Rl3Wh80
+BpZakkQa1halA1s9hPKE4hSs1o/Bvpt0K2NP5rQj2ffZrusUS7b4j98dKt73ndoj
+S/yWaDix6F+P02Xum7tObsvptpMCTm6Dlx9me9uaAY8O/LjAxfMNoTEoWjoj45gr
+kkHGxEiBDHl6Cv2HVJKjrHsZmoqiY3jKtPeibLnveePGyKTDgVseKFiAhrtsWzAs
+EIkF2/r4y3dptO0lD6NymXHY/06ozAuxF4mLEQx1UrlSFlQt+YrRnkMBABZ8eixj
+CxPn8hnHk8dk1lh0lQ2zxU/+vqh9smkwXO0cpDBSVMNdmkXzy+91LCXL7nkBUTbg
+KGNmYzm9eIVKF44jsb+m0uoBlRflxnbl5/1ULr4Eyd/u+E9Chi9EQIHbpd0ESg/E
+v7b9YzP3Mpt3lkBpKe8amidQii2A31IbH+CVeggkNhKf/5W8B0gEvaxe1OCtxQrr
+DfgDo63lnkKUVUPudgy3Go0LSP8aaxuSJexDLmYYYdZqA3YqbMjkKh50yQgya0kq
+PU5eyYuVN2cZoEX33lwCCQNt+LCQXzhjUvuubcm9gmfpXfl26FlUzKdXVw8igaVR
+0jwZ6meBcB0Lj7gJLencHeLEm3qwm5Uoz9Ap4j32nRcgVn+SA+quCJ2Ai5H1X0/c
+7Uz5vwaIXve/7n2LQ7DKBn4MZcXxgTcdx5iZr00PLqFXrm2FINIqucNfRhr08TBG
+yB/1DSPKPsIRJs7/Q35pRGmXFltbZyLFbrDPGNe0VswDaT6eOf3a67+yF+bzqujk
+gso9+U/o0c36EtckqEZh64ZwnZU+0MpQ6gGL+l5IOg2H45cbHj0Wt6Q7KfYRsl5G
+RJqdB2NcOenpC4QdwhjG9TFNzagj7YrmNa5S4JbtGOIdK2ajJHhqQX0HlGIVPAIj
+bzvUvfdh3qWRUYQJj6ZIcPdhOtexc/Hv6WLLsgVQDNwliHw+RZyj1rV3fRcl13Y+
+hB+BZRQrKqJap1y1b7P2Krkkjp+euSwcg+e314b/ReuWaObGc7z7iHt3dG4Vf6cW
+Tb7MpuaWh3ferhYwOLFqS+P3nekQ3+GInZTU3c7dXsn9yxBoqU5I7DLNP6DCf6cj
+HapGJbLtlAawzYyh+gRzSQXOD5onab9JuhVLtsOUeYhPByjpRpcHEqGGf4BFa6Mg
+WbxT/b2omZ/W7T85DpYBXVW+fMYiTf5BFvZx2viq+YvkESJECPb6adBTV/BNMOk1
+fcvfmLoymPfQiIUPZyl3RBSoo4hRshvmja4gyBA9VuGFIF7JMPaXymlNOHrn+Uuq
+j4pBlcGKx2Gp+EvdKoMzGCWm6B6wzMm+eF60Sq8p7DXw5UdMfBpDgiKmhVtMf0hF
+xw47SHgZucoofGS7Sj2PPoJYJAOoeVbcRHgtSICaJe0Wk/xl3x1G44sr3KJEBW/U
+3veX6Hg+kdjcBCUQB3Rdnv0rOZ1Nh0j6ve+fpBlDZfMvwa6Cysx+Znr1Ql4EO7l5
+fbLXe5IgwKWxsFMijpfN1VXhxhJalW1S2/By3YQq/8QsSoKIHoS1Qh9CFoskZCBR
+aUcKSsUvPVsSsaDHO1L+iPoGykhVMtW44ExvJMLzM8dlnn2VhN1CTeLeiVKe2kA3
+13h05yeWKuwhOphmFKnrpAThPk/w0+1EItOvwxymuMWyRIJTU6HDGgZ+ZwTp0Dnn
+xCyb+yyb06uzVkFszlbm3lS/Quq0YdY5iNqdRQ+aoIVoI7BAoOj9N/K4ThC44KIP
+ONQJauRrq4EZw4+O5x+3jB6GHXSO
+=N1Pd
 -----END PGP MESSAGE-----
 
 * Doom Modules
@@ -2492,7 +2494,6 @@ Everything in this section gets "tangled" into the ~packages.el~ file which allo
 ;(unpin! t)
 
 (package! org-pdftools)
-(package! org-crypt)
 (package! treemacs)
 (package! treemacs-evil)
 (package! treemacs-magit)
@@ -2514,6 +2515,6 @@ Everything in this section gets "tangled" into the ~packages.el~ file which allo
 (when IS-MAC
   (package! exec-path-from-shell))
 (package! nov)
-(package! mu
-  :recipe (:host github :repo "piercegwang/mu"))
+;; (package! mu
+;;   :recipe (:host github :repo "piercegwang/mu"))
 #+end_src
