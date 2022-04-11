@@ -1009,7 +1009,7 @@ Custom commands, testing sorting strategy variable
 
 *** Crypt
 
-#+begin_src emacs-lisp :tangle no
+#+begin_src emacs-lisp
 (use-package! org-crypt
   :config
   (org-crypt-use-before-save-magic)
@@ -1572,10 +1572,12 @@ CLOSED: [2020-11-24 Tue 00:50]
 
 ** Dired
 #+begin_src emacs-lisp
-  (setq delete-by-moving-to-trash t)
-  (setq trash-directory "~/.Trash")
-  (setq insert-directory-program "/usr/local/bin/gls"
-        dired-use-ls-dired t)
+(setq delete-by-moving-to-trash t)
+(setq dired-use-ls-dired t)
+(cond ((eq system-type 'darwin) (setq insert-directory-program "/usr/local/bin/gls"
+                                      trash-directory "~/.Trash"))
+      ((eq system-type 'gnu/linux) (setq insert-directory-program "/usr/bin/ls"
+                                         trash-directory "~/local/share/Trash")))
 #+end_src
 
 Make moving files easier between two split buffers.
