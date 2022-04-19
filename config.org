@@ -2112,7 +2112,7 @@ See [[https://github.com/piercegwang/ohsics_to_org][https://github.com/piercegwa
 
 ** Mu MUD Client
 
-#+begin_src emacs-lisp :tangle no
+#+begin_src emacs-lisp
 (use-package! mu
   :config
   (autoload 'mu-open "mu" "Play on MUSHes and MUDs" t)
@@ -2513,10 +2513,13 @@ Everything in this section gets "tangled" into the ~packages.el~ file which allo
 (package! doct)
 (package! darkroom)
 (package! ox-awesomecv
-  :recipe (:host gitlab :repo "Titan-C/org-cv"))
+  :recipe (:host gitlab
+           :repo "Titan-C/org-cv"))
 (when IS-MAC
   (package! exec-path-from-shell))
 (package! nov)
-;; (package! mu
-;;   :recipe (:host github :repo "piercegwang/mu"))
+(package! mu
+  :recipe (:host github
+           :repo "piercegwang/mu"
+           :branch "master"))
 #+end_src
