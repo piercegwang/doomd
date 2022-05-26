@@ -7,41 +7,41 @@
 ;; Doom fonts:1 ends here
 
 ;; [[file:config.org::*Passwords][Passwords:1]]
-  (load-file "~/.passwords.el")
+(load-file "~/.passwords.el")
 ;; Passwords:1 ends here
 
 ;; [[file:config.org::*Org-mode][Org-mode:2]]
 (after! org
-    ;; Set to the name of the file where new notes will be stored
-    (setq org-mobile-inbox-for-pull "~/Dropbox/Apps/MobileOrg/index.org")
-    ;; Set to <your Dropbox root directory>/MobileOrg.
-    (setq org-mobile-directory "~/Dropbox/Apps/MobileOrg")
+  ;; Set to the name of the file where new notes will be stored
+  (setq org-mobile-inbox-for-pull "~/Dropbox/Apps/MobileOrg/index.org")
+  ;; Set to <your Dropbox root directory>/MobileOrg.
+  (setq org-mobile-directory "~/Dropbox/Apps/MobileOrg")
   (after! org-crypt
     (setq org-crypt-key "pierce.g.wang@gmail.com")
     ;; GPG key to use for encryption
     ;; Either the Key ID or set to nil to use symmetric encryption.
     )
-    (require 'ox-publish)
-    (setq org-publish-project-alist
-          '(("pages-notes"
-             :base-directory "~/Dropbox/org_publish/"
-             :base-extension "org"
-             :publishing-directory "~/Documents/github/github_pages/"
-             :recursive t
-             :publishing-function org-html-publish-to-html
-             :headline-levels 4             ; Just the default for this project.
-             ;; :html-head "<link rel=\"stylesheet\" type=\"text/css\" href=\"css/style.css\"/>"
-             :auto-preamble t
-             )
-            ("pages-static"
-             :base-directory "~/Dropbox/org_publish/"
-             :base-extension "css\\|js\\|png\\|jpg\\|gif\\|pdf\\|mp3\\|ogg\\|swf\\|jpeg\\|txt\\|json"
-             :publishing-directory "~/Documents/github/github_pages/"
-             :recursive t
-             :publishing-function org-publish-attachment
-             )
-            ("pages" :components ("pages-notes" "pages-static"))
-            ))
+  (require 'ox-publish)
+  (setq org-publish-project-alist
+        '(("pages-notes"
+           :base-directory "~/Dropbox/org_publish/"
+           :base-extension "org"
+           :publishing-directory "~/Documents/github/github_pages/"
+           :recursive t
+           :publishing-function org-html-publish-to-html
+           :headline-levels 4             ; Just the default for this project.
+           ;; :html-head "<link rel=\"stylesheet\" type=\"text/css\" href=\"css/style.css\"/>"
+           :auto-preamble t
+           )
+          ("pages-static"
+           :base-directory "~/Dropbox/org_publish/"
+           :base-extension "css\\|js\\|png\\|jpg\\|gif\\|pdf\\|mp3\\|ogg\\|swf\\|jpeg\\|txt\\|json"
+           :publishing-directory "~/Documents/github/github_pages/"
+           :recursive t
+           :publishing-function org-publish-attachment
+           )
+          ("pages" :components ("pages-notes" "pages-static"))
+          ))
   (use-package! org-gcal
     :config
     (map! :leader
@@ -59,7 +59,7 @@
           org-gcal-notify-p nil
           org-gcal-up-days 60)
     (setq org-gcal-remove-api-cancelled-events t))
-    (setq org-reveal-root "file:///Users/piercewang/Documents/projects/revealjs/reveal.js-4.1.0")
+  (setq org-reveal-root "file:///Users/piercewang/Documents/projects/revealjs/reveal.js-4.1.0")
   (setq org-capture-templates
         (doct '(("Inboxes" :keys "i"
                  :file "~/Dropbox/org/inbox.org"
@@ -201,13 +201,11 @@
 (setq shell-file-name "/bin/zsh")
 ;; Shell:1 ends here
 
-;; [[file:config.org::*Flyspell mode][Flyspell mode:1]]
-  (defun pgw/turn-on-flyspell-hook ()
-    (if (or (string-match "^/Users/piercewang/Dropbox/org/notes/college/" (if (eq buffer-file-name nil) "" buffer-file-name)))
-        (flyspell-mode 1)))
+(defun pgw/turn-on-flyspell-hook ()
+  (if (or (string-match "^/Users/piercewang/Dropbox/org/notes/college/" (if (eq buffer-file-name nil) "" buffer-file-name)))
+      (flyspell-mode 1)))
 
-  (add-hook! 'org-mode-hook 'turn-on-flyspell)
-;; Flyspell mode:1 ends here
+(add-hook! 'org-mode-hook 'turn-on-flyspell)
 
 ;; [[file:config.org::*User Configuration][User Configuration:1]]
 (setq user-full-name "Pierce Wang"
@@ -215,7 +213,7 @@
 ;; User Configuration:1 ends here
 
 ;; [[file:config.org::*browse-url-firefox-program][browse-url-firefox-program:1]]
-  (setq browse-url-firefox-program "/Applications/Firefox.app/Contents/MacOS/firefox-bin")
+(setq browse-url-firefox-program "/Applications/Firefox.app/Contents/MacOS/firefox-bin")
 ;; browse-url-firefox-program:1 ends here
 
 ;; [[file:config.org::*Generate Class Calendar][Generate Class Calendar:1]]
