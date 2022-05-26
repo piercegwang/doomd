@@ -5,7 +5,9 @@
  ;; If there is more than one, they won't work right.
  '(org-modules '(ol-bibtex org-habit))
  '(safe-local-variable-values
-   '((org-roam-dailies-capture-templates
+   '((projectile-project-package-cmd nil)
+     (projectile-project-compilation-cmd "cd bin && cmake .. && make")
+     (org-roam-dailies-capture-templates
       ("c" "Class" plain #'org-roam-capture--get-point "%?" :file-name "daily/class-%<%Y%m%d%H%M%S>" :head "#+setupfile: ~/.doom.d/org-mode/templates/general/note.org
 #+setupfile: ~/.doom.d/org-mode/templates/school/name_email.org
 #+setupfile: ~/.doom.d/org-mode/templates/school/writing_setup.org
