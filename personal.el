@@ -12,15 +12,23 @@
 
 ;; [[file:config.org::*Org-mode][Org-mode:2]]
 (after! org
+<<<<<<< HEAD
   ;; Set to the name of the file where new notes will be stored
   (setq org-mobile-inbox-for-pull "~/Dropbox/Apps/MobileOrg/index.org")
   ;; Set to <your Dropbox root directory>/MobileOrg.
   (setq org-mobile-directory "~/Dropbox/Apps/MobileOrg")
+=======
+    ;; Set to the name of the file where new notes will be stored
+    (setq org-mobile-inbox-for-pull "~/NextCloud/Documents/Apps/MobileOrg/index.org")
+    ;; Set to <your NextCloud/Documents root directory>/MobileOrg.
+    (setq org-mobile-directory "~/NextCloud/Documents/Apps/MobileOrg")
+>>>>>>> 6a921af (Changed to NextCloud)
   (after! org-crypt
     (setq org-crypt-key "pierce.g.wang@gmail.com")
     ;; GPG key to use for encryption
     ;; Either the Key ID or set to nil to use symmetric encryption.
     )
+<<<<<<< HEAD
   (require 'ox-publish)
   (setq org-publish-project-alist
         '(("pages-notes"
@@ -42,6 +50,29 @@
            )
           ("pages" :components ("pages-notes" "pages-static"))
           ))
+=======
+    (require 'ox-publish)
+    (setq org-publish-project-alist
+          '(("pages-notes"
+             :base-directory "~/NextCloud/Documents/org_publish/"
+             :base-extension "org"
+             :publishing-directory "~/Documents/github/github_pages/"
+             :recursive t
+             :publishing-function org-html-publish-to-html
+             :headline-levels 4             ; Just the default for this project.
+             ;; :html-head "<link rel=\"stylesheet\" type=\"text/css\" href=\"css/style.css\"/>"
+             :auto-preamble t
+             )
+            ("pages-static"
+             :base-directory "~/NextCloud/Documents/org_publish/"
+             :base-extension "css\\|js\\|png\\|jpg\\|gif\\|pdf\\|mp3\\|ogg\\|swf\\|jpeg\\|txt\\|json"
+             :publishing-directory "~/Documents/github/github_pages/"
+             :recursive t
+             :publishing-function org-publish-attachment
+             )
+            ("pages" :components ("pages-notes" "pages-static"))
+            ))
+>>>>>>> 6a921af (Changed to NextCloud)
   (use-package! org-gcal
     :config
     (map! :leader
@@ -62,24 +93,24 @@
   (setq org-reveal-root "file:///Users/piercewang/Documents/projects/revealjs/reveal.js-4.1.0")
   (setq org-capture-templates
         (doct '(("Inboxes" :keys "i"
-                 :file "~/Dropbox/org/inbox.org"
+                 :file "~/NextCloud/Documents/org/inbox.org"
                  :type entry
                  :template ("* %?")
                  :children (("Flexible Entry" :keys "i")
                             ("Todo" :keys "t"
                              :template ("* TODO %?"))
                             ("Notes Entry" :keys "n"
-                             :file "~/Dropbox/org/notes.org"
+                             :file "~/NextCloud/Documents/org/notes.org"
                              :template ("* %?"
                                         "%U"))
                             ("Link" :keys "l"
-                             :file "~/Dropbox/org/links.org"
+                             :file "~/NextCloud/Documents/org/links.org"
                              :headline "!Inbox"
                              :prepend t
                              :template ("* [[%?%:link][%:description]]"
                                         "%U"))))
                 ("Finances" :keys "f"
-                 :file "~/Dropbox/org/finances.org.gpg"
+                 :file "~/NextCloud/Documents/org/finances.org.gpg"
                  :children (("Credit Card Transaction" :keys "c"
                              :headline "Nordstrom Card"
                              :type table-line
@@ -88,9 +119,9 @@
                 ("Events" :keys "e"
                  :type entry
                  :children (("Emacs Entry (Not Synced)" :keys "f"
-                             :file "~/Dropbox/org/events.org")
+                             :file "~/NextCloud/Documents/org/events.org")
                             ("Emacs Calendar" :keys "e"
-                             :file "~/Dropbox/org/calendars/cal_emacs.org"
+                             :file "~/NextCloud/Documents/org/calendars/cal_emacs.org"
                              :template ("* %^{Title of event}"
                                         ":PROPERTIES:"
                                         ":calendar-id: ihfv2u5n9uf5ksj5484vbe7mj4@group.calendar.google.com"
@@ -99,7 +130,7 @@
                                         "%^{Scheduled time + duration}T%?"
                                         ":END:"))
                             ("Emacs Calendar" :keys "g"
-                             :file "~/Dropbox/org/calendars/cal_gmail.org"
+                             :file "~/NextCloud/Documents/org/calendars/cal_gmail.org"
                              :template ("* %^{Title of event}"
                                         ":PROPERTIES:"
                                         ":calendar-id: pierce.g.wang@gmail.com"
@@ -108,14 +139,14 @@
                                         "%^{Scheduled time + duration}T%?"
                                         ":END:"))))
                 ("Stuff and Things" :keys "s"
-                 :file "~/Dropbox/org/notes/stuff_and_things/organizing_temp.org"
+                 :file "~/NextCloud/Documents/org/notes/stuff_and_things/organizing_temp.org"
                  :children (("Database Entry" :keys "i"
                              :type entry
                              :template ("* DECIDE %?"
                              "%U"))
                             ("Packing for College" :keys "p"
                              :type entry
-                             :file "~/Dropbox/org-roam/temporary/20210805114431-packing_for_college.org"
+                             :file "~/NextCloud/Documents/org-roam/temporary/20210805114431-packing_for_college.org"
                              :contexts (:in-file "20210805114431-packing_for_college.org")
                              :template ("* DONE Item"
                                         "%^{TYPE}p"
@@ -139,8 +170,8 @@
                                         "%^{COMPOSED}p")))))))
   
   (after! org-roam
-    (setq org-roam-directory "~/Dropbox/org-roam/"
-          org-roam-db-location "~/Dropbox/org-roam/org-roam.db"
+    (setq org-roam-directory "~/NextCloud/Documents/org-roam/"
+          org-roam-db-location "~/NextCloud/Documents/org-roam/org-roam.db"
           org-roam-dailies-directory "daily/"
           org-roam-db-update-method 'immediate ;; could change later if it gets slow
           org-roam-tag-sources '(prop vanilla)
@@ -185,7 +216,7 @@
              :file-name "%<%Y%m%d%H%M%S>-${slug}"
              :head "#+roam_tags: \n#+title: ${title}\n#+category: \n"
              :unnarrowed t))))
-  (setq pgw/refile-targets (file-expand-wildcards "~/Dropbox/org/*.org"))
+  (setq pgw/refile-targets (file-expand-wildcards "~/NextCloud/Documents/org/*.org"))
   )
 ;; Org-mode:2 ends here
 
@@ -201,9 +232,16 @@
 (setq shell-file-name "/bin/zsh")
 ;; Shell:1 ends here
 
+<<<<<<< HEAD
 (defun pgw/turn-on-flyspell-hook ()
   (if (or (string-match "^/Users/piercewang/Dropbox/org/notes/college/" (if (eq buffer-file-name nil) "" buffer-file-name)))
       (flyspell-mode 1)))
+=======
+;; [[file:config.org::*Flyspell mode][Flyspell mode:1]]
+  (defun pgw/turn-on-flyspell-hook ()
+    (if (or (string-match "^/Users/piercewang/NextCloud/Documents/org/notes/college/" (if (eq buffer-file-name nil) "" buffer-file-name)))
+        (flyspell-mode 1)))
+>>>>>>> 6a921af (Changed to NextCloud)
 
 (add-hook! 'org-mode-hook 'turn-on-flyspell)
 
