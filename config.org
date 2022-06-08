@@ -74,9 +74,14 @@ All configurations here get "tangled" into the main ~config.el~ file.
 
 Load personal settings or general settings?
 
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle no
 (load-file "~/.doom.d/personal.el")
 #+end_src
+
+#+begin_src emacs-lisp :tangle yes
+(load-file "~/.doom.d/work.el")
+#+end_src
+
 ** Better defaults
 *** Simple Settings
 
@@ -582,6 +587,14 @@ Special Fonts config for ease of zooming chinese and english fonts at same rate.
       doom-serif-font (font-spec :family "Ubuntu"))
 #+end_src
 
+#+begin_src emacs-lisp :tangle "work.el"
+(setq doom-font (font-spec :family "Ubuntu Mono" :size 14 :height 1.0)
+      doom-big-font (font-spec :family "Ubuntu Mono" :size 26)
+      doom-variable-pitch-font (font-spec :family "Open Sans" :size 12)
+      doom-unicode-font (font-spec :family "Ubuntu Mono")
+      doom-serif-font (font-spec :family "Ubuntu"))
+#+end_src
+
 *** Mixed Pitch
 Mixed pitch package for mixing variable and monospace fonts where appropriate (replacing buffer-face-mode).
 
@@ -682,8 +695,7 @@ CLOSED: [2020-11-29 Sun 11:30]
 **** Changing Defaults
 
 #+begin_src emacs-lisp
-(setq org-directory "~/NextCloud/Documents/org"
-      org-default-notes-file (concat org-directory "/inbox.org")
+(setq org-default-notes-file (concat org-directory "/inbox.org")
       org-use-property-inheritance t
       org-log-done 'time
       org-list-allow-alphabetical t
@@ -699,6 +711,14 @@ CLOSED: [2020-11-29 Sun 11:30]
         (:hlines . "no")
         (:tangle . "no")
         (:comments . "link")))
+#+end_src
+
+#+begin_src emacs-lisp :tangle personal.el
+(setq org-directory "~/NextCloud/Documents/org")
+#+end_src
+
+#+begin_src emacs-lisp :tangle work.el
+(setq org-directory "~/NextCloud/Documents/org/notes/acacia")
 #+end_src
 
 **** org-roam
@@ -819,7 +839,7 @@ CLOSED: [2020-11-29 Sun 11:30]
 ***** Custom Commands
 Custom commands, testing sorting strategy variable
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle personal.el
   (setq org-agenda-custom-commands
         '(("c" . "Columbia")
           ("cf" . "Columbia Friend Schedules")
@@ -854,20 +874,27 @@ Custom commands, testing sorting strategy variable
 #+end_src
 
 ***** Files
-#+begin_src emacs-lisp
-(setq org-agenda-files (append (file-expand-wildcards "~/NextCloud/Documents/org/*.org")
-                               (file-expand-wildcards "~/NextCloud/Documents/org/*.org.gpg")
-                               (file-expand-wildcards "~/NextCloud/Documents/org/calendars/*.org")
+#+begin_src emacs-lisp :tangle personal.el
+(setq org-agenda-files (append (file-expand-wildcards (concat org-directory "/*.org"))
+                               (file-expand-wildcards (concat org-directory "/*.org.gpg"))
+                               (file-expand-wildcards (concat org-directory "/calendars/*.org"))
                                '("/Users/piercewang/NextCloud/Documents/org/notes/columbia/2022_Spring/calendar/2022_spring_calendar.org")))
 
 (defun pgw/org-agenda-reload-files ()
   (interactive)
-  (setq org-agenda-files (append (file-expand-wildcards "~/NextCloud/Documents/org/*.org")
-                                 (file-expand-wildcards "~/NextCloud/Documents/org/*.org.gpg")
-                                 (file-expand-wildcards "~/NextCloud/Documents/org/calendars/*.org")
+  (setq org-agenda-files (append (file-expand-wildcards (concat org-directory "/*.org"))
+                                 (file-expand-wildcards (concat org-directory "/*.org.gpg"))
+                                 (file-expand-wildcards (concat org-directory "/calendars/*.org"))
                                  '("/Users/piercewang/NextCloud/Documents/org/notes/columbia/2022_Spring/calendar/2022_spring_calendar.org"))))
 #+end_src
 
+#+begin_src emacs-lisp :tangle work.el
+(setq org-agenda-files (append (file-expand-wildcards (concat org-directory "/*.org"))))
+
+(defun pgw/org-agenda-reload-files ()
+  (interactive)
+  (setq org-agenda-files (append (file-expand-wildcards (concat org-directory "/*.org")))))
+#+end_src
 ***** Time Grid Variable
 
 #+begin_src emacs-lisp
@@ -1077,7 +1104,7 @@ Calendar Setup:
 #+end_src
 
 **** DOCT Org Capture Template
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle personal.el
 (setq org-capture-templates
       (doct '(("Inboxes" :keys "i"
                :file "~/NextCloud/Documents/org/inbox.org"
@@ -2166,11 +2193,42 @@ See [[https://github.com/piercegwang/ohsics_to_org][https://github.com/piercegwa
 *** Rust
 
 #+begin_src emacs-lisp
+(setq racer-rust-src-path "/Users/piercewang/.rustup/toolchains/stable-aarch64-apple-darwin/lib/rustlib/src/rust/library")
+
+(setq lsp-rust-analyzer-cargo-unset-test ["core" "ed25519-dalek"])
+
+(defun pgw/lsp-rust-analyzer-open-local-docs ()
+  "Open a local URL for documentation related to the current TextDocumentPosition."
+  (interactive)
+  (-if-let* ((params (lsp-make-rust-analyzer-open-external-docs-params
+                      :text-document (lsp--text-document-identifier)
+                      :position (lsp--cur-position)))
+             (url (lsp-request "experimental/externalDocs" params))
+             (parsed-url t)
+             (dir default-directory)
+             (parsed-dir t)
+             (final-url t))
+      (progn
+        (message url)
+        (message dir)
+        (if (eq (string-match "/[\.0-9]+/\\([.\#\-\_a-zA-Z0-9]+\\)" url) nil)
+            (progn (message "Unable to parse link.")
+                   (browse-url url))
+          (setq parsed-url (match-string 1 url)))
+        (message parsed-url)
+        (if (eq (string-match "^\\(.*\\)src\\/" dir) nil)
+            (warn "Unable to parse directory.")
+          (setq parsed-dir (match-string 1 dir)))
+        (message parsed-dir)
+        (setq final-url (concat "file://" parsed-dir "target/doc/" parsed-url))
+        (browse-url final-url))
+    (warn "URL not found")))
+
 
 (map! (:when (featurep! :lang rust)
        (:map rustic-mode-map
         :localleader
-        :desc "Open external docs for current pointer." "b O" #'lsp-rust-analyzer-open-external-docs)))
+        :desc "Open external docs for current pointer." "b O" #'pgw/lsp-rust-analyzer-open-local-docs)))
 
 #+end_src
 
