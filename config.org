@@ -2221,7 +2221,7 @@ See [[https://github.com/piercegwang/ohsics_to_org][https://github.com/piercegwa
       (progn
         (message url)
         (message dir)
-        (if (eq (string-match "/[\.0-9]+/\\([.\#\-\_a-zA-Z0-9]+\\)" url) nil)
+        (if (eq (string-match "/[\.0-9]+[\-\.a-zA-Z0-9]*/\\([.\#\-\_a-zA-Z0-9]+\\)" url) nil)
             (progn (message "Unable to parse link.")
                    (browse-url url))
           (setq parsed-url (match-string 1 url)))
