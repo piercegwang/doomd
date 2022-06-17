@@ -933,12 +933,14 @@ Custom commands, testing sorting strategy variable
 **** Babel
 
 #+begin_src emacs-lisp
-  (with-eval-after-load 'org
-    (org-babel-do-load-languages 'org-babel-load-languages
-                                 '((python . t)
-                                   (c . t)
-                                   (ditaa . t)
-                                   )))
+(with-eval-after-load 'org
+  (org-babel-do-load-languages 'org-babel-load-languages
+                               '((python . t)
+                                 (c . t)
+                                 (ditaa . t)
+                                 )))
+
+(if (eq system-type 'gnu/linux) (setq org-ditaa-jar-path "/usr/share/ditaa/ditaa.jar"))
 #+end_src
 
 **** Org-drill
