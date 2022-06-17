@@ -1124,12 +1124,17 @@ Calendar Setup:
                            :template ("* [[%?%:link][%:description]]"
                                       "%U"))))
               ("Finances" :keys "f"
-               :file "~/NextCloud/Documents/org/finances.org.gpg"
-               :children (("Credit Card Transaction" :keys "c"
-                           :headline "Nordstrom Card"
-                           :type table-line
-                           :table-line-pos "III-1"
-                           :template ("| | %? | |"))))
+               ;; :file "~/NextCloud/Documents/org/finances.org.gpg"
+               :children (("Income" :keys "i"
+                           :file "~/NextCloud/Documents/org/notes/finance/finance_inbox.org"
+                           :headline "Inbox"
+                           :template ("* ?"
+                                      ":PROPERTIES:"
+                                      ":DATE: %U"
+                                      ":END:"
+                                      "%^{amount}p"
+                                      "%^{beforetax}p"
+                                      "%^{category}p"))))
               ("Events" :keys "e"
                :type entry
                :children (("Emacs Entry (Not Synced)" :keys "f"
@@ -1151,8 +1156,12 @@ Calendar Setup:
                                       ":END:"
                                       ":org-gcal:"
                                       "%^{Scheduled time + duration}T%?"
-                                      ":END:"))))
-              ("Stuff and Things" :keys "s"
+                                      ":END:")))))))
+
+#+end_src
+
+#+begin_example
+("Stuff and Things" :keys "s"
                :file "~/NextCloud/Documents/org/notes/stuff_and_things/organizing_temp.org"
                :children (("Database Entry" :keys "i"
                            :type entry
@@ -1181,11 +1190,10 @@ Calendar Setup:
                            :template ("* - %?"
                                       "%^{COMPOSER}p"
                                       "%^{ARRANGEMENT}p"
-                                      "%^{COMPOSED}p")))))))
+                                      "%^{COMPOSED}p"))))
+#+end_example
 
-#+end_src
-
-#+begin_src elisp :tangle no
+,#+begin_src elisp :tangle no
 (setq org-capture-templates
       '(("m" "Viola Repertoire" entry (id "enter id here")
          "* - %?\n%^{COMPOSER}p\n%^{ARRANGEMENT}p\n%^{COMPOSED}p\n")))
@@ -1338,7 +1346,7 @@ Disable automatic completion from company--slows everything down a bit.
 
 ** Shell
 #+begin_src emacs-lisp :tangle "personal.el"
-(setq shell-file-name "/bin/zsh")
+(setq shell-file-name "/usr/bin/bash")
 #+end_src
 
 ** Magit
@@ -2169,7 +2177,7 @@ See [[https://github.com/piercegwang/ohsics_to_org][https://github.com/piercegwa
   (add-hook! vterm-mode
              (evil-emacs-state 1))
   (add-to-list 'vterm-tramp-shells '("sshx" "/bin/bash"))
-  (setq vterm-shell "zsh"))
+  (setq vterm-shell "bash"))
 #+end_src
 
 ** Languages
