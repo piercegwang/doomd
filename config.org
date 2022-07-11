@@ -1432,8 +1432,8 @@ I love Emacs Tetris!
 #+begin_src emacs-lisp
 (use-package! tetris
   :bind (:map tetris-mode-map
-         ("z" . tetris-rotate-next)
-         ("x" . tetris-rotate-prev)
+         ("z" . tetris-rotate-prev)
+         ("x" . tetris-rotate-next)
          ("k" . tetris-move-bottom)
          ("h" . tetris-move-left)
          ("j" . tetris-move-down)
