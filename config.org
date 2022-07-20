@@ -430,6 +430,8 @@ Light themes:
 
     ;; Load the theme (doom-one, doom-molokai, etc); keep in mind that each theme
     ;; may have their own settings.
+    ;; (load-theme 'doom-challenger-deep t)
+    ;; (load-theme 'doom-outrun-electric t)
     (load-theme 'doom-acario-dark t)
     ;; (load-theme 'doom-snazzy t)
     ;; (load-theme 'modus-operandi)
@@ -727,23 +729,6 @@ CLOSED: [2020-11-29 Sun 11:30]
 (use-package! org-roam
   :hook (after-init . org-roam-mode)
   :config
-  (map! :leader
-        (:prefix-map ("r" . "Roam")
-         :desc "Roam" "l" #'org-roam
-         :desc "Roam Find File" "f" #'org-roam-find-file
-         :desc "Roam Graph" "g" #'org-roam-graph
-         :desc "Roam Capture" "c" #'org-roam-capture
-         :desc "Roam Refresh" "!" #'pgw/org-roam-refresh
-         :desc "Roam Insert" "i" #'org-roam-insert
-         (:prefix ("d" . "Dailies")
-          :desc "Capture Today" "." #'org-roam-dailies-capture-today
-          :desc "Capture Yesterday" "h" #'org-roam-dailies-capture-yesterday
-          :desc "Capture Tomorrow" "l" #'org-roam-dailies-capture-tomorrow
-          :desc "Capture Date" "d" #'org-roam-dailies-capture-date
-          :desc "Find Date" "/" #'org-roam-dailies-find-date
-          :desc "Find Next Note" "L" #'org-roam-dailies-find-next-note
-          :desc "Find Prev Note" "H" #'org-roam-dailies-find-previous-note)))
-  (org-roam-mode 1)
   (defun pgw/org-roam-refresh ()
     (interactive)
     (org-roam-db-build-cache :force)
@@ -937,10 +922,11 @@ Custom commands, testing sorting strategy variable
   (org-babel-do-load-languages 'org-babel-load-languages
                                '((python . t)
                                  (c . t)
-                                 (ditaa . t)
-                                 )))
+                                 (ditaa . t))))
 
-(if (eq system-type 'gnu/linux) (setq org-ditaa-jar-path "/usr/share/ditaa/ditaa.jar"))
+(cond ((eq system-type 'gnu/linux) (setq org-ditaa-jar-path "/usr/share/ditaa/ditaa.jar"))
+      ((eq system-type 'darwin) (setq org-ditaa-jar-path "/opt/homebrew/Cellar/ditaa/0.11.0_1/libexec/ditaa-0.11.0-standalone.jar")))
+
 #+end_src
 
 **** Org-drill
@@ -1268,7 +1254,7 @@ Calendar Setup:
 ** Company mode
 Disable automatic completion from company--slows everything down a bit.
 #+begin_src emacs-lisp
-(setq company-idle-delay nil) ;; original 0.2
+(setq company-idle-delay 0.2) ;; original 0.2
 #+end_src
 
 ** LaTeX
@@ -2179,7 +2165,7 @@ See [[https://github.com/piercegwang/ohsics_to_org][https://github.com/piercegwa
   (add-hook! vterm-mode
              (evil-emacs-state 1))
   (add-to-list 'vterm-tramp-shells '("sshx" "/bin/bash"))
-  (setq vterm-shell "bash"))
+  (setq vterm-shell "zsh"))
 #+end_src
 
 ** Languages
@@ -2537,7 +2523,7 @@ markdown          ; writing docs for people to ignore
 ;;nim               ; python + lisp at the speed of c
 ;;nix               ; I hereby declare "nix geht mehr!"
 ;;ocaml             ; an objective camel
-(org +roam)       ; organize your plain life in plain text
+(org +roam2)       ; organize your plain life in plain text
 ;;php               ; perl's insecure younger brother
 ;;plantuml          ; diagrams for confusing people more
 ;;purescript        ; javascript, but functional
