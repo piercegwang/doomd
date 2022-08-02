@@ -732,7 +732,9 @@ CLOSED: [2020-11-29 Sun 11:30]
   (defun pgw/org-roam-refresh ()
     (interactive)
     (org-roam-db-build-cache :force)
-    (org-roam-buffer--update-maybe :redisplay)))
+    (org-roam-buffer--update-maybe :redisplay))
+  (setq org-roam-directory "/Users/piercewang/NextCloud/Documents/org-roam/")
+  (setq org-roam-db-location "/Users/piercewang/NextCloud/Documents/org-roam.db"))
 #+end_src
 
 **** ​Todo keywords
@@ -1334,7 +1336,8 @@ Disable automatic completion from company--slows everything down a bit.
 
 ** Shell
 #+begin_src emacs-lisp :tangle "personal.el"
-(setq shell-file-name "/usr/bin/bash")
+(setq shell-file-name "/bin/bash")
+;; (setq shell-file-name "/opt/homebrew/bin/fish")
 #+end_src
 
 ** Magit
@@ -1347,34 +1350,15 @@ Disable automatic completion from company--slows everything down a bit.
 ** Backups
 
 #+begin_src emacs-lisp
-;; make backup to a designated dir, mirroring the full path
-
-(defun my-backup-file-name (fpath)
-  "Return a new file path of a given file path.
-If the new path's directories does not exist, create them."
-  (let* (
-         (backupRootDir "~/backups/")
-         (filePath (replace-regexp-in-string "[A-Za-z]:" "" fpath )) ; remove Windows driver letter in path, ➢ for example: “C:”
-         (backupFilePath (replace-regexp-in-string "//" "/" (concat backupRootDir filePath "~") )))
-    (make-directory (file-name-directory backupFilePath) (file-name-directory backupFilePath))
-    backupFilePath
-  )
-)
-#+end_src
-
-
-
-#+begin_src emacs-lisp
-
-(setq backup-directory-alist '(("." . "~/backup"))
+(setq backup-directory-alist '(("." . "~/NextCloud/Documents/backup"))
   backup-by-copying t    ; Don't delink hardlinks
   version-control t      ; Use version numbers on backups
   delete-old-versions t  ; Automatically delete excess backups
-  kept-new-versions 20   ; how many of the newest versions to keep
+  kept-new-versions 15   ; how many of the newest versions to keep
   kept-old-versions 5    ; and how many of the old
   make-backup-files t    ; Use backups
   vc-make-backup-files t ; Make it under vc too
-  make-backup-file-name-function 'my-backup-file-name)
+)
 #+end_src
 
 ** Daemon
@@ -2165,7 +2149,7 @@ See [[https://github.com/piercegwang/ohsics_to_org][https://github.com/piercegwa
   (add-hook! vterm-mode
              (evil-emacs-state 1))
   (add-to-list 'vterm-tramp-shells '("sshx" "/bin/bash"))
-  (setq vterm-shell "zsh"))
+  (setq vterm-shell "fish"))
 #+end_src
 
 ** Languages
