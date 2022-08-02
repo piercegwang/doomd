@@ -74,12 +74,10 @@ All configurations here get "tangled" into the main ~config.el~ file.
 
 Load personal settings or general settings?
 
-#+begin_src emacs-lisp :tangle no
-(load-file "~/.doom.d/personal.el")
-#+end_src
-
 #+begin_src emacs-lisp :tangle yes
-(load-file "~/.doom.d/work.el")
+(if (file-exists-p "~/.work_computer")
+    (load-file "~/.doom.d/work.el")
+  (load-file "~/.doom.d/personal.el"))
 #+end_src
 
 ** Better defaults
