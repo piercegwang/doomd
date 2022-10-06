@@ -1,0 +1,6 @@
+# Latex Basic Formatting
+#+latex_class: article
+#+LATEX_CLASS_OPTIONS: [12pt]
+#+LATEX_HEADER: \usepackage[margin=0.75in]{geometry}
+# #+LATEX_HEADER: \usepackage{setspace}
+#+LATEX_HEADER: \setlength{\parindent}{0pt}
