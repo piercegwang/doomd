@@ -70,6 +70,20 @@ This helps get rid of =functions might not be defined at runtime= warnings. See 
 
 All configurations here get "tangled" into the main ~config.el~ file.
 
+#+begin_src emacs-lisp
+;; config.el file -*- lexical-binding: t; -*-
+#+end_src
+
+** Doom fonts
+
+#+begin_src emacs-lisp
+(setq doom-font (font-spec :family "Ubuntu Mono" :size 14 :height 1.0))
+(setq doom-unicode-font (font-spec :family "Noto Serif SC")
+      doom-big-font (font-spec :family "Ubuntu Mono" :size 26)
+      doom-variable-pitch-font (font-spec :family "Open Sans" :size 12)
+      doom-serif-font (font-spec :family "Ubuntu"))
+#+end_src
+
 ** Load Setting
 
 Load personal settings or general settings?
@@ -78,6 +92,12 @@ Load personal settings or general settings?
 (if (file-exists-p "~/.work_computer")
     (load-file "~/.doom.d/work.el")
   (load-file "~/.doom.d/personal.el"))
+#+end_src
+
+** Custom Loads
+
+#+begin_src emacs-lisp
+(add-to-list 'load-path (expand-file-name "~/.doom.d/custom/"))
 #+end_src
 
 ** Better defaults
@@ -108,7 +128,7 @@ Load personal settings or general settings?
 #+end_src
 
 *** Auto-customisations
-By default changes made via a customisation interface are added to =init.el=.
+By default changes made via a customization interface are added to =init.el=.
 I prefer the idea of using a separate file for this. We just need to change a
 setting, and load it if it exists.
 #+begin_src emacs-lisp
@@ -127,16 +147,16 @@ First, we'll enter the new window
       evil-split-window-below t)
 #+end_src
 
-Then, we'll pull up ~ivy~
-#+begin_src emacs-lisp
+Then, we'll pull up ~ivy~ (Disabled--I actually don't like this)
+#+begin_src emacs-lisp :tangle no
 (defadvice! prompt-for-buffer (&rest _)
   :after '(evil-window-split evil-window-vsplit)
   (+ivy/switch-buffer))
 #+end_src
 
-Oh, and previews are nice
+Oh, and previews are (not) nice - they lag a lot
 #+begin_src emacs-lisp
-(setq +ivy-buffer-preview t)
+(setq +ivy-buffer-preview nil)
 #+end_src
 
 Window rotation is nice, and can be found under =SPC w r= and =SPC w R=.
@@ -168,6 +188,100 @@ navigation/swapping commands.
 ** Bookmarks
 #+begin_src emacs-lisp
   (global-set-key (kbd "C-x r D") 'bookmark-delete)
+#+end_src
+
+** Fonts
+*** DISABLED Chinese Font with English Font             :ARCHIVE:
+CLOSED: [2020-11-29 Sun 11:28]
+Special Fonts config for ease of zooming chinese and english fonts at same rate.
+
+#+begin_src emacs-lisp :tangle no
+  (when (display-graphic-p)
+    (if (eq system-type 'darwin)
+        (set-face-attribute 'default nil :font "Menlo"))
+
+    (defvar emacs-english-font "Menlo" "The font name for English.")
+    (defvar emacs-cjk-font "WenQuanYi Micro Hei Mono" "The font name for CJK.")
+    (find-font (font-spec :name "WenQuanYi Micro Hei Mono"))
+    (font-family-list)
+    (if (eq system-type 'windows-nt)
+       (setq emacs-cjk-font "WenQuanYi Micro Hey Mono"
+              emacs-english-font "Menlo")
+      (setq emacs-cjk-font "WenQuanYi Micro Hei Mono"))
+
+    (defvar emacs-font-size-pair '(12 . 14) ; Old '(12 . 14)
+      "Default font size pair for (english . chinese)")
+
+    (defvar emacs-font-size-pair-list
+      '((5 .  6) (9 . 10) (10 . 12) (12 . 14)
+        (13 . 16) (15 . 18) (17 . 20) (19 . 22)
+        (20 . 24) (21 . 26) (24 . 28) (26 . 32)
+        (28 . 34) (30 . 36) (34 . 40) (36 . 44))
+      "This list is used to store matching (english . chinese) font-size.")
+
+    (defun font-exist-p (fontname)
+      "Test if this font is exist or not."
+      (if (or (not fontname) (string= fontname ""))
+          nil
+        (if (not (x-list-fonts fontname)) nil t)))
+
+    (defun set-font (english chinese size-pair)
+      "Setup emacs English and Chinese font on x window-system."
+
+      (if (font-exist-p english)
+          (set-frame-font (format "%s:pixelsize=%d" english (car size-pair)) t))
+
+      (if (font-exist-p chinese)
+          (dolist (charset '(kana han symbol cjk-misc bopomofo))
+            (set-fontset-font (frame-parameter nil 'font) charset
+                              (font-spec :family chinese :size (cdr size-pair))))))
+    ;; Setup font size based on emacs-font-size-pair
+    (set-font emacs-english-font emacs-cjk-font emacs-font-size-pair)
+
+    (defun emacs-step-font-size (step)
+      "Increase/Decrease emacs's font size."
+      (let ((scale-steps emacs-font-size-pair-list))
+        (if (< step 0) (setq scale-steps (reverse scale-steps)))
+        (setq emacs-font-size-pair
+              (or (cadr (member emacs-font-size-pair scale-steps))
+                  emacs-font-size-pair))
+        (when emacs-font-size-pair
+          (message "emacs font size set to %.1f" (car emacs-font-size-pair))
+          (set-font emacs-english-font emacs-cjk-font emacs-font-size-pair))))
+
+          (defun increase-emacs-font-size ()
+      "Decrease emacs's font-size acording emacs-font-size-pair-list."
+      (interactive) (emacs-step-font-size 1))
+
+    (defun decrease-emacs-font-size ()
+      "Increase emacs's font-size acording emacs-font-size-pair-list."
+      (interactive) (emacs-step-font-size -1))
+
+    (global-set-key (kbd "C-=") 'increase-emacs-font-size)
+    (global-set-key (kbd "C--") 'decrease-emacs-font-size)
+    )
+
+  (set-face-attribute 'default nil :font emacs-english-font :height 120)
+  (dolist (charset '(kana han symbol cjk-misc bopomofo))
+      (set-face-attribute charset (font-spec :family emacs-cjk-font :size (cdr emacs-font-size-pair))))
+
+  (set-font emacs-english-font emacs-cjk-font emacs-font-size-pair)
+#+end_src
+
+*** Mixed Pitch
+Mixed pitch package for mixing variable and monospace fonts where appropriate (replacing buffer-face-mode).
+
+I copied mixed-pitch.el from [[https://gitlab.com/jabranham/mixed-pitch/][this]] repository because of [[https://gitlab.com/jabranham/mixed-pitch/issues/6][this]] issue. I will hopefully be changing it back at some point (or coming up with a better fix because the fonts don't seem to work great together) but for now this will be the fix.
+
+#+begin_src emacs-lisp
+  (use-package! mixed-pitch
+    :config
+    ;; (set-face-attribute 'variable-pitch :height 160)
+    (dolist (face '(line-number line-number-current-line org-list-dt org-link)) (add-to-list 'mixed-pitch-fixed-pitch-faces face))
+    ;; (add-hook! 'text-mode-hook 'mixed-pitch-mode)
+    (map! :leader
+          :n "t m" 'mixed-pitch-mode)
+    (set-face-attribute 'variable-pitch nil :height 0.8))
 #+end_src
 
 ** Tramp
@@ -244,23 +358,44 @@ navigation/swapping commands.
   (defun insert-org-image (&optional swindow)
     "Prompt user for name of file, append time and date string, then use the Mac OSX `screencapture` feature to take a photo and place it in the relative ./figures directory."
     (interactive "P")
-    (unless (not (memq system-type '(gnu gnu/linux darwin)))
-           (let* ((outdir "figures")
-                  (givenname (read-string "Enter File Name: "))
-                  (namefile (concat (format-time-string "%Y%m%d_%H%M%S") (if (not (string= givenname "")) (concat "_" givenname) "") ".jpeg"))
-                  (program (cond ((if (memq system-type '(gnu gnu/linux)) "gnome-screenshot" nil))
-                                 ((if (eq system-type 'darwin) "screencapture" ""))))
-                  (argument (cond ((string= program "screencapture") (if swindow "-w" "-i"))
-                                  ((string= program "gnome-screenshot") (if swindow "-w" "-a"))))
-                  (outfile (concat outdir "/" namefile)))
-             (unless (file-directory-p outdir)
-               (make-directory outdir t))
-             (if (memq system-type '(gnu gnu/linux))
-                 (setq outfile (concat "--file=" outfile)))
-             (message "Program: %s\nArgument: %s\nOutfile: %s" program argument outfile)
-             (call-process program nil nil nil argument outfile)
-             (message namefile)
-             (insert (concat (concat "[[file:./figures/" (file-name-nondirectory outfile)) "]]")))))
+    (let* ((outdir "figures")
+           (givenname (read-string "Enter File Name: ")))
+        (cond
+         ((memq system-type '(gnu gnu/linux))
+          (let* ((namefile (concat (format-time-string "%Y%m%d_%H%M%S") (if (not (string= givenname "")) (concat "_" givenname) "") ".png"))
+                 (program "xclip")
+                 (outfile (concat outdir "/" namefile))
+                 (argument "-selection clipboard -target image/png -out > "))
+            (unless (file-directory-p outdir)
+              (make-directory outdir t))
+            (message "Program: %s\nArgument: %s\nOutfile: %s" program "-selection clipboard -target image/png -out > " outfile)
+            (start-process-shell-command "Creating image..." nil (concat "xclip -selection clipboard -target image/png -out > " outfile))
+            (message namefile)
+            (insert (concat (concat "[[file:./figures/" (file-name-nondirectory outfile)) "]]"))))
+        ((memq system-type '(darwin))
+          (let* ((namefile (concat (format-time-string "%Y%m%d_%H%M%S") (if (not (string= givenname "")) (concat "_" givenname) "") ".jpeg"))
+                 (program "screencapture")
+                 (argument (if swindow "-w" "-i"))
+                 (outfile (concat outdir "/" namefile)))
+            (unless (file-directory-p outdir)
+              (make-directory outdir t))
+            (message "Program: %s\nArgument: %s\nOutfile: %s" program argument outfile)
+            (call-process program nil nil nil argument outfile)
+            (message namefile)
+            (insert (concat (concat "[[file:./figures/" (file-name-nondirectory outfile)) "]]")))))))
+#+end_src
+
+*** Insert Ditaa Source Code Block
+#+begin_src emacs-lisp
+  (defun pgw/insert-ditaa-block (&optional swindow)
+    "Prompt user for name of file, append time and date string, then use the Mac OSX `screencapture` feature to take a photo and place it in the relative ./figures directory."
+    (interactive "P")
+    (let* ((outdir "figures")
+           (givenname (read-string "Enter File Name: ")))
+          (let* ((namefile (concat (format-time-string "%Y%m%d_%H%M%S") (if (not (string= givenname "")) (concat "_" givenname) "") ".png")))
+            (unless (file-directory-p outdir)
+              (make-directory outdir t))
+            (insert (concat "ditaa :file \"figures/" namefile "\"\n")))))
 #+end_src
 
 *** Keyboard Coding System
@@ -352,6 +487,17 @@ https://stackoverflow.com/questions/2540997/create-more-than-one-eshell-instance
     (substring return 1 nil)))
 #+end_src
 
+*** Move buffer to new workspace
+
+#+begin_src emacs-lisp
+(defun pgw/buffer-to-new-workspace ()
+  (interactive)
+  (let ((buffer (current-buffer)))
+    (+workspace/close-window-or-workspace)
+    (+workspace/new)
+    (switch-to-buffer buffer)))
+#+end_src
+
 ** Modifier Keys
 #+begin_src emacs-lisp
   (when (eq system-type 'darwin)
@@ -362,6 +508,15 @@ https://stackoverflow.com/questions/2540997/create-more-than-one-eshell-instance
 
   (when (eq system-type 'gnu/linux)
     (with-no-warnings (setq x-super-keysym 'hyper)))
+#+end_src
+
+** Workspaces
+
+#+begin_src emacs-lisp
+(map! :leader
+      :n "TAB b" 'pgw/buffer-to-new-workspace
+      :n "TAB H" '+workspace/swap-left
+      :n "TAB L" '+workspace/swap-right)
 #+end_src
 
 ** Visuals
@@ -428,11 +583,14 @@ Light themes:
 
     ;; Load the theme (doom-one, doom-molokai, etc); keep in mind that each theme
     ;; may have their own settings.
-    ;; (load-theme 'doom-challenger-deep t)
     ;; (load-theme 'doom-outrun-electric t)
-    (load-theme 'doom-snazzy t)
+    (load-theme 'doom-acario-dark t)
+    ;; (load-theme 'doom-challenger-deep t)
     ;; (load-theme 'doom-snazzy t)
+    ;; (load-theme 'doom-solarized-dark t)
     ;; (load-theme 'modus-operandi)
+    ;; (load-theme 'doom-gruvbox-light)
+    ;; (load-theme 'doom-acario-light t) ;; Good one
 
     ;; Enable flashing mode-line on errors
     (doom-themes-visual-bell-config)
@@ -499,118 +657,6 @@ Make Emacs play nice with my window manager and resizing around other windows.
   (use-package! ztree)
 #+end_src
 
-** Fonts
-*** DISABLED Chinese Font with English Font             :ARCHIVE:
-CLOSED: [2020-11-29 Sun 11:28]
-Special Fonts config for ease of zooming chinese and english fonts at same rate.
-
-#+begin_src emacs-lisp :tangle no
-  (when (display-graphic-p)
-    (if (eq system-type 'darwin)
-        (set-face-attribute 'default nil :font "Menlo"))
-
-    (defvar emacs-english-font "Menlo" "The font name for English.")
-    (defvar emacs-cjk-font "WenQuanYi Micro Hei Mono" "The font name for CJK.")
-    (find-font (font-spec :name "WenQuanYi Micro Hei Mono"))
-    (font-family-list)
-    (if (eq system-type 'windows-nt)
-       (setq emacs-cjk-font "WenQuanYi Micro Hey Mono"
-              emacs-english-font "Menlo")
-      (setq emacs-cjk-font "WenQuanYi Micro Hei Mono"))
-
-    (defvar emacs-font-size-pair '(12 . 14) ; Old '(12 . 14)
-      "Default font size pair for (english . chinese)")
-
-    (defvar emacs-font-size-pair-list
-      '((5 .  6) (9 . 10) (10 . 12) (12 . 14)
-        (13 . 16) (15 . 18) (17 . 20) (19 . 22)
-        (20 . 24) (21 . 26) (24 . 28) (26 . 32)
-        (28 . 34) (30 . 36) (34 . 40) (36 . 44))
-      "This list is used to store matching (english . chinese) font-size.")
-
-    (defun font-exist-p (fontname)
-      "Test if this font is exist or not."
-      (if (or (not fontname) (string= fontname ""))
-          nil
-        (if (not (x-list-fonts fontname)) nil t)))
-
-    (defun set-font (english chinese size-pair)
-      "Setup emacs English and Chinese font on x window-system."
-
-      (if (font-exist-p english)
-          (set-frame-font (format "%s:pixelsize=%d" english (car size-pair)) t))
-
-      (if (font-exist-p chinese)
-          (dolist (charset '(kana han symbol cjk-misc bopomofo))
-            (set-fontset-font (frame-parameter nil 'font) charset
-                              (font-spec :family chinese :size (cdr size-pair))))))
-    ;; Setup font size based on emacs-font-size-pair
-    (set-font emacs-english-font emacs-cjk-font emacs-font-size-pair)
-
-    (defun emacs-step-font-size (step)
-      "Increase/Decrease emacs's font size."
-      (let ((scale-steps emacs-font-size-pair-list))
-        (if (< step 0) (setq scale-steps (reverse scale-steps)))
-        (setq emacs-font-size-pair
-              (or (cadr (member emacs-font-size-pair scale-steps))
-                  emacs-font-size-pair))
-        (when emacs-font-size-pair
-          (message "emacs font size set to %.1f" (car emacs-font-size-pair))
-          (set-font emacs-english-font emacs-cjk-font emacs-font-size-pair))))
-
-          (defun increase-emacs-font-size ()
-      "Decrease emacs's font-size acording emacs-font-size-pair-list."
-      (interactive) (emacs-step-font-size 1))
-
-    (defun decrease-emacs-font-size ()
-      "Increase emacs's font-size acording emacs-font-size-pair-list."
-      (interactive) (emacs-step-font-size -1))
-
-    (global-set-key (kbd "C-=") 'increase-emacs-font-size)
-    (global-set-key (kbd "C--") 'decrease-emacs-font-size)
-    )
-
-  (set-face-attribute 'default nil :font emacs-english-font :height 120)
-  (dolist (charset '(kana han symbol cjk-misc bopomofo))
-      (set-face-attribute charset (font-spec :family emacs-cjk-font :size (cdr emacs-font-size-pair))))
-
-  (set-font emacs-english-font emacs-cjk-font emacs-font-size-pair)
-#+end_src
-
-*** Doom fonts
-
-#+begin_src emacs-lisp :tangle "personal.el"
-(setq doom-font (font-spec :family "Ubuntu Mono" :size 14 :height 1.0)
-      doom-big-font (font-spec :family "Ubuntu Mono" :size 26)
-      doom-variable-pitch-font (font-spec :family "Open Sans" :size 12)
-      doom-unicode-font (font-spec :family "Ubuntu Mono")
-      doom-serif-font (font-spec :family "Ubuntu"))
-#+end_src
-
-#+begin_src emacs-lisp :tangle "work.el"
-(setq doom-font (font-spec :family "Ubuntu Mono" :size 14 :height 1.0)
-      doom-big-font (font-spec :family "Ubuntu Mono" :size 26)
-      doom-variable-pitch-font (font-spec :family "Open Sans" :size 12)
-      doom-unicode-font (font-spec :family "Ubuntu Mono")
-      doom-serif-font (font-spec :family "Ubuntu"))
-#+end_src
-
-*** Mixed Pitch
-Mixed pitch package for mixing variable and monospace fonts where appropriate (replacing buffer-face-mode).
-
-I copied mixed-pitch.el from [[https://gitlab.com/jabranham/mixed-pitch/][this]] repository because of [[https://gitlab.com/jabranham/mixed-pitch/issues/6][this]] issue. I will hopefully be changing it back at some point (or coming up with a better fix because the fonts don't seem to work great together) but for now this will be the fix.
-
-#+begin_src emacs-lisp
-  (use-package! mixed-pitch
-    :config
-    ;; (set-face-attribute 'variable-pitch :height 160)
-    (dolist (face '(line-number line-number-current-line org-list-dt org-link)) (add-to-list 'mixed-pitch-fixed-pitch-faces face))
-    ;; (add-hook! 'text-mode-hook 'mixed-pitch-mode)
-    (map! :leader
-          :n "t m" 'mixed-pitch-mode)
-    (set-face-attribute 'variable-pitch nil :height 0.8))
-#+end_src
-
 ** GPG
 
 #+begin_src emacs-lisp
@@ -665,8 +711,8 @@ CLOSED: [2020-11-29 Sun 11:30]
 ** Get TODO Nodes
 #+begin_src emacs-lisp
 (defun pgw/org-roam-get-todos ()
-  (map 'cons #'org-roam-node-file
-    (map 'cons #'org-roam-backlink-source-node
+  (mapcar #'org-roam-node-file
+    (mapcar #'org-roam-backlink-source-node
             (org-roam-backlinks-get
             (org-roam-node-from-id "ab2c5980-0f5f-4d46-8ad3-8194f67ac39d") :unique t))))
 #+end_src
@@ -866,19 +912,6 @@ Custom commands, testing sorting strategy variable
 #+begin_src emacs-lisp :tangle personal.el
   (setq org-agenda-custom-commands
         '(("c" . "Columbia")
-          ("cf" . "Columbia Friend Schedules")
-          ("cfe" "Ellie's Schedule" agenda ""
-           ((org-agenda-span 7)
-            (org-agenda-files
-             (file-expand-wildcards "/Users/piercewang/NextCloud/Documents/org/notes/columbia/2022_Spring/calendar/2022_spring_ellie/2022_spring_ellie.org"))))
-          ("cfk" "Kaeon's Schedule" agenda ""
-           ((org-agenda-span 7)
-            (org-agenda-files
-             (file-expand-wildcards "/Users/piercewang/NextCloud/Documents/org/notes/columbia/2022_Spring/calendar/2022_spring_kaeon/2022_spring_kaeon.org"))))
-          ("cfj" "Jenny's Schedule" agenda ""
-           ((org-agenda-span 7)
-            (org-agenda-files
-             (file-expand-wildcards "/Users/piercewang/NextCloud/Documents/org/notes/columbia/2022_Spring/calendar/2022_spring_jenny/2022_spring_jenny.org"))))
           ("l" "Logging View" agenda ""
            ((org-agenda-span 1)
             (org-agenda-files
@@ -887,7 +920,9 @@ Custom commands, testing sorting strategy variable
            ((org-agenda-span 1)
             (org-agenda-sorting-strategy
              '((agenda habit-down time-up deadline-up)))))
-          ("D" "College Deadlines" tags-todo "+collegeapps")
+          ("T" "Todo List" todo "TODO"
+           ((org-agenda-sorting-strategy
+             '((priority-up)))))
           ("Q" . "Custom queries")
           ("Qa" "Query all (Archive included)" search ""
            ((org-agenda-files (append (file-expand-wildcards (concat org-directory "/*.org"))
@@ -905,7 +940,6 @@ Custom commands, testing sorting strategy variable
 (defun pgw/org-agenda-reload-files ()
   (interactive)
   (setq org-agenda-files (append (pgw/org-roam-get-todos)
-                                 (file-expand-wildcards (concat org-directory "/calendars/*.org"))
                                  '("/Users/piercewang/NextCloud/Documents/org/notes/columbia/2022_Spring/calendar/2022_spring_calendar.org"))))
 #+end_src
 
@@ -918,7 +952,7 @@ Custom commands, testing sorting strategy variable
 #+end_src
 
 #+begin_src emacs-lisp
-(add-hook 'org-agenda-mode-hook 'pgw/org-agenda-reload-files)
+(pgw/org-agenda-reload-files)
 #+end_src
 
 ***** Time Grid Variable
@@ -927,6 +961,14 @@ Custom commands, testing sorting strategy variable
   (setq org-agenda-time-grid '((daily today require-timed)
                                (600 800 1000 1200 1400 1600 1800 2000 2200)
                                "......" "----------------"))
+#+end_src
+
+***** Keybindings :keybinds:
+
+#+begin_src emacs-lisp
+(map! :map evil-org-agenda-mode-map
+      :leader "m m l" #'org-agenda-log-mode
+      :leader "m m r" 'pgw/org-agenda-reload-files)
 #+end_src
 
 **** Crypt
@@ -966,20 +1008,37 @@ Custom commands, testing sorting strategy variable
                                  (ditaa . t)
                                  (ledger . t))))
 
-(cond ((eq system-type 'gnu/linux) (setq org-ditaa-jar-path "/usr/share/ditaa/ditaa.jar"))
-      ((eq system-type 'darwin) (setq org-ditaa-jar-path "/opt/homebrew/Cellar/ditaa/0.11.0_1/libexec/ditaa-0.11.0-standalone.jar")))
+#+end_src
 
+**** Habit
+#+begin_src emacs-lisp
+(require 'org-habit)
+(setq org-enforce-todo-dependencies t
+      org-habit-show-habits t)
 #+end_src
 
 **** Org-contrib
 
-
+#+begin_src emacs-lisp
+; (use-package! org-contrib
+;   (require 'ob-ledger))
+#+end_src
 
 **** Org-drill
 
 #+begin_src emacs-lisp
+(defun pgw/character-writing-practice ()
+  (interactive)
+  (start-process-shell-command "Running FingerPaint" nil "~/.local/bin/fingerpaint -o ~/tmp/character-writing-practice.png"))
+#+end_src
+
+#+begin_src emacs-lisp
   ;;; org-drill
-  (use-package! org-drill)
+  (use-package! org-drill
+    ;; :bind (:map org-drill-response-mode-map
+    ;;      ("c" . pgw/character-writing-practice))
+    :config
+    (require 'org-drill-table))
 #+end_src
 
 **** Latex
@@ -1005,7 +1064,7 @@ Custom commands, testing sorting strategy variable
   (setq org-format-latex-options
         ;; '(:foreground "#000000" :background default ;; light theme
         '(:foreground "#d6d6d4" :background default ;; dark tieme
-                      :scale 1.0
+                      :scale 1.5
                       :html-foreground "Black" :html-background "Transparent"
                       :html-scale 1.0
                       :matchers ("begin" "$1" "$" "$$" "\\(" "\\[")))
@@ -1045,20 +1104,6 @@ Fix color handling in org-preview-latex-fragment
 (setq org-odt-styles-file "~/.doom.d/odt/mla.ott")
 #+end_src
 
-**** DISABLED org-noter: PDF Annotation
-CLOSED: [2021-11-29 Mon 16:54]
-Obsolete because of PDF reader in Doom.
-
-#+begin_src emacs-lisp :tangle no
-  (use-package! org-noter
-    :after org
-    :ensure t
-    :config
-    (setq org-noter-default-notes-file-names '("notes.org")
-          org-noter-notes-search-path '("~/NextCloud/Documents/org/notes"))
-    )
-#+end_src
-
 **** org-gcal: Calendar Integration
 Calendar Setup:
 #+begin_src emacs-lisp
@@ -1076,13 +1121,42 @@ Calendar Setup:
   (setq org-gcal-client-id pgw/org-gcal-client-id
         org-gcal-client-secret pgw/org-gcal-client-secret
         org-gcal-file-alist pgw/org-gcal-file-alist
-        org-gcal-local-timezone "America/Los_Angeles"
+        org-gcal-local-timezone "America/New_York"
         org-gcal-notify-p nil
         org-gcal-up-days 30
         org-gcal-down-days 60)
   (setq org-gcal-remove-api-cancelled-events t))
 #+end_src
 
+**** Org-mode Startup Buffers
+
+#+begin_src emacs-lisp
+(setq org-agenda-inhibit-startup nil)
+#+end_src
+
+
+This fixes org-capture being messed up, but also makes buffers not start indent mode correctly. Thoughts on how to fix?
+#+begin_src emacs-lisp
+(defalias '+org--restart-mode-h #'ignore)
+#+end_src
+
+Related to
+- [[https://github.com/doomemacs/doomemacs/issues/5411]]
+- [[https://github.com/doomemacs/doomemacs/issues/5714]]
+
+**** DISABLED org-noter: PDF Annotation
+CLOSED: [2021-11-29 Mon 16:54]
+Obsolete because of PDF reader in Doom.
+
+#+begin_src emacs-lisp :tangle no
+  (use-package! org-noter
+    :after org
+    :ensure t
+    :config
+    (setq org-noter-default-notes-file-names '("notes.org")
+          org-noter-notes-search-path '("~/NextCloud/Documents/org/notes"))
+    )
+#+end_src
 
 *** Personal Configurations
 :PROPERTIES:
@@ -1115,7 +1189,7 @@ Calendar Setup:
         '(("pages-notes"
            :base-directory "~/NextCloud/Documents/org_publish/"
            :base-extension "org"
-           :publishing-directory "~/Documents/github/github_pages/"
+           :publishing-directory "~/Documents/github/piercegwang.github.io/"
            :recursive t
            :publishing-function org-html-publish-to-html
            :headline-levels 4             ; Just the default for this project.
@@ -1125,7 +1199,7 @@ Calendar Setup:
           ("pages-static"
            :base-directory "~/NextCloud/Documents/org_publish/"
            :base-extension "css\\|js\\|png\\|jpg\\|gif\\|pdf\\|mp3\\|ogg\\|swf\\|jpeg\\|txt\\|json"
-           :publishing-directory "~/Documents/github/github_pages/"
+           :publishing-directory "~/Documents/github/piercegwang.github.io/"
            :recursive t
            :publishing-function org-publish-attachment
            )
@@ -1143,7 +1217,7 @@ Calendar Setup:
 #+begin_src emacs-lisp :tangle personal.el
 (setq org-capture-templates
       (doct '(("Inboxes" :keys "i"
-               :file "~/NextCloud/Documents/org/inbox.org"
+               :file "~/NextCloud/Documents/org-roam/20220808093519-todo_inbox.org"
                :type entry
                :template ("* %?")
                :children (("Flexible Entry" :keys "i")
@@ -1172,13 +1246,22 @@ Calendar Setup:
                                       ":END:"
                                       "%^{amount}p"
                                       "%^{beforetax}p"
-                                      "%^{category}p"))))
+                                      "%^{category}p"))
+                          ("Transaction (Generic - Chase College)" :keys "t"
+                           :file "~/NextCloud/Documents/org-roam/20220802062356-2022_income.org"
+                           :headline "Expenses"
+                           :template ("* %U"
+                                      "#+begin_src ledger :results silent"
+                                      "%(format-time-string \"%Y/%m/%d\") * %^{Specific Transaction Name}"
+                                      "%?"
+                                      "    assets:%^{Source|bank:chase college|bank:nordstrom|venmo|cash}"
+                                      "#+end_src"))))
               ("Events" :keys "e"
                :type entry
                :children (("Emacs Entry (Not Synced)" :keys "f"
-                           :file "~/NextCloud/Documents/org/events.org")
+                           :file "~/NextCloud/Documents/org-roam/20220817093640-emacs_calendar.org")
                           ("Emacs Calendar" :keys "e"
-                           :file "~/NextCloud/Documents/org/calendars/cal_emacs.org"
+                           :file "~/NextCloud/Documents/org-roam/20220817093640-emacs_calendar.org"
                            :template ("* %^{Title of event}"
                                       ":PROPERTIES:"
                                       ":calendar-id: ihfv2u5n9uf5ksj5484vbe7mj4@group.calendar.google.com"
@@ -1186,16 +1269,69 @@ Calendar Setup:
                                       ":org-gcal:"
                                       "%^{Scheduled time + duration}T%?"
                                       ":END:"))
-                          ("Emacs Calendar" :keys "g"
-                           :file "~/NextCloud/Documents/org/calendars/cal_gmail.org"
+                          ("Main Calendar" :keys "g"
+                           :file "~/NextCloud/Documents/org-roam/20220817093328-main_google_calendar.org"
                            :template ("* %^{Title of event}"
                                       ":PROPERTIES:"
                                       ":calendar-id: pierce.g.wang@gmail.com"
                                       ":END:"
                                       ":org-gcal:"
                                       "%^{Scheduled time + duration}T%?"
-                                      ":END:")))))))
-
+                                      ":END:"))
+                          ("MMS Calendar" :keys "m"
+                           :file "~/NextCloud/Documents/org-roam/20220903112443-morningside_music_society_calendar.org"
+                           :template ("* %^{Title of event}"
+                                      ":PROPERTIES:"
+                                      ":calendar-id: morningsidemusicsociety@gmail.com"
+                                      ":END:"
+                                      ":org-gcal:"
+                                      "%^{Scheduled time + duration}T%?"
+                                      ":END:"))))
+              ("Columbia" :keys "c"
+               :type entry
+               :children (("STATUN1001_001_2022_3 - INTRO TO STATISTICAL REASONING" :keys "s"
+                           :file "~/NextCloud/Documents/org-roam/20220902082826-columbia_fall_2022_classes_assignments.org"
+                           :regexp "INTRO TO STATISTICAL REASONING"
+                           :template ("* NEXT %?"
+                                      "DEADLINE: %^T"))
+                          ("HUMAUN1123_027_2022_3 - MASTERPIECES OF WESTERN MUSIC" :keys "m"
+                           :file "~/NextCloud/Documents/org-roam/20220902082826-columbia_fall_2022_classes_assignments.org"
+                           :regexp "MASTERPIECES OF WESTERN MUSIC"
+                           :template ("* NEXT %?"
+                                      "DEADLINE: %^T"))
+                          ("CSEEW3827_001_2022_3 - FUNDAMENTALS OF COMPUTER SYSTSM" :keys "c"
+                           :file "~/NextCloud/Documents/org-roam/20220902082826-columbia_fall_2022_classes_assignments.org"
+                           :regexp "FUNDAMENTALS OF COMPUTER SYSTSM"
+                           :template ("* NEXT %?"
+                                      "DEADLINE: %^T"))
+                          ("COMSW3261_002_2022_3 - COMPUTER SCIENCE THEORY" :keys "t"
+                           :file "~/NextCloud/Documents/org-roam/20220902082826-columbia_fall_2022_classes_assignments.org"
+                           :regexp "COMPUTER SCIENCE THEORY"
+                           :template ("* NEXT %?"
+                                      "DEADLINE: %^T"))
+                          ("COCICC1101_021_2022_3 - CONTEMP WESTERN CIVILIZATION I" :keys "p"
+                           :file "~/NextCloud/Documents/org-roam/20220902082826-columbia_fall_2022_classes_assignments.org"
+                           :regexp "CONTEMP WESTERN CIVILIZATION I"
+                           :template ("* NEXT %?"
+                                      "DEADLINE: %^T"))
+                          ("CHNSUN2201_002_2022_3 - SECOND YEAR CHINESE I" :keys "C"
+                           :file "~/NextCloud/Documents/org-roam/20220902082826-columbia_fall_2022_classes_assignments.org"
+                           :regexp "SECOND YEAR CHINESE I"
+                           :template ("* NEXT %?"
+                                      "DEADLINE: %^T"))))
+              ("Stuff and Things" :keys "s"
+               :file "~/NextCloud/Documents/org/notes/stuff_and_things/organizing_temp.org"
+               :children (("Database Entry" :keys "i"
+                           :type entry
+                           :template ("* DECIDE %?"
+                           "%U"))
+                          ("Violin Repertoire" :keys "m"
+                           :type entry
+                           :id "89641a25-2cab-4b04-8d36-75c77d4dc855"
+                           :template ("* - %?"
+                                      "%^{COMPOSER}p"
+                                      "%^{ARRANGEMENT}p"
+                                      "%^{COMPOSED}p")))))))
 #+end_src
 
 #+begin_example
@@ -1231,18 +1367,18 @@ Calendar Setup:
                                       "%^{COMPOSED}p"))))
 #+end_example
 
-,#+begin_src elisp :tangle no
-(setq org-capture-templates
-      '(("m" "Viola Repertoire" entry (id "enter id here")
-         "* - %?\n%^{COMPOSER}p\n%^{ARRANGEMENT}p\n%^{COMPOSED}p\n")))
-#+end_src
 
 **** Org Refile
 
 #+begin_src emacs-lisp
 (setq pgw/refile-targets (file-expand-wildcards "~/NextCloud/Documents/org/*.org"))
 #+end_src
+** Ditaa
 
+#+begin_src emacs-lisp
+(cond ((eq system-type 'gnu/linux) (setq org-ditaa-jar-path "/usr/share/ditaa/ditaa.jar"))
+      ((eq system-type 'darwin) (setq org-ditaa-jar-path "/opt/homebrew/Cellar/ditaa/0.11.0_1/libexec/ditaa-0.11.0-standalone.jar")))
+#+end_src
 
 ** ~Darkroom~ for Writing
 #+begin_src emacs-lisp
@@ -1253,6 +1389,7 @@ Calendar Setup:
 Disable automatic completion from company--slows everything down a bit.
 #+begin_src emacs-lisp
 (setq company-idle-delay 0.2) ;; original 0.2
+(setq company-global-modes '(not erc-mode circe-mode message-mode help-mode gud-mode vterm-mode org-mode))
 #+end_src
 
 ** Ledger Mode
@@ -1379,15 +1516,18 @@ For files changed by dropbox and also dired buffers.
 
 ** Calendar
 #+begin_src emacs-lisp :personal.el
-(setq calendar-latitude 37.759995)
-(setq calendar-longitude -122.427046)
-(setq calendar-location-name "San Francisco, CA")
+;; (setq calendar-latitude 37.759995)
+;; (setq calendar-longitude -122.427046)
+;; (setq calendar-location-name "San Francisco, CA")
+(setq calendar-latitude 40.806701)
+(setq calendar-longitude -73.962855)
+(setq calendar-location-name "New York, NY")
 #+end_src
 
 *** Date Style
 Set date style to ISO
 #+begin_src emacs-lisp
-(calendar-set-date-style 'iso)
+(setq calendar-date-style 'iso)
 #+end_src
 
 ** Artist Mode
@@ -1924,7 +2064,7 @@ Unset default compose message and set personal keybinds.
   (global-set-key (kbd "C-x m c") 'mu4e-compose-new)
 #+end_src
 
-** OHS
+** School
 *** DISABLED Schoolyear Calculation for sexp Diary Entries        :ARCHIVE:
 CLOSED: [2020-11-29 Sun 11:41]
 
@@ -2016,7 +2156,7 @@ optional DESC: string containing a description for the event
 This function uses the variable `pgw/schoolyear-dates' for the value of holidays
 unless custom-dates is specified"
 
-  (let* ((current (calendar-absolute-from-gregorian (diary-make-date 2021 9 9)))
+  (let* ((current (calendar-absolute-from-gregorian (diary-make-date 2022 9 5)))
          (desc (if desc (setq desc (format "\n%s\n" desc)) (setq desc "")))
          (schoolyear-dates (if custom-dates custom-dates (setq schoolyear-dates pgw/schoolyear-dates)))
          (fallstart (gethash "fallstart" schoolyear-dates))
@@ -2066,18 +2206,21 @@ unless custom-dates is specified"
       #s(hash-table
          size 5
          test equal
-         data ("fallstart" (2021 08 30)
-               "fallend" (2021 12 17)
-               "springstart" (2022 1 18)
-               "springend" (2022 5 13)
-               "noclasses" ((2021 9 6) ;; Labor Day
-                            (2021 11 1) ;; No Classes
-                            (2021 11 2) ;; Election Day, University Holiday
-                            (2021 11 24 2021 11 26) ;; No Classes
-                            (2021 11 25) ;; Thanksgiving, University Holiday
-                            (2022 1 17)  ;; Martin Luther King Jr. Day, University Holiday
-                            (2022 3 14 2022 3 18)  ;; Spring Break
-                            (2022 5 3 2022 5 13)) ; Reading and Exam Days
+         data ("fallstart" (2022 9 5)
+               "fallend" (2022 12 23)
+               "springstart" (2023 1 17)
+               "springend" (2023 5 1)
+               "noclasses" ((2022 9 5) ;; Labor Day
+                            (2022 11 7) ;; No Classes
+                            (2022 11 8) ;; Election Day, University Holiday
+                            (2022 11 23 2022 11 24) ;; No Classes
+                            (2022 11 25) ;; Thanksgiving, University Holiday
+                            (2022 12 13 2022 12 15) ;; Study days
+                            (2022 12 16 2022 12 23) ;; Final Exams
+                            ;; Update spring semester entries
+                            (2023 01 16)  ;; Martin Luther King Jr. Day, University Holiday
+                            (2023 03 13 2023 03 17)  ;; Spring Break
+                            (2023 05 02 23 05 12)) ; Reading and Exam Days
                             )))
 
 (setq pgw/juilliard-schoolyear-dates
@@ -2150,7 +2293,7 @@ See [[https://github.com/piercegwang/ohsics_to_org][https://github.com/piercegwa
   (add-hook! vterm-mode
              (evil-emacs-state 1))
   (add-to-list 'vterm-tramp-shells '("sshx" "/bin/bash"))
-  (setq vterm-shell "fish"))
+  (setq vterm-shell "bash"))
 #+end_src
 
 ** Languages
@@ -2215,7 +2358,7 @@ See [[https://github.com/piercegwang/ohsics_to_org][https://github.com/piercegwa
 
 ** Mu MUD Client
 
-#+begin_src emacs-lisp :tangle no
+#+begin_src emacs-lisp :tangle yes
 (use-package! mu
   :config
   (autoload 'mu-open "mu" "Play on MUSHes and MUDs" t)
@@ -2242,39 +2385,43 @@ See [[https://github.com/piercegwang/ohsics_to_org][https://github.com/piercegwa
 
 -----BEGIN PGP MESSAGE-----
 
-hQGMAw/LnjL7EsekAQv/eQbCVaTdMkCV6vG2+1f7wazjlGCmVMkEJ+4oqwxzMCk8
-kOUIes8J8APU05r9XOFJj9ip7RL/tFMc4Tw+PpwG72Ur+fVmS5S8vSPquBlf6ord
-EgkVF3TZwHZFWA6IgYpy7yvaiHaBzHu2zlVmihNSvZhceAoxv/6MZLXxyrEpP8Wh
-ah7KYpLUXtfQpegVsk7gHv0oh/N9vjQA3mDZHdHMKcDjnSmFY/tQK8VTy+YARIS6
-psPECGKI7EmvHS5nlZrxedncv3qYvkSXtkw76nVFuNcXV2RDULCoZvlEnFsoRHut
-JgVCQArHogXCZB8GLLGKyKgHylL/b35Yxm16xDrdHxP1sqE1QU6pwo7q8hjckb2x
-a6s7dkFjLOoEkaZdN6+o2Vrig7JtaOnHtu4i18uj84y5v+sxtwGZ0xFOi7NeGbR/
-MY4agJY9jqpBqFAMI2WO+5aIn/ZY2ublBvVlgn2Dw07oCfgoIT2AgiSHnSes5U7Q
-nDMIa8m26OKuCGDOYxKX0uoBPXc1twAVxvzB21rFI3NKNNSpHWCaflATevCZUAPJ
-4xPysTLzu4cSFsIldFrdcGcAwW/MWGblNoYSjIqFPxq21k+1HK/E37Nq8tTCiALY
-KnR+uA9cqfTkvagAfG3j0rIgooC8wC4c+5A4U0idNqRsztJ8kWFM0X2KrxeHenyI
-KnZixh+nPCpgqp6O3VLoEhCQlJvS04zvmht/mMcUUaOgSH6SItLbkmVJZSFfJKai
-MAMCYYrpG+Aj2UjiGRmxeJ3Cg0FxUwO/txK0hL3sldOY8b8yh2XQp2LEjEVYPSAJ
-4K1yWJh8akr60uP8ckrTlja3yF9xRwXkxeNUg0XDqn2AAhHx+kol7hRrK7r4dg0x
-agkB4TC5i19ASDe6cfYrumRkZz21LeuJPowGkiKdTaKLamAvqvKihzB03tZInmqL
-J1AW/xPizzSeGVWaMNuokFSnX99mmVo7fZ/EZcUL9XCBu0U+GBt8Y9nhn4RHsUWp
-ndPl6Zu9X5rDS/oRtfULUnabuJiA+DxkMdr+hOVn09sDjvHuZdDbWqYuuYD+qXnR
-rNaekMyllsFGvChvDIILMYABJCCsnrMkCgz89wvAPwBz6VMENx+iyvUc1w2KbPxf
-dijfNxNbWwtSZmCDjREYv0zygEPo3p4X/9q6oTWN2kIxC4MpwRJUWtwk7RfKoyqK
-xGgN2jIfo1hxo4Hldwwh+taFvVH/z/ok8xAXc+iHkXIW5P1reianBfYPQtLhR28P
-STJ8Iv2VuKWnLjQahZEc/Ysn7n/xnga1BtYrN1Q4tJh1VxmNOc4mFbYpoSJX04Ah
-vZNynWOCK794HtGLGobVsVSpG4kbmym0Bf4Zmi//IX+emt7aFfPfzhv4A1lU3DjX
-K0mbkDAMFkT0cXppcAcGo4gh5SP77DEOwu8dNW0flrirF+qTMzrzjJwP0DYhXO2g
-i2BapUcHgkxf3dbPCOnlxKS31KsYWyuin+6VzXGwTEtOIfsPx4bMzeAf6obZZQmw
-ZpqKDKm4MypVYRubl2zQX6GTagGD2VFvboe/pfkCcSrSFvmfhyjmzLux3yz8AZzB
-7O0+o6dSS7VhqQ0u2JKZu9Lm4EzHECqeguoQsJ7QQqNTtJJosfh+KIbjrGivUeVf
-8rkZFXjIOE/kaS8BbGt8ckrE5qPH/D2OGA4PreC7MUw1u9QjBFiVpyLkt8q6iDCo
-W9Y03baUPcJzSip3ngD3BKMul0VlTmQWpSvr3HX0hw4TRvfvQryetEojJND3sv2O
-Qbz4nMrfiTFgazgKCR4SbDVFf/NmbVUM5I2H44YYSJV2w7/UeNFxKzUVnaxlTc6K
-mytCI4a4rCMCpZW840wIT4N/rA1n7rQqPqixfJyaCiGtZS47x2CfIgpiC3/JReqk
-LElnQLRBJFazLbIm/O8GhvCcbNkRQyXReCZh88/LtOMRUqGB/DDtxWQgeSQSs8kv
-+H6PXVcUFopq22AywYwNBtmpO+Bqd29RhGpys2rLeXo5/V1eW0Dm
-=q+Sc
+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
+ewsr6k6XW7XuEMs8H9pG4g==
+=rBYy
 -----END PGP MESSAGE-----
 
 ** Polymode
@@ -2289,6 +2436,16 @@ LElnQLRBJFazLbIm/O8GhvCcbNkRQyXReCZh88/LtOMRUqGB/DDtxWQgeSQSs8kv
 
 #+begin_src emacs-lisp :tangle "personal.el"
 (provide '.personal)
+#+end_src
+
+** Load Setting
+
+Load personal settings or general settings?
+
+#+begin_src emacs-lisp :tangle yes
+(if (file-exists-p "~/.work_computer")
+    (load "~/.doom.d/work.el")
+  (load "~/.doom.d/personal.el"))
 #+end_src
 
 * Doom Modules
@@ -2377,7 +2534,7 @@ ivy               ; a search engine for love and life
 doom              ; what makes DOOM look the way it does
 doom-dashboard    ; a nifty splash screen for Emacs
 doom-quit         ; DOOM quit-message prompts when you quit Emacs
-(emoji +unicode)  ; 🙂
+;;(emoji +unicode)  ; 🙂
 hl-todo           ; highlight TODO/FIXME/NOTE/DEPRECATED/HACK/REVIEW
 ;;hydra
 ;;indent-guides     ; highlighted indent columns
@@ -2390,7 +2547,7 @@ ophints           ; highlight the region an operation acts on
 (popup +defaults)   ; tame sudden yet inevitable temporary windows
 ;;tabs              ; a tab bar for Emacs
 ;;treemacs          ; a project drawer, like neotree but cooler
-unicode           ; extended unicode support for various languages
+;;unicode           ; extended unicode support for various languages
 vc-gutter         ; vcs diff in the fringe
 vi-tilde-fringe   ; fringe tildes to mark beyond EOB
 ;;window-select     ; visually switch windows
@@ -2646,10 +2803,11 @@ Everything in this section gets "tangled" into the ~packages.el~ file which allo
   :recipe (:host nil
            :type git
            :repo "https://git.sr.ht/~bzg/org-contrib"
-           :branch "release_0.4"))
+           :branch "release_0.4"
+           :files ("lisp/*.elc" "lisp/*.el")))
 ;; (package! ledger-mode)
-;; (package! mu
-;;   :recipe (:host github
-;;            :repo "piercegwang/mu"
-;;            :branch "master"))
+(package! mu
+  :recipe (:host github
+           :repo "piercegwang/mu"
+           :branch "master"))
 #+end_src
