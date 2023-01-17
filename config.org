@@ -11,7 +11,6 @@
 #+STARTUP: content indent
 #+SEQ_TODO: TODO(t) | DISABLED(D)
 * Package Configurations
-
 * Installing
 :PROPERTIES:
 :header-args:emacs-lisp: :tangle no :comments no
@@ -23,29 +22,16 @@ This config works best with [[https://github.com/d12frosted/homebrew-emacs-plus]
   sudo osascript -e 'tell application "Finder" to make alias file to POSIX file "/usr/local/opt/emacs-mac/Emacs.app" at POSIX file "/Applications"'
 #+end_src
 
-** Dependencies
+** D
+ependencies
 #+begin_src sh :tangle no
-  brew install ispell
-  brew cask install mactex
+apt install ripgrep fdclone
 #+end_src
 
 ** Meta
-When this configuration is loaded for the first time, the =init.el= is the file that is loaded. It looks like this:
+Every time you edit this file, you'll want to tangle it.
 
-#+BEGIN_SRC emacs-lisp :tangle no
-  ;; This file replaces itself with the actual configuration at first run.
-
-  ;; We can't tangle without org!
-  (require 'org)
-  ;; Open the configuration
-  (find-file (concat user-emacs-directory "init.org"))
-  ;; tangle it
-  (org-babel-tangle)
-  ;; load it
-  (load-file (concat user-emacs-directory "init.el"))
-  ;; finally byte-compile it
-  (byte-compile-file (concat user-emacs-directory "init.el"))
-#+END_SRC
+To do this, either run =(org-babel-tangle)= or type =C-c C-v t=.
 
 ** Headers
 Lexical scoping for the init-file is needed, it can be specified in the header. This is the first line of the actual configuration:
@@ -74,24 +60,26 @@ All configurations here get "tangled" into the main ~config.el~ file.
 ;; config.el file -*- lexical-binding: t; -*-
 #+end_src
 
-** Doom fonts
+** Tangle Decider Macros
 
 #+begin_src emacs-lisp
+(defmacro personal (&rest body)
+  (if (file-exists-p "~/.personal_computer")
+    (cons 'progn body)))
+
+(defmacro work (&rest body)
+  (if (file-exists-p "~/.work_computer")
+    (cons 'progn body)))
+#+end_src
+
+** Doom fonts
+
+#+begin_src emacs-lisp :tangle no
 (setq doom-font (font-spec :family "Ubuntu Mono" :size 14 :height 1.0))
 (setq doom-unicode-font (font-spec :family "Noto Serif SC")
       doom-big-font (font-spec :family "Ubuntu Mono" :size 26)
       doom-variable-pitch-font (font-spec :family "Open Sans" :size 12)
       doom-serif-font (font-spec :family "Ubuntu"))
-#+end_src
-
-** Load Setting
-
-Load personal settings or general settings?
-
-#+begin_src emacs-lisp :tangle yes
-(if (file-exists-p "~/.work_computer")
-    (load-file "~/.doom.d/work.el")
-  (load-file "~/.doom.d/personal.el"))
 #+end_src
 
 ** Custom Loads
@@ -185,6 +173,7 @@ navigation/swapping commands.
 #+begin_src emacs-lisp
 (setq-default enable-local-variables t)
 #+end_src
+
 ** Bookmarks
 #+begin_src emacs-lisp
   (global-set-key (kbd "C-x r D") 'bookmark-delete)
@@ -274,14 +263,26 @@ Mixed pitch package for mixing variable and monospace fonts where appropriate (r
 I copied mixed-pitch.el from [[https://gitlab.com/jabranham/mixed-pitch/][this]] repository because of [[https://gitlab.com/jabranham/mixed-pitch/issues/6][this]] issue. I will hopefully be changing it back at some point (or coming up with a better fix because the fonts don't seem to work great together) but for now this will be the fix.
 
 #+begin_src emacs-lisp
-  (use-package! mixed-pitch
-    :config
-    ;; (set-face-attribute 'variable-pitch :height 160)
-    (dolist (face '(line-number line-number-current-line org-list-dt org-link)) (add-to-list 'mixed-pitch-fixed-pitch-faces face))
-    ;; (add-hook! 'text-mode-hook 'mixed-pitch-mode)
-    (map! :leader
-          :n "t m" 'mixed-pitch-mode)
-    (set-face-attribute 'variable-pitch nil :height 0.8))
+(use-package! mixed-pitch
+  :config
+  ;; (set-face-attribute 'variable-pitch :height 160)
+  (dolist (face '(line-number line-number-current-line org-list-dt org-link)) (add-to-list 'mixed-pitch-fixed-pitch-faces face))
+  ;; (add-hook! 'text-mode-hook 'mixed-pitch-mode)
+  (map! :leader
+        :n "t m" 'mixed-pitch-mode)
+  (set-face-attribute 'variable-pitch nil :height 0.8))
+#+end_src
+
+** Modifier Keys
+#+begin_src emacs-lisp
+  (when (eq system-type 'darwin)
+    (with-no-warnings
+      (setq mac-option-modifier 'meta)
+      (setq mac-control-modifier 'control)
+      (setq ns-function-modifier 'hyper)))
+
+  (when (eq system-type 'gnu/linux)
+    (with-no-warnings (setq x-super-keysym 'hyper)))
 #+end_src
 
 ** Tramp
@@ -498,27 +499,6 @@ https://stackoverflow.com/questions/2540997/create-more-than-one-eshell-instance
     (switch-to-buffer buffer)))
 #+end_src
 
-** Modifier Keys
-#+begin_src emacs-lisp
-  (when (eq system-type 'darwin)
-    (with-no-warnings
-      (setq mac-option-modifier 'meta)
-      (setq mac-control-modifier 'control)
-      (setq ns-function-modifier 'hyper)))
-
-  (when (eq system-type 'gnu/linux)
-    (with-no-warnings (setq x-super-keysym 'hyper)))
-#+end_src
-
-** Workspaces
-
-#+begin_src emacs-lisp
-(map! :leader
-      :n "TAB b" 'pgw/buffer-to-new-workspace
-      :n "TAB H" '+workspace/swap-left
-      :n "TAB L" '+workspace/swap-right)
-#+end_src
-
 ** Visuals
 
 #+begin_src emacs-lisp
@@ -639,10 +619,19 @@ Make Emacs play nice with my window manager and resizing around other windows.
   (set-default 'truncate-lines t)
 #+end_src
 
-** Windows and Frames
+** Windows, Frames, and Workspaces
 *** Window Management
 #+begin_src emacs-lisp
   (use-package! rotate)
+#+end_src
+
+*** Workspaces
+
+#+begin_src emacs-lisp
+(map! :leader
+      :n "TAB b" 'pgw/buffer-to-new-workspace
+      :n "TAB H" '+workspace/swap-left
+      :n "TAB L" '+workspace/swap-right)
 #+end_src
 
 ** Treemacs
@@ -717,6 +706,10 @@ CLOSED: [2020-11-29 Sun 11:30]
             (org-roam-node-from-id "ab2c5980-0f5f-4d46-8ad3-8194f67ac39d") :unique t))))
 #+end_src
 ** Org-mode
+:PROPERTIES:
+:CUSTOM_ID: org
+:header-args:emacs-lisp: :tangle no :noweb-ref org-conf
+:END:
 
 #+begin_src emacs-lisp :noweb no-export :tangle yes :noweb-ref nil
 (after! org
@@ -724,155 +717,7 @@ CLOSED: [2020-11-29 Sun 11:30]
   )
 #+end_src
 
-#+begin_src emacs-lisp :noweb no-export :tangle "personal.el" :noweb-ref nil
-(after! org
-  <<org-personal-conf>>
-  )
-#+end_src
-
-*** General Configurations
-:PROPERTIES:
-:CUSTOM_ID: org
-:header-args:emacs-lisp: :tangle no :noweb-ref org-conf
-:END:
-**** Org IDs
-
-#+begin_src emacs-lisp
-(setq org-id-locations-file "~/NextCloud/Documents/.orgids")
-#+end_src
-
-#+begin_src emacs-lisp
-(defun org-id-remove-entry ()
-  "Remove/delete the ID entry and update the databases.
-Update the `org-id-locations' global hash-table, and update the
-`org-id-locations-file'.  `org-id-track-globally' must be `t`."
-  (interactive)
-  (save-excursion
-    (org-back-to-heading t)
-    (when (org-entry-delete (point) "ID")
-      (org-id-update-id-locations nil 'silent))))
-
-(map! (:map org-mode-map
-         :localleader
-         :desc "Remove ID Entry" "D" #'org-id-remove-entry))
-#+end_src
-
-**** Drawers
-
-#+begin_src emacs-lisp
-(map! (:map org-mode-map
-         :localleader
-         :desc "Remove ID Entry" "u" #'org-insert-drawer))
-#+end_src
-
-**** Tables
-
-#+begin_src emacs-lisp
-(map! :leader
-      :map org-mode-map
-      :n "m b t t" 'org-table-toggle-column-width
-      :nv "m b y" 'org-table-copy-region
-      :nv "m b p" 'org-table-paste-rectangle
-      :nv "m b d y" 'org-table-cut-region)
-#+end_src
-
-**** Changing Defaults
-
-#+begin_src emacs-lisp
-(setq org-default-notes-file (concat org-directory "/inbox.org")
-      org-use-property-inheritance t
-      org-log-done 'time
-      org-list-allow-alphabetical t
-      org-export-in-background nil
-      org-catch-invisible-edits 'smart
-      org-export-with-sub-superscripts '{}
-      org-babel-default-header-args
-      '((:session . "none")
-        (:results . "replace")
-        (:exports . "code")
-        (:cache . "no")
-        (:noweb . "no")
-        (:hlines . "no")
-        (:tangle . "no")
-        (:comments . "link")))
-#+end_src
-
-#+begin_src emacs-lisp :tangle personal.el
-(setq org-directory "~/NextCloud/Documents/org")
-#+end_src
-
-#+begin_src emacs-lisp :tangle work.el
-(setq org-directory "~/NextCloud/Documents/org/notes/acacia")
-#+end_src
-
-
-**** ​Todo keywords
-
-#+begin_src emacs-lisp
-  (setq org-todo-keywords
-        '((sequence "NEXT(n)" "TODO(t)" "IN-PROGRESS(i)" "WAITING(w)" "|" "DONE(d)" "CANCELLED(c)" "DELEGATED(g)")))
-#+end_src
-
-**** Tags
-#+begin_src emacs-lisp
-(setq org-tag-persistent-alist '(("noexport" . ?N))
-      org-complete-tags-always-offer-all-agenda-tags nil)
-#+end_src
-
-**** Log when tasks are marked as done:
-#+begin_src emacs-lisp
-(setq org-log-done 'time) ; Log when task marked as done
-#+end_src
-
-**** Quick Capture
-***** Helper Functions
-#+begin_src emacs-lisp
-(defun pgw/year-month ()
-  "Custom function to return date in format: YYYY-MM"
-  (format-time-string "%Y-%m"))
-
-(defun pgw/U ()
-  "Custom function to return date in org inactive timestamp format"
-  (format-time-string "[%Y-%m-%d %a]"))
-
-(defun pgw/add-12 ()
-  "Custom function return active org timestamp with exactly 24 hour difference"
-  (format-time-string "%Y-%m-%d %a %H:%M" (time-add (current-time) 85500)))
-
-(defun pgw/headline_date ()
-  "Function to find the date as headline for Violin capture template"
-  (goto-char (point-min))
-  (let ((searchresults (search-forward (format-time-string "[%Y-%m-%d %a]") nil t)))
-    (if searchresults
-        'searchresults
-      (error "Not found! Use Vc to create today's practice first."))))
-#+end_src
-
-**** org-roam
-
-#+begin_src emacs-lisp
-(use-package! org-roam
-  :hook (after-init . org-roam-mode)
-  :config
-  (defun pgw/org-roam-refresh ()
-    (interactive)
-    (org-roam-db-build-cache :force)
-    (org-roam-buffer--update-maybe :redisplay))
-  (setq org-roam-directory "~/NextCloud/Documents/org-roam/")
-  (setq org-roam-db-location "~/NextCloud/Documents/org-roam.db"))
-#+end_src
-
-**** Org Refile:
-#+begin_src emacs-lisp
-(setq org-refile-targets '((nil :maxlevel . 9)
-                           (org-agenda-files :maxlevel . 9)
-                           (pgw/refile-targets :maxlevel . 9)))
-(setq org-refile-use-outline-path 'file)
-(setq org-outline-path-complete-in-steps nil)
-(setq org-refile-allow-creating-parent-nodes 'confirm)
-#+end_src
-
-**** Agenda
+*** Agenda
 
 #+begin_src emacs-lisp
 ;; org-agenda-auto-exclude-function
@@ -902,11 +747,10 @@ Update the `org-id-locations' global hash-table, and update the
 (setq org-agenda-max-entries nil)
 
 
-(after! org
-  (map! :map evil-org-agenda-mode-map "SPC m l" #'org-agenda-log-mode))
+(map! :map evil-org-agenda-mode-map "SPC m l" #'org-agenda-log-mode)
 #+end_src
 
-***** Custom Commands
+**** Custom Commands
 Custom commands, testing sorting strategy variable
 
 #+begin_src emacs-lisp :tangle personal.el
@@ -932,7 +776,7 @@ Custom commands, testing sorting strategy variable
                                     (concat org-directory "/links.org_archive")))))))
 #+end_src
 
-***** Files
+**** Files
 #+begin_src emacs-lisp :tangle personal.el
 (setq org-agenda-files (append (file-expand-wildcards (concat org-directory "/calendars/*.org"))
                                '("/Users/piercewang/NextCloud/Documents/org/notes/columbia/2022_Spring/calendar/2022_spring_calendar.org")))
@@ -955,7 +799,7 @@ Custom commands, testing sorting strategy variable
 (pgw/org-agenda-reload-files)
 #+end_src
 
-***** Time Grid Variable
+**** Time Grid Variable
 
 #+begin_src emacs-lisp
   (setq org-agenda-time-grid '((daily today require-timed)
@@ -963,7 +807,7 @@ Custom commands, testing sorting strategy variable
                                "......" "----------------"))
 #+end_src
 
-***** Keybindings :keybinds:
+**** Keybindings :keybinds:
 
 #+begin_src emacs-lisp
 (map! :map evil-org-agenda-mode-map
@@ -971,34 +815,7 @@ Custom commands, testing sorting strategy variable
       :leader "m m r" 'pgw/org-agenda-reload-files)
 #+end_src
 
-**** Crypt
-
-#+begin_src emacs-lisp
-(use-package! org-crypt
-  :config
-  (org-crypt-use-before-save-magic)
-  (setq org-tags-exclude-from-inheritance (quote ("crypt")))
-
-  (setq org-crypt-key "pierce.g.wang@gmail.com")
-  ;; GPG key to use for encryption
-  ;; Either the Key ID or set to nil to use symmetric encryption.
-
-  (setq auto-save-default nil)
-  ;; Auto-saving does not cooperate with org-crypt.el: so you need
-  ;; to turn it off if you plan to use org-crypt.el quite often.
-  ;; Otherwise, you'll get an (annoying) message each time you
-  ;; start Org.
-
-  ;; To turn it off only locally, you can insert this:
-  ;;
-  ;; # -*- buffer-auto-save-file-name: nil; -*-
-  (map! :leader
-        (:prefix-map ("k" . "org-crypt")
-         :desc "Org Encrypt Entry" "e" #'org-encrypt-entry
-         :desc "Org Decrypt Entry" "d" #'org-decrypt-entry)))
-#+end_src
-
-**** Babel
+*** Babel
 
 #+begin_src emacs-lisp
 (with-eval-after-load 'org
@@ -1010,328 +827,183 @@ Custom commands, testing sorting strategy variable
 
 #+end_src
 
-**** Habit
-#+begin_src emacs-lisp
-(require 'org-habit)
-(setq org-enforce-todo-dependencies t
-      org-habit-show-habits t)
-#+end_src
-
-**** Org-contrib
+*** Changing Defaults
 
 #+begin_src emacs-lisp
-; (use-package! org-contrib
-;   (require 'ob-ledger))
+(setq org-default-notes-file (concat org-directory "/inbox.org")
+      org-use-property-inheritance t
+      org-log-done 'time
+      org-list-allow-alphabetical t
+      org-export-in-background nil
+      org-catch-invisible-edits 'smart
+      org-export-with-sub-superscripts '{}
+      org-babel-default-header-args
+      '((:session . "none")
+        (:results . "replace")
+        (:exports . "code")
+        (:cache . "no")
+        (:noweb . "no")
+        (:hlines . "no")
+        (:tangle . "no")
+        (:comments . "link")))
 #+end_src
 
-**** Org-drill
-
-#+begin_src emacs-lisp
-(defun pgw/character-writing-practice ()
-  (interactive)
-  (start-process-shell-command "Running FingerPaint" nil "~/.local/bin/fingerpaint -o ~/tmp/character-writing-practice.png"))
-#+end_src
-
-#+begin_src emacs-lisp
-  ;;; org-drill
-  (use-package! org-drill
-    ;; :bind (:map org-drill-response-mode-map
-    ;;      ("c" . pgw/character-writing-practice))
-    :config
-    (require 'org-drill-table))
-#+end_src
-
-**** Latex
-#+begin_src emacs-lisp
-  (require 'ox-latex)
-#+end_src
-
-***** CDLatex
-#+begin_src emacs-lisp
-  (use-package! cdlatex
-    :after org
-    :config
-    (add-hook! 'org-mode-hook #'org-cdlatex-mode)
-    (add-to-list 'org-tab-first-hook 'org-try-cdlatex-tab)
-    )
-#+end_src
-
-***** Fragments
-
-
-
-#+begin_src emacs-lisp
-  (setq org-format-latex-options
-        ;; '(:foreground "#000000" :background default ;; light theme
-        '(:foreground "#d6d6d4" :background default ;; dark tieme
-                      :scale 1.5
-                      :html-foreground "Black" :html-background "Transparent"
-                      :html-scale 1.0
-                      :matchers ("begin" "$1" "$" "$$" "\\(" "\\[")))
-#+end_src
-
-Fix color handling in org-preview-latex-fragment
-
-#+begin_src emacs-lisp
-  (let ((dvipng--plist (alist-get 'dvipng org-preview-latex-process-alist)))
-    (plist-put dvipng--plist :use-xcolor t)
-    (plist-put dvipng--plist :image-converter '("dvipng -D %D -T tight -o %O %f")))
-#+end_src
-
-#+begin_src emacs-lisp :tangle no
-  (global-set-key (kbd "C-c C-x C-l") 'org-toggle-latex-fragment)
-#+end_src
-
-**** Org Superstar (Bullets revamped)
-#+begin_src emacs-lisp
-  (use-package! org-superstar
-    :config
-    (setq org-superstar-prettify-item-bullets t)
-    :hook (org-mode . org-superstar-mode))
-
-#+end_src
-
-**** Export
-***** HTML
-
-#+begin_src emacs-lisp
-  (setq org-html-validation-link nil)
-#+end_src
-
-***** ODT
-
-#+begin_src emacs-lisp
-(setq org-odt-styles-file "~/.doom.d/odt/mla.ott")
-#+end_src
-
-**** org-gcal: Calendar Integration
-Calendar Setup:
-#+begin_src emacs-lisp
-(use-package! org-gcal
-  :config
-  (map! :leader
-        (:prefix-map ("d" . "Gcal Commands")
-         :desc "Post to gcal" "p" #'org-gcal-post-at-point
-         :desc "Sync with gcal" "s" #'org-gcal-sync
-         :desc "Fetch from gcal" "f" #'org-gcal-fetch
-         :desc "Delete at point" "d" #'org-gcal-delete-at-point
-         :desc "Remove sync tokens (hard refresh)" "t" #'org-gcal-sync-tokens-clear
-         :desc "Sync current buffer" "b s" #'org-gcal-sync-buffer
-         :desc "Fetch current buffer" "b f" #'org-gcal-fetch-buffer))
-  (setq org-gcal-client-id pgw/org-gcal-client-id
-        org-gcal-client-secret pgw/org-gcal-client-secret
-        org-gcal-file-alist pgw/org-gcal-file-alist
-        org-gcal-local-timezone "America/New_York"
-        org-gcal-notify-p nil
-        org-gcal-up-days 30
-        org-gcal-down-days 60)
-  (setq org-gcal-remove-api-cancelled-events t))
-#+end_src
-
-**** Org-mode Startup Buffers
-
-#+begin_src emacs-lisp
-(setq org-agenda-inhibit-startup nil)
-#+end_src
-
-
-This fixes org-capture being messed up, but also makes buffers not start indent mode correctly. Thoughts on how to fix?
-#+begin_src emacs-lisp
-(defalias '+org--restart-mode-h #'ignore)
-#+end_src
-
-Related to
-- [[https://github.com/doomemacs/doomemacs/issues/5411]]
-- [[https://github.com/doomemacs/doomemacs/issues/5714]]
-
-**** DISABLED org-noter: PDF Annotation
-CLOSED: [2021-11-29 Mon 16:54]
-Obsolete because of PDF reader in Doom.
-
-#+begin_src emacs-lisp :tangle no
-  (use-package! org-noter
-    :after org
-    :ensure t
-    :config
-    (setq org-noter-default-notes-file-names '("notes.org")
-          org-noter-notes-search-path '("~/NextCloud/Documents/org/notes"))
-    )
-#+end_src
-
-*** Personal Configurations
-:PROPERTIES:
-:CUSTOM_ID: org
-:header-args:emacs-lisp: :tangle no :noweb-ref org-personal-conf
-:END:
-**** MobileOrg
-
-#+begin_src emacs-lisp
-  ;; Set to the name of the file where new notes will be stored
-  (setq org-mobile-inbox-for-pull "~/NextCloud/Documents/Apps/MobileOrg/index.org")
-  ;; Set to <your NextCloud/Documents root directory>/MobileOrg.
-  (setq org-mobile-directory "~/NextCloud/Documents/Apps/MobileOrg")
-#+end_src
-
-**** Crypt
-
-#+begin_src emacs-lisp
-(after! org-crypt
-  (setq org-crypt-key "pierce.g.wang@gmail.com")
-  ;; GPG key to use for encryption
-  ;; Either the Key ID or set to nil to use symmetric encryption.
-  )
-#+end_src
-
-**** Export Publishing
-#+begin_src emacs-lisp
-  (require 'ox-publish)
-  (setq org-publish-project-alist
-        '(("pages-notes"
-           :base-directory "~/NextCloud/Documents/org_publish/"
-           :base-extension "org"
-           :publishing-directory "~/Documents/github/piercegwang.github.io/"
-           :recursive t
-           :publishing-function org-html-publish-to-html
-           :headline-levels 4             ; Just the default for this project.
-           ;; :html-head "<link rel=\"stylesheet\" type=\"text/css\" href=\"css/style.css\"/>"
-           :auto-preamble t
-           )
-          ("pages-static"
-           :base-directory "~/NextCloud/Documents/org_publish/"
-           :base-extension "css\\|js\\|png\\|jpg\\|gif\\|pdf\\|mp3\\|ogg\\|swf\\|jpeg\\|txt\\|json"
-           :publishing-directory "~/Documents/github/piercegwang.github.io/"
-           :recursive t
-           :publishing-function org-publish-attachment
-           )
-          ("pages" :components ("pages-notes" "pages-static"))
-          ))
-#+end_src
-
-**** org-reveal
-
-#+begin_src emacs-lisp :
-  (setq org-reveal-root "file:///Users/piercewang/Documents/projects/revealjs/reveal.js-4.1.0")
-#+end_src
-
-**** DOCT Org Capture Template
 #+begin_src emacs-lisp :tangle personal.el
-(setq org-capture-templates
-      (doct '(("Inboxes" :keys "i"
-               :file "~/NextCloud/Documents/org-roam/20220808093519-todo_inbox.org"
-               :type entry
-               :template ("* %?")
-               :children (("Flexible Entry" :keys "i")
-                          ("Todo" :keys "t"
-                           :template ("* TODO %?"))
-                          ("Notes Entry" :keys "n"
-                           :file "~/NextCloud/Documents/org/notes.org"
-                           :template ("* %?"
-                                      "%U"))
-                          ("Link" :keys "l"
-                           :file "~/NextCloud/Documents/org/links.org"
-                           :headline "!Inbox"
-                           :prepend t
-                           :template ("* [[%?%:link][%:description]]"
-                                      "%U"))))
-              ("Finances" :keys "f"
-               ;; :file "~/NextCloud/Documents/org/finances.org.gpg"
-               :children (("Income" :keys "i"
-                           :file "~/NextCloud/Documents/org-roam/20220802062356-2022_income.org.org"
-                           :headline "Inbox"
-                           :template ("* %?"
-                                      ":PROPERTIES:"
-                                      ":DATE: %U"
-                                      ":period_start: %^u"
-                                      ":period_end: %^u"
-                                      ":END:"
-                                      "%^{amount}p"
-                                      "%^{beforetax}p"
-                                      "%^{category}p"))
-                          ("Transaction (Generic - Chase College)" :keys "t"
-                           :file "~/NextCloud/Documents/org-roam/20220802062356-2022_income.org"
-                           :headline "Expenses"
-                           :template ("* %U"
-                                      "#+begin_src ledger :results silent"
-                                      "%(format-time-string \"%Y/%m/%d\") * %^{Specific Transaction Name}"
-                                      "%?"
-                                      "    assets:%^{Source|bank:chase college|bank:nordstrom|venmo|cash}"
-                                      "#+end_src"))))
-              ("Events" :keys "e"
-               :type entry
-               :children (("Emacs Entry (Not Synced)" :keys "f"
-                           :file "~/NextCloud/Documents/org-roam/20220817093640-emacs_calendar.org")
-                          ("Emacs Calendar" :keys "e"
-                           :file "~/NextCloud/Documents/org-roam/20220817093640-emacs_calendar.org"
-                           :template ("* %^{Title of event}"
-                                      ":PROPERTIES:"
-                                      ":calendar-id: ihfv2u5n9uf5ksj5484vbe7mj4@group.calendar.google.com"
-                                      ":END:"
-                                      ":org-gcal:"
-                                      "%^{Scheduled time + duration}T%?"
-                                      ":END:"))
-                          ("Main Calendar" :keys "g"
-                           :file "~/NextCloud/Documents/org-roam/20220817093328-main_google_calendar.org"
-                           :template ("* %^{Title of event}"
-                                      ":PROPERTIES:"
-                                      ":calendar-id: pierce.g.wang@gmail.com"
-                                      ":END:"
-                                      ":org-gcal:"
-                                      "%^{Scheduled time + duration}T%?"
-                                      ":END:"))
-                          ("MMS Calendar" :keys "m"
-                           :file "~/NextCloud/Documents/org-roam/20220903112443-morningside_music_society_calendar.org"
-                           :template ("* %^{Title of event}"
-                                      ":PROPERTIES:"
-                                      ":calendar-id: morningsidemusicsociety@gmail.com"
-                                      ":END:"
-                                      ":org-gcal:"
-                                      "%^{Scheduled time + duration}T%?"
-                                      ":END:"))))
-              ("Columbia" :keys "c"
-               :type entry
-               :children (("STATUN1001_001_2022_3 - INTRO TO STATISTICAL REASONING" :keys "s"
-                           :file "~/NextCloud/Documents/org-roam/20220902082826-columbia_fall_2022_classes_assignments.org"
-                           :regexp "INTRO TO STATISTICAL REASONING"
-                           :template ("* NEXT %?"
-                                      "DEADLINE: %^T"))
-                          ("HUMAUN1123_027_2022_3 - MASTERPIECES OF WESTERN MUSIC" :keys "m"
-                           :file "~/NextCloud/Documents/org-roam/20220902082826-columbia_fall_2022_classes_assignments.org"
-                           :regexp "MASTERPIECES OF WESTERN MUSIC"
-                           :template ("* NEXT %?"
-                                      "DEADLINE: %^T"))
-                          ("CSEEW3827_001_2022_3 - FUNDAMENTALS OF COMPUTER SYSTSM" :keys "c"
-                           :file "~/NextCloud/Documents/org-roam/20220902082826-columbia_fall_2022_classes_assignments.org"
-                           :regexp "FUNDAMENTALS OF COMPUTER SYSTSM"
-                           :template ("* NEXT %?"
-                                      "DEADLINE: %^T"))
-                          ("COMSW3261_002_2022_3 - COMPUTER SCIENCE THEORY" :keys "t"
-                           :file "~/NextCloud/Documents/org-roam/20220902082826-columbia_fall_2022_classes_assignments.org"
-                           :regexp "COMPUTER SCIENCE THEORY"
-                           :template ("* NEXT %?"
-                                      "DEADLINE: %^T"))
-                          ("COCICC1101_021_2022_3 - CONTEMP WESTERN CIVILIZATION I" :keys "p"
-                           :file "~/NextCloud/Documents/org-roam/20220902082826-columbia_fall_2022_classes_assignments.org"
-                           :regexp "CONTEMP WESTERN CIVILIZATION I"
-                           :template ("* NEXT %?"
-                                      "DEADLINE: %^T"))
-                          ("CHNSUN2201_002_2022_3 - SECOND YEAR CHINESE I" :keys "C"
-                           :file "~/NextCloud/Documents/org-roam/20220902082826-columbia_fall_2022_classes_assignments.org"
-                           :regexp "SECOND YEAR CHINESE I"
-                           :template ("* NEXT %?"
-                                      "DEADLINE: %^T"))))
-              ("Stuff and Things" :keys "s"
-               :file "~/NextCloud/Documents/org/notes/stuff_and_things/organizing_temp.org"
-               :children (("Database Entry" :keys "i"
-                           :type entry
-                           :template ("* DECIDE %?"
-                           "%U"))
-                          ("Violin Repertoire" :keys "m"
-                           :type entry
-                           :id "89641a25-2cab-4b04-8d36-75c77d4dc855"
-                           :template ("* - %?"
-                                      "%^{COMPOSER}p"
-                                      "%^{ARRANGEMENT}p"
-                                      "%^{COMPOSED}p")))))))
+(setq org-directory "~/NextCloud/Documents/org")
+#+end_src
+
+#+begin_src emacs-lisp :tangle work.el
+(setq org-directory "~/NextCloud/Documents/org/notes/acacia")
+#+end_src
+
+*** Crypt
+
+#+begin_src emacs-lisp
+(personal
+ (use-package! org-crypt
+   :config
+   (org-crypt-use-before-save-magic)
+   (setq org-tags-exclude-from-inheritance (quote ("crypt")))
+  
+   (setq org-crypt-key "pierce.g.wang@gmail.com")
+   ;; GPG key to use for encryption
+   ;; Either the Key ID or set to nil to use symmetric encryption.
+  
+   (setq auto-save-default nil)
+   ;; Auto-saving does not cooperate with org-crypt.el: so you need
+   ;; to turn it off if you plan to use org-crypt.el quite often.
+   ;; Otherwise, you'll get an (annoying) message each time you
+   ;; start Org.
+  
+   ;; To turn it off only locally, you can insert this:
+   ;;
+   ;; # -*- buffer-auto-save-file-name: nil; -*-
+   (map! :leader
+         (:prefix-map ("k" . "org-crypt")
+          :desc "Org Encrypt Entry" "e" #'org-encrypt-entry
+          :desc "Org Decrypt Entry" "d" #'org-decrypt-entry))))
+#+end_src
+
+*** DOCT Org Capture Template
+#+begin_src emacs-lisp
+(personal
+ (setq org-capture-templates
+       (doct '(("Inboxes" :keys "i"
+                :file "~/NextCloud/Documents/org-roam/20220808093519-todo_inbox.org"
+                :type entry
+                :template ("* %?")
+                :children (("Flexible Entry" :keys "i")
+                           ("Todo" :keys "t"
+                            :template ("* TODO %?"))
+                           ("Notes Entry" :keys "n"
+                            :file "~/NextCloud/Documents/org/notes.org"
+                            :template ("* %?"
+                                       "%U"))
+                           ("Link" :keys "l"
+                            :file "~/NextCloud/Documents/org/links.org"
+                            :headline "!Inbox"
+                            :prepend t
+                            :template ("* [[%?%:link][%:description]]"
+                                       "%U"))))
+               ("Finances" :keys "f"
+                ;; :file "~/NextCloud/Documents/org/finances.org.gpg"
+                :children (("Income" :keys "i"
+                            :file "~/NextCloud/Documents/org-roam/20220802062356-2022_income.org.org"
+                            :headline "Inbox"
+                            :template ("* %?"
+                                       ":PROPERTIES:"
+                                       ":DATE: %U"
+                                       ":period_start: %^u"
+                                       ":period_end: %^u"
+                                       ":END:"
+                                       "%^{amount}p"
+                                       "%^{beforetax}p"
+                                       "%^{category}p"))
+                           ("Transaction (Generic - Chase College)" :keys "t"
+                            :file "~/NextCloud/Documents/org-roam/20220802062356-2022_income.org"
+                            :headline "Expenses"
+                            :template ("* %U"
+                                       "#+begin_src ledger :results silent"
+                                       "%(format-time-string \"%Y/%m/%d\") * %^{Specific Transaction Name}"
+                                       "%?"
+                                       "    assets:%^{Source|bank:chase college|bank:nordstrom|venmo|cash}"
+                                       "#+end_src"))))
+               ("Events" :keys "e"
+                :type entry
+                :children (("Emacs Entry (Not Synced)" :keys "f"
+                            :file "~/NextCloud/Documents/org-roam/20220817093640-emacs_calendar.org")
+                           ("Emacs Calendar" :keys "e"
+                            :file "~/NextCloud/Documents/org-roam/20220817093640-emacs_calendar.org"
+                            :template ("* %^{Title of event}"
+                                       ":PROPERTIES:"
+                                       ":calendar-id: ihfv2u5n9uf5ksj5484vbe7mj4@group.calendar.google.com"
+                                       ":END:"
+                                       ":org-gcal:"
+                                       "%^{Scheduled time + duration}T%?"
+                                       ":END:"))
+                           ("Main Calendar" :keys "g"
+                            :file "~/NextCloud/Documents/org-roam/20220817093328-main_google_calendar.org"
+                            :template ("* %^{Title of event}"
+                                       ":PROPERTIES:"
+                                       ":calendar-id: pierce.g.wang@gmail.com"
+                                       ":END:"
+                                       ":org-gcal:"
+                                       "%^{Scheduled time + duration}T%?"
+                                       ":END:"))
+                           ("MMS Calendar" :keys "m"
+                            :file "~/NextCloud/Documents/org-roam/20220903112443-morningside_music_society_calendar.org"
+                            :template ("* %^{Title of event}"
+                                       ":PROPERTIES:"
+                                       ":calendar-id: morningsidemusicsociety@gmail.com"
+                                       ":END:"
+                                       ":org-gcal:"
+                                       "%^{Scheduled time + duration}T%?"
+                                       ":END:"))))
+               ("Columbia" :keys "c"
+                :type entry
+                :children (("STATUN1001_001_2022_3 - INTRO TO STATISTICAL REASONING" :keys "s"
+                            :file "~/NextCloud/Documents/org-roam/20220902082826-columbia_fall_2022_classes_assignments.org"
+                            :regexp "INTRO TO STATISTICAL REASONING"
+                            :template ("* NEXT %?"
+                                       "DEADLINE: %^T"))
+                           ("HUMAUN1123_027_2022_3 - MASTERPIECES OF WESTERN MUSIC" :keys "m"
+                            :file "~/NextCloud/Documents/org-roam/20220902082826-columbia_fall_2022_classes_assignments.org"
+                            :regexp "MASTERPIECES OF WESTERN MUSIC"
+                            :template ("* NEXT %?"
+                                       "DEADLINE: %^T"))
+                           ("CSEEW3827_001_2022_3 - FUNDAMENTALS OF COMPUTER SYSTSM" :keys "c"
+                            :file "~/NextCloud/Documents/org-roam/20220902082826-columbia_fall_2022_classes_assignments.org"
+                            :regexp "FUNDAMENTALS OF COMPUTER SYSTSM"
+                            :template ("* NEXT %?"
+                                       "DEADLINE: %^T"))
+                           ("COMSW3261_002_2022_3 - COMPUTER SCIENCE THEORY" :keys "t"
+                            :file "~/NextCloud/Documents/org-roam/20220902082826-columbia_fall_2022_classes_assignments.org"
+                            :regexp "COMPUTER SCIENCE THEORY"
+                            :template ("* NEXT %?"
+                                       "DEADLINE: %^T"))
+                           ("COCICC1101_021_2022_3 - CONTEMP WESTERN CIVILIZATION I" :keys "p"
+                            :file "~/NextCloud/Documents/org-roam/20220902082826-columbia_fall_2022_classes_assignments.org"
+                            :regexp "CONTEMP WESTERN CIVILIZATION I"
+                            :template ("* NEXT %?"
+                                       "DEADLINE: %^T"))
+                           ("CHNSUN2201_002_2022_3 - SECOND YEAR CHINESE I" :keys "C"
+                            :file "~/NextCloud/Documents/org-roam/20220902082826-columbia_fall_2022_classes_assignments.org"
+                            :regexp "SECOND YEAR CHINESE I"
+                            :template ("* NEXT %?"
+                                       "DEADLINE: %^T"))))
+               ("Stuff and Things" :keys "s"
+                :file "~/NextCloud/Documents/org/notes/stuff_and_things/organizing_temp.org"
+                :children (("Database Entry" :keys "i"
+                            :type entry
+                            :template ("* DECIDE %?"
+                                       "%U"))
+                           ("Violin Repertoire" :keys "m"
+                            :type entry
+                            :id "89641a25-2cab-4b04-8d36-75c77d4dc855"
+                            :template ("* - %?"
+                                       "%^{COMPOSER}p"
+                                       "%^{ARRANGEMENT}p"
+                                       "%^{COMPOSED}p"))))))))
 #+end_src
 
 #+begin_example
@@ -1367,12 +1039,295 @@ Obsolete because of PDF reader in Doom.
                                       "%^{COMPOSED}p"))))
 #+end_example
 
-
-**** Org Refile
+*** Drawers
 
 #+begin_src emacs-lisp
-(setq pgw/refile-targets (file-expand-wildcards "~/NextCloud/Documents/org/*.org"))
+(map! (:map org-mode-map
+         :localleader
+         :desc "Remove ID Entry" "u" #'org-insert-drawer))
 #+end_src
+
+*** Export
+**** HTML
+
+#+begin_src emacs-lisp
+  (setq org-html-validation-link nil)
+#+end_src
+
+**** ODT
+
+#+begin_src emacs-lisp
+(setq org-odt-styles-file "~/.doom.d/odt/mla.ott")
+#+end_src
+
+*** Export Publishing
+#+begin_src emacs-lisp
+(personal
+ (require 'ox-publish)
+ (setq org-publish-project-alist
+       '(("pages-notes"
+          :base-directory "~/NextCloud/Documents/org_publish/"
+          :base-extension "org"
+          :publishing-directory "~/Documents/github/piercegwang.github.io/"
+          :recursive t
+          :publishing-function org-html-publish-to-html
+          :headline-levels 4             ; Just the default for this project.
+          ;; :html-head "<link rel=\"stylesheet\" type=\"text/css\" href=\"css/style.css\"/>"
+          :auto-preamble t
+          )
+         ("pages-static"
+          :base-directory "~/NextCloud/Documents/org_publish/"
+          :base-extension "css\\|js\\|png\\|jpg\\|gif\\|pdf\\|mp3\\|ogg\\|swf\\|jpeg\\|txt\\|json"
+          :publishing-directory "~/Documents/github/piercegwang.github.io/"
+          :recursive t
+          :publishing-function org-publish-attachment
+          )
+         ("pages" :components ("pages-notes" "pages-static")))))
+#+end_src
+
+*** Habit
+#+begin_src emacs-lisp
+(require 'org-habit)
+(setq org-enforce-todo-dependencies t
+      org-habit-show-habits t)
+#+end_src
+
+*** Latex
+#+begin_src emacs-lisp
+  (require 'ox-latex)
+#+end_src
+
+**** CDLatex
+#+begin_src emacs-lisp
+  (use-package! cdlatex
+    :after org
+    :config
+    (add-hook! 'org-mode-hook #'org-cdlatex-mode)
+    (add-to-list 'org-tab-first-hook 'org-try-cdlatex-tab)
+    )
+#+end_src
+
+**** Fragments
+
+
+
+#+begin_src emacs-lisp
+  (setq org-format-latex-options
+        ;; '(:foreground "#000000" :background default ;; light theme
+        '(:foreground "#d6d6d4" :background default ;; dark tieme
+                      :scale 1.5
+                      :html-foreground "Black" :html-background "Transparent"
+                      :html-scale 1.0
+                      :matchers ("begin" "$1" "$" "$$" "\\(" "\\[")))
+#+end_src
+
+Fix color handling in org-preview-latex-fragment
+
+#+begin_src emacs-lisp
+  (let ((dvipng--plist (alist-get 'dvipng org-preview-latex-process-alist)))
+    (plist-put dvipng--plist :use-xcolor t)
+    (plist-put dvipng--plist :image-converter '("dvipng -D %D -T tight -o %O %f")))
+#+end_src
+
+#+begin_src emacs-lisp :tangle no
+  (global-set-key (kbd "C-c C-x C-l") 'org-toggle-latex-fragment)
+#+end_src
+
+*** Log when tasks are marked as done:
+#+begin_src emacs-lisp
+(setq org-log-done 'time) ; Log when task marked as done
+#+end_src
+
+*** MobileOrg
+
+#+begin_src emacs-lisp
+(personal
+  ;; Set to the name of the file where new notes will be stored
+  (setq org-mobile-inbox-for-pull "~/NextCloud/Documents/Apps/MobileOrg/index.org")
+  ;; Set to <your NextCloud/Documents root directory>/MobileOrg.
+  (setq org-mobile-directory "~/NextCloud/Documents/Apps/MobileOrg"))
+#+end_src
+
+*** Org-contrib
+
+#+begin_src emacs-lisp
+; (use-package! org-contrib
+;   (require 'ob-ledger))
+#+end_src
+
+*** Org-drill
+
+#+begin_src emacs-lisp
+(defun pgw/character-writing-practice ()
+  (interactive)
+  (start-process-shell-command "Running FingerPaint" nil "~/.local/bin/fingerpaint -o ~/tmp/character-writing-practice.png"))
+#+end_src
+
+#+begin_src emacs-lisp
+  ;;; org-drill
+  (use-package! org-drill
+    ;; :bind (:map org-drill-response-mode-map
+    ;;      ("c" . pgw/character-writing-practice))
+    :config
+    (require 'org-drill-table))
+#+end_src
+
+*** org-gcal: Calendar Integration
+#+begin_src emacs-lisp
+(personal
+ (use-package! org-gcal
+   :config
+   (setq plstore-cache-passphrase-for-symmetric-encryption t)
+   (map! :leader
+         (:prefix-map ("d" . "Gcal Commands")
+          :desc "Post to gcal" "p" #'org-gcal-post-at-point
+          :desc "Sync with gcal" "s" #'org-gcal-sync
+          :desc "Fetch from gcal" "f" #'org-gcal-fetch
+          :desc "Delete at point" "d" #'org-gcal-delete-at-point
+          :desc "Remove sync tokens (hard refresh)" "t" #'org-gcal-sync-tokens-clear
+          :desc "Sync current buffer" "b s" #'org-gcal-sync-buffer
+          :desc "Fetch current buffer" "b f" #'org-gcal-fetch-buffer))
+   (setq org-gcal-client-id pgw/org-gcal-client-id
+         org-gcal-client-secret pgw/org-gcal-client-secret
+         org-gcal-file-alist pgw/org-gcal-file-alist
+         org-gcal-local-timezone "America/New_York"
+         org-gcal-notify-p nil
+         org-gcal-up-days 30
+         org-gcal-down-days 60)
+   (setq org-gcal-remove-api-cancelled-events t)))
+#+end_src
+
+*** Org IDs
+
+#+begin_src emacs-lisp
+(setq org-id-locations-file "~/NextCloud/Documents/.orgids")
+#+end_src
+
+#+begin_src emacs-lisp
+(defun org-id-remove-entry ()
+  "Remove/delete the ID entry and update the databases.
+Update the `org-id-locations' global hash-table, and update the
+`org-id-locations-file'.  `org-id-track-globally' must be `t`."
+  (interactive)
+  (save-excursion
+    (org-back-to-heading t)
+    (when (org-entry-delete (point) "ID")
+      (org-id-update-id-locations nil 'silent))))
+
+(map! (:map org-mode-map
+         :localleader
+         :desc "Remove ID Entry" "D" #'org-id-remove-entry))
+#+end_src
+
+*** Org-mode Startup Buffers
+
+#+begin_src emacs-lisp
+(setq org-agenda-inhibit-startup nil)
+#+end_src
+
+This fixes org-capture being messed up, but also makes buffers not start indent mode correctly. Thoughts on how to fix?
+#+begin_src emacs-lisp
+(defalias '+org--restart-mode-h #'ignore)
+#+end_src
+
+Related to
+- [[https://github.com/doomemacs/doomemacs/issues/5411]]
+- [[https://github.com/doomemacs/doomemacs/issues/5714]]
+
+*** Org Refile
+
+#+begin_src emacs-lisp
+(personal (setq pgw/refile-targets (file-expand-wildcards "~/NextCloud/Documents/org-roam/*.org")))
+#+end_src
+*** Org Refile:
+#+begin_src emacs-lisp
+(setq org-refile-targets '((nil :maxlevel . 9)
+                           (org-agenda-files :maxlevel . 9)
+                           (pgw/refile-targets :maxlevel . 9)))
+(setq org-refile-use-outline-path 'file)
+(setq org-outline-path-complete-in-steps nil)
+(setq org-refile-allow-creating-parent-nodes 'confirm)
+#+end_src
+
+*** org-reveal
+
+#+begin_src emacs-lisp
+(personal
+ (setq org-reveal-root "file:///Users/piercewang/Documents/projects/revealjs/reveal.js-4.1.0"))
+#+end_src
+
+
+*** Org Superstar (Bullets revamped)
+#+begin_src emacs-lisp
+  (use-package! org-superstar
+    :config
+    (setq org-superstar-prettify-item-bullets t)
+    :hook (org-mode . org-superstar-mode))
+
+#+end_src
+
+*** Quick Capture
+**** Helper Functions
+#+begin_src emacs-lisp
+(defun pgw/year-month ()
+  "Custom function to return date in format: YYYY-MM"
+  (format-time-string "%Y-%m"))
+
+(defun pgw/U ()
+  "Custom function to return date in org inactive timestamp format"
+  (format-time-string "[%Y-%m-%d %a]"))
+
+(defun pgw/add-12 ()
+  "Custom function return active org timestamp with exactly 24 hour difference"
+  (format-time-string "%Y-%m-%d %a %H:%M" (time-add (current-time) 85500)))
+
+(defun pgw/headline_date ()
+  "Function to find the date as headline for Violin capture template"
+  (goto-char (point-min))
+  (let ((searchresults (search-forward (format-time-string "[%Y-%m-%d %a]") nil t)))
+    (if searchresults
+        'searchresults
+      (error "Not found! Use Vc to create today's practice first."))))
+#+end_src
+
+*** Tables
+
+#+begin_src emacs-lisp
+(map! :leader
+      :map org-mode-map
+      :n "m b t t" 'org-table-toggle-column-width
+      :nv "m b y" 'org-table-copy-region
+      :nv "m b p" 'org-table-paste-rectangle
+      :nv "m b d y" 'org-table-cut-region)
+#+end_src
+
+*** Tags
+#+begin_src emacs-lisp
+(setq org-tag-persistent-alist '(("noexport" . ?N))
+      org-complete-tags-always-offer-all-agenda-tags nil)
+#+end_src
+
+*** ​Todo keywords
+
+#+begin_src emacs-lisp
+  (setq org-todo-keywords
+        '((sequence "NEXT(n)" "TODO(t)" "IN-PROGRESS(i)" "WAITING(w)" "|" "DONE(d)" "CANCELLED(c)" "DELEGATED(g)")))
+#+end_src
+
+** org-roam
+
+#+begin_src emacs-lisp
+(use-package! org-roam
+  :hook (after-init . org-roam-mode)
+  :config
+  (defun pgw/org-roam-refresh ()
+    (interactive)
+    (org-roam-db-build-cache :force)
+    (org-roam-buffer--update-maybe :redisplay))
+  (setq org-roam-directory "~/NextCloud/Documents/org-roam/")
+  (setq org-roam-db-location "~/NextCloud/Documents/org-roam.db"))
+#+end_src
+
 ** Ditaa
 
 #+begin_src emacs-lisp
@@ -1382,7 +1337,7 @@ Obsolete because of PDF reader in Doom.
 
 ** ~Darkroom~ for Writing
 #+begin_src emacs-lisp
-  (use-package! darkroom)
+(use-package! darkroom)
 #+end_src
 
 ** Company mode
@@ -1464,17 +1419,19 @@ Disable automatic completion from company--slows everything down a bit.
 
 *** exec-path-from-shell
 
-#+begin_src emacs-lisp :tangle "personal.el"
-(when IS-MAC
-  (use-package! exec-path-from-shell
-    :config
-    (setq exec-path-from-shell-shell-name "/bin/zsh"))
-  (exec-path-from-shell-initialize))
+#+begin_src emacs-lisp
+(personal
+ (when IS-MAC
+   (use-package! exec-path-from-shell
+     :config
+     (setq exec-path-from-shell-shell-name "/bin/zsh"))
+   (exec-path-from-shell-initialize)))
 #+end_src
 
 ** Shell
-#+begin_src emacs-lisp :tangle "personal.el"
-(setq shell-file-name "/bin/bash")
+#+begin_src emacs-lisp
+(personal (setq shell-file-name "/bin/bash"))
+(work (setq shell-file-name "/bin/zsh"))
 ;; (setq shell-file-name "/opt/homebrew/bin/fish")
 #+end_src
 
@@ -1515,13 +1472,13 @@ For files changed by dropbox and also dired buffers.
 #+end_src
 
 ** Calendar
-#+begin_src emacs-lisp :personal.el
-;; (setq calendar-latitude 37.759995)
-;; (setq calendar-longitude -122.427046)
-;; (setq calendar-location-name "San Francisco, CA")
-(setq calendar-latitude 40.806701)
-(setq calendar-longitude -73.962855)
-(setq calendar-location-name "New York, NY")
+#+begin_src emacs-lisp
+(setq calendar-latitude 37.759995)
+(setq calendar-longitude -122.427046)
+(setq calendar-location-name "San Francisco, CA")
+;; (setq calendar-latitude 40.806701)
+;; (setq calendar-longitude -73.962855)
+;; (setq calendar-location-name "New York, NY")
 #+end_src
 
 *** Date Style
@@ -1559,12 +1516,12 @@ Also remember, can use <middle mouse button> to see the menu of options.
 
 ** Flyspell mode
 Activate =flyspell-mode= automatically in all school files.
-#+begin_src elisp :tangle "personal.el"
+#+begin_src emacs-lisp
+(personal
   (defun pgw/turn-on-flyspell-hook ()
     (if (or (string-match "^/Users/piercewang/NextCloud/Documents/org/notes/college/" (if (eq buffer-file-name nil) "" buffer-file-name)))
         (flyspell-mode 1)))
-
-  (add-hook! 'org-mode-hook 'turn-on-flyspell)
+  (add-hook! 'org-mode-hook 'turn-on-flyspell))
 #+end_src
 ** Calc
 
@@ -1600,10 +1557,11 @@ I love Emacs Tetris!
 #+end_src
 
 ** ERC
-#+begin_src emacs-lisp :personal.el
+#+begin_src emacs-lisp
+(personal
   (setq erc-log-channels-directory "~/logs/")
   (setq erc-save-buffer-on-part t)
-  (map! :leader "e e" (lambda () (interactive) (erc :server "irc.freenode.net" :port 6667 :nick "tesrodome" :password passwords_ERC)))
+  (map! :leader "e e" (lambda () (interactive) (erc :server "irc.freenode.net" :port 6667 :nick "tesrodome" :password passwords_ERC))))
 #+end_src
 
 ** Keybinds
@@ -1636,29 +1594,11 @@ Insert Org-mode Image
       :v "k" 'previous-line)
 #+end_src
 
-** Hydra for Resizing Windows
-
-Functions to change:
-~(enlarge-window)~
-~(shrink-window-horizontally)~
-~(enlarge-window-horizontally)~
-
-#+begin_src emacs-lisp :tangle no
-  (defhydra hydra-windowmanage (global-map "H-c ^")
-    "Hydra for window management."
-    ("=" enlarge-window "+Vertical")
-    ("-" (enlarge-window -1) "-Vertical")
-    ("]" enlarge-window-horizontally "+Horizontal")
-    ("[" shrink-window-horizontally "-Horizontal")
-    ("q" nil "Quit"))
-
-  (global-set-key (kbd "C-c C-6") 'hydra-windowmanage/body)
-#+end_src
-
 ** User Configuration
-#+begin_src emacs-lisp :tangle "personal.el"
-(setq user-full-name "Pierce Wang"
-      user-mail-address "pierce.g.wang@gmail.com")
+#+begin_src emacs-lisp
+(personal
+ (setq user-full-name "Pierce Wang"
+       user-mail-address "pierce.g.wang@gmail.com"))
 #+end_src
 
 ** Buffer Mangement
@@ -1692,7 +1632,7 @@ CLOSED: [2020-11-24 Tue 00:50]
   (define-key ibuffer-mode-map (kbd "P") nil)
 #+end_src
 
-*** Bufler - Alphapapa
+*** DISABLED Bufler - Alphapapa
 
 #+begin_src emacs-lisp :tangle no
   (use-package! bufler
@@ -1813,8 +1753,8 @@ Move
 ** browse-url-firefox-program
 Allow the function =browse-url-firefox= to open links in firefox using bin. One could probably also accomplish this using =brew='s version of firefox, but I didn't want to install firefox again.
 
-#+begin_src emacs-lisp :tangle "personal.el"
-  (setq browse-url-firefox-program "/Applications/Firefox.app/Contents/MacOS/firefox-bin")
+#+begin_src emacs-lisp
+(personal (setq browse-url-firefox-program "/Applications/Firefox.app/Contents/MacOS/firefox-bin"))
 #+end_src
 
 ** DISABLED mu4e
@@ -2102,7 +2042,8 @@ This is super messy, any tips on making this kind of code cleaner?
 
 The identified problem was that in general, for class schedules, I've used a repeating event. However, repeating events (in =org-mode= or otherwise) are not holiday-aware. So, the point of this code is to generate a list of scheduled org headlines for all of my classes which is 100% accurate and does not put classes on holidays or no-class study week days.
 
-#+begin_src emacs-lisp :results silent :tangle "personal.el"
+#+begin_src emacs-lisp :results silent
+(personal
 (defun pgw/date-block (absolute y1 m1 d1 y2 m2 d2)
   "Block date entry. An adapted version of the `diary-block'
 function from the diary-lib."
@@ -2239,7 +2180,7 @@ unless custom-dates is specified"
                             (2022 1 17)  ;; Martin Luther King Jr. Day, University Holiday
                             (2022 2 26 2022 3 13)) ;; Midterm Recess
                             ;; (2022 5 3 2022 5 6)) ;; Jury week
-                            )))
+                            ))))
 
 #+end_src
 
@@ -2278,12 +2219,12 @@ This runs a bash script which in turn
 2. runs a python program which parses the calendar file into =ohs_gcal.org= according to the class. In doing so, it takes into account whether the timestamp should be a deadline or not.
 
 See [[https://github.com/piercegwang/ohsics_to_org][https://github.com/piercegwang/ohsics_to_org]] for more info.
-#+begin_src emacs-lisp :results silent :tangle "personal.el"
-(defun pgw/sync-canvas-cal ()
-  (interactive)
-  (start-process-shell-command "Running syncgcal.sh" nil "bash ~/Documents/github/org_canvas_parser/syncgcal.sh"))
-
-(map! :leader "d o" #'pgw/sync-canvas-cal)
+#+begin_src emacs-lisp :results silent
+(personal
+ (defun pgw/sync-canvas-cal ()
+   (interactive)
+   (start-process-shell-command "Running syncgcal.sh" nil "bash ~/Documents/github/org_canvas_parser/syncgcal.sh"))
+ (map! :leader "d o" #'pgw/sync-canvas-cal))
 #+end_src
 
 ** ~vterm~
@@ -2385,43 +2326,43 @@ See [[https://github.com/piercegwang/ohsics_to_org][https://github.com/piercegwa
 
 -----BEGIN PGP MESSAGE-----
 
-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
-ewsr6k6XW7XuEMs8H9pG4g==
-=rBYy
+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
+=A1oQ
 -----END PGP MESSAGE-----
 
 ** Polymode
@@ -2430,22 +2371,6 @@ ewsr6k6XW7XuEMs8H9pG4g==
 (use-package! polymode)
 (use-package! poly-markdown)
 (use-package! poly-R)
-#+end_src
-
-** End of personal.el
-
-#+begin_src emacs-lisp :tangle "personal.el"
-(provide '.personal)
-#+end_src
-
-** Load Setting
-
-Load personal settings or general settings?
-
-#+begin_src emacs-lisp :tangle yes
-(if (file-exists-p "~/.work_computer")
-    (load "~/.doom.d/work.el")
-  (load "~/.doom.d/personal.el"))
 #+end_src
 
 * Doom Modules
@@ -2547,7 +2472,7 @@ ophints           ; highlight the region an operation acts on
 (popup +defaults)   ; tame sudden yet inevitable temporary windows
 ;;tabs              ; a tab bar for Emacs
 ;;treemacs          ; a project drawer, like neotree but cooler
-;;unicode           ; extended unicode support for various languages
+unicode           ; extended unicode support for various languages
 vc-gutter         ; vcs diff in the fringe
 vi-tilde-fringe   ; fringe tildes to mark beyond EOB
 ;;window-select     ; visually switch windows
@@ -2772,6 +2697,12 @@ Everything in this section gets "tangled" into the ~packages.el~ file which allo
 ;(unpin! t)
 
 (package! org-pdftools)
+;; (unpin! org-gcal)
+(package! org-gcal
+  :recipe (:host github
+           :type git
+           :repo "kidd/org-gcal.el")
+  :pin "3cc48a989ac859a97d25964c28874317a6e1672a")
 (package! treemacs)
 (package! treemacs-evil)
 (package! treemacs-magit)
@@ -2780,7 +2711,6 @@ Everything in this section gets "tangled" into the ~packages.el~ file which allo
 ;; (package! bufler)
 ;; (package! doom-snippets :ignore t)
 (package! rotate)
-;; (package! org-roam)
 (package! 2048-game)
 (package! org-superstar)
 (package! counsel)
