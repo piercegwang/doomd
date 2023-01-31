@@ -75,7 +75,7 @@ All configurations here get "tangled" into the main ~config.el~ file.
 ** Doom fonts
 
 #+begin_src emacs-lisp :tangle no
-(setq doom-font (font-spec :family "Ubuntu Mono" :size 14 :height 1.0))
+(setq doom-font (font-spec :family "Source Code Pro" :size 14 :height 1.0))
 (setq doom-unicode-font (font-spec :family "Noto Serif SC")
       doom-big-font (font-spec :family "Ubuntu Mono" :size 26)
       doom-variable-pitch-font (font-spec :family "Open Sans" :size 12)
@@ -177,6 +177,11 @@ navigation/swapping commands.
 ** Bookmarks
 #+begin_src emacs-lisp
   (global-set-key (kbd "C-x r D") 'bookmark-delete)
+#+end_src
+
+** Passwords
+#+begin_src emacs-lisp
+  (load-file "~/.passwords.el")
 #+end_src
 
 ** Fonts
@@ -634,13 +639,6 @@ Make Emacs play nice with my window manager and resizing around other windows.
       :n "TAB L" '+workspace/swap-right)
 #+end_src
 
-** Treemacs
-#+begin_src emacs-lisp
-  (use-package! treemacs)
-  (use-package! treemacs-evil)
-  (use-package! treemacs-magit)
-#+end_src
-
 ** ztree (Tool for diffing and merging directories)
 #+begin_src emacs-lisp
   (use-package! ztree)
@@ -652,11 +650,6 @@ Make Emacs play nice with my window manager and resizing around other windows.
   ;; (require 'epa-file)
   (epa-file-enable)
   (setf epa-pinentry-mode 'loopback)
-#+end_src
-
-** Passwords
-#+begin_src emacs-lisp
-  (load-file "~/.passwords.el")
 #+end_src
 
 ** Mode Line
@@ -753,7 +746,8 @@ CLOSED: [2020-11-29 Sun 11:30]
 **** Custom Commands
 Custom commands, testing sorting strategy variable
 
-#+begin_src emacs-lisp :tangle personal.el
+#+begin_src emacs-lisp
+(personal
   (setq org-agenda-custom-commands
         '(("c" . "Columbia")
           ("l" "Logging View" agenda ""
@@ -773,29 +767,25 @@ Custom commands, testing sorting strategy variable
                                       (file-expand-wildcards (concat org-directory "/*.org_archive"))))))
           ("Ql" "Query Links" search ""
            ((org-agenda-files (list (concat org-directory "/links.org")
-                                    (concat org-directory "/links.org_archive")))))))
+                                    (concat org-directory "/links.org_archive"))))))))
 #+end_src
 
 **** Files
-#+begin_src emacs-lisp :tangle personal.el
-(setq org-agenda-files (append (file-expand-wildcards (concat org-directory "/calendars/*.org"))
-                               '("/Users/piercewang/NextCloud/Documents/org/notes/columbia/2022_Spring/calendar/2022_spring_calendar.org")))
-
-(defun pgw/org-agenda-reload-files ()
-  (interactive)
-  (setq org-agenda-files (append (pgw/org-roam-get-todos)
-                                 '("/Users/piercewang/NextCloud/Documents/org/notes/columbia/2022_Spring/calendar/2022_spring_calendar.org"))))
-#+end_src
-
-#+begin_src emacs-lisp :tangle work.el
-(setq org-agenda-files '())
-
-(defun pgw/org-agenda-reload-files ()
-  (interactive)
-  (setq org-agenda-files (append (pgw/org-roam-get-todos))))
-#+end_src
-
 #+begin_src emacs-lisp
+(personal
+ (setq org-agenda-files (append (file-expand-wildcards (concat org-directory "/calendars/*.org"))))
+
+ (defun pgw/org-agenda-reload-files ()
+   (interactive)
+   (setq org-agenda-files (append (pgw/org-roam-get-todos)))))
+
+(work
+ (setq org-agenda-files '())
+
+ (defun pgw/org-agenda-reload-files ()
+   (interactive)
+   (setq org-agenda-files (append (pgw/org-roam-get-todos)))))
+
 (pgw/org-agenda-reload-files)
 #+end_src
 
@@ -848,12 +838,9 @@ Custom commands, testing sorting strategy variable
         (:comments . "link")))
 #+end_src
 
-#+begin_src emacs-lisp :tangle personal.el
-(setq org-directory "~/NextCloud/Documents/org")
-#+end_src
-
-#+begin_src emacs-lisp :tangle work.el
-(setq org-directory "~/NextCloud/Documents/org/notes/acacia")
+#+begin_src emacs-lisp
+(personal (setq org-directory "~/NextCloud/Documents/org"))
+(work (setq org-directory "~/NextCloud/Documents/org/notes/acacia"))
 #+end_src
 
 *** Crypt
@@ -961,34 +948,30 @@ Custom commands, testing sorting strategy variable
                                        ":END:"))))
                ("Columbia" :keys "c"
                 :type entry
-                :children (("STATUN1001_001_2022_3 - INTRO TO STATISTICAL REASONING" :keys "s"
-                            :file "~/NextCloud/Documents/org-roam/20220902082826-columbia_fall_2022_classes_assignments.org"
-                            :regexp "INTRO TO STATISTICAL REASONING"
+                :children (
+                           ("COMSW4118_001_2023_1 - Operating Systems I" :keys "o"
+                            :file "~/NextCloud/Documents/org-roam/20230116175417-columbia_spring_2023_class_assignments.org"
+                            :regexp "id:6f5d02ad-ccce-48ea-a478-6921bd309f7d"
                             :template ("* NEXT %?"
                                        "DEADLINE: %^T"))
-                           ("HUMAUN1123_027_2022_3 - MASTERPIECES OF WESTERN MUSIC" :keys "m"
-                            :file "~/NextCloud/Documents/org-roam/20220902082826-columbia_fall_2022_classes_assignments.org"
-                            :regexp "MASTERPIECES OF WESTERN MUSIC"
+                           ("COMSW3251_001_2023_1 - COMPUTATIONAL LINEAR ALGEBRA" :keys "l"
+                            :file "~/NextCloud/Documents/org-roam/20230116175417-columbia_spring_2023_class_assignments.org"
+                            :regexp "id:2cecfc8f-5dcb-4331-bb9e-0d5e188b95de"
                             :template ("* NEXT %?"
                                        "DEADLINE: %^T"))
-                           ("CSEEW3827_001_2022_3 - FUNDAMENTALS OF COMPUTER SYSTSM" :keys "c"
-                            :file "~/NextCloud/Documents/org-roam/20220902082826-columbia_fall_2022_classes_assignments.org"
-                            :regexp "FUNDAMENTALS OF COMPUTER SYSTSM"
+                           ("CHNSUN2202_002_2023_1 - SECOND YEAR CHINESE II" :keys "c"
+                            :file "~/NextCloud/Documents/org-roam/20230116175417-columbia_spring_2023_class_assignments.org"
+                            :regexp "id:0fd0cc39-5ace-4c23-9650-0ef975ed958a"
                             :template ("* NEXT %?"
                                        "DEADLINE: %^T"))
-                           ("COMSW3261_002_2022_3 - COMPUTER SCIENCE THEORY" :keys "t"
-                            :file "~/NextCloud/Documents/org-roam/20220902082826-columbia_fall_2022_classes_assignments.org"
-                            :regexp "COMPUTER SCIENCE THEORY"
+                           ("PSYCUN1001_001_2023_1 - THE SCIENCE OF PSYCHOLOGY" :keys "p"
+                            :file "~/NextCloud/Documents/org-roam/20230116175417-columbia_spring_2023_class_assignments.org"
+                            :regexp "id:9a197ba7-bb2a-4490-8e20-0ace2e898b51"
                             :template ("* NEXT %?"
                                        "DEADLINE: %^T"))
-                           ("COCICC1101_021_2022_3 - CONTEMP WESTERN CIVILIZATION I" :keys "p"
-                            :file "~/NextCloud/Documents/org-roam/20220902082826-columbia_fall_2022_classes_assignments.org"
-                            :regexp "CONTEMP WESTERN CIVILIZATION I"
-                            :template ("* NEXT %?"
-                                       "DEADLINE: %^T"))
-                           ("CHNSUN2201_002_2022_3 - SECOND YEAR CHINESE I" :keys "C"
-                            :file "~/NextCloud/Documents/org-roam/20220902082826-columbia_fall_2022_classes_assignments.org"
-                            :regexp "SECOND YEAR CHINESE I"
+                           ("COCICC1102_021_2023_1 - CC Section 21 (MW 2:10)" :keys "C"
+                            :file "~/NextCloud/Documents/org-roam/20230116175417-columbia_spring_2023_class_assignments.org"
+                            :regexp "id:9eacd76b-670f-4002-a3ed-9003cd7b4df8"
                             :template ("* NEXT %?"
                                        "DEADLINE: %^T"))))
                ("Stuff and Things" :keys "s"
@@ -1068,7 +1051,7 @@ Custom commands, testing sorting strategy variable
        '(("pages-notes"
           :base-directory "~/NextCloud/Documents/org_publish/"
           :base-extension "org"
-          :publishing-directory "~/Documents/github/piercegwang.github.io/"
+          :publishing-directory "~/Documents/piercegwang.github.io/"
           :recursive t
           :publishing-function org-html-publish-to-html
           :headline-levels 4             ; Just the default for this project.
@@ -1078,7 +1061,7 @@ Custom commands, testing sorting strategy variable
          ("pages-static"
           :base-directory "~/NextCloud/Documents/org_publish/"
           :base-extension "css\\|js\\|png\\|jpg\\|gif\\|pdf\\|mp3\\|ogg\\|swf\\|jpeg\\|txt\\|json"
-          :publishing-directory "~/Documents/github/piercegwang.github.io/"
+          :publishing-directory "~/Documents/piercegwang.github.io/"
           :recursive t
           :publishing-function org-publish-attachment
           )
@@ -1194,7 +1177,8 @@ Fix color handling in org-preview-latex-fragment
          org-gcal-notify-p nil
          org-gcal-up-days 30
          org-gcal-down-days 60)
-   (setq org-gcal-remove-api-cancelled-events t)))
+   (setq org-gcal-remove-api-cancelled-events t)
+   (org-gcal-reload-client-id-secret)))
 #+end_src
 
 *** Org IDs
@@ -1237,13 +1221,12 @@ Related to
 *** Org Refile
 
 #+begin_src emacs-lisp
-(personal (setq pgw/refile-targets (file-expand-wildcards "~/NextCloud/Documents/org-roam/*.org")))
+;; (personal (setq pgw/refile-targets (pgw/org-roam-get-todos)))
 #+end_src
 *** Org Refile:
 #+begin_src emacs-lisp
 (setq org-refile-targets '((nil :maxlevel . 9)
-                           (org-agenda-files :maxlevel . 9)
-                           (pgw/refile-targets :maxlevel . 9)))
+                           (org-agenda-files :maxlevel . 9)))
 (setq org-refile-use-outline-path 'file)
 (setq org-outline-path-complete-in-steps nil)
 (setq org-refile-allow-creating-parent-nodes 'confirm)
@@ -1314,18 +1297,34 @@ Related to
         '((sequence "NEXT(n)" "TODO(t)" "IN-PROGRESS(i)" "WAITING(w)" "|" "DONE(d)" "CANCELLED(c)" "DELEGATED(g)")))
 #+end_src
 
+*** org-download
+
+#+begin_src emacs-lisp
+(use-package! org-download
+  :config
+  (setq org-download-screenshot-method "gnome-screenshot"))
+#+end_src
+
 ** org-roam
 
 #+begin_src emacs-lisp
-(use-package! org-roam
-  :hook (after-init . org-roam-mode)
-  :config
-  (defun pgw/org-roam-refresh ()
-    (interactive)
-    (org-roam-db-build-cache :force)
-    (org-roam-buffer--update-maybe :redisplay))
-  (setq org-roam-directory "~/NextCloud/Documents/org-roam/")
-  (setq org-roam-db-location "~/NextCloud/Documents/org-roam.db"))
+  (use-package! org-roam
+    :hook (after-init . org-roam-mode)
+    :config
+    (setq org-roam-directory "~/NextCloud/Documents/org-roam/"
+          org-roam-db-location "~/NextCloud/Documents/org-roam.db"
+          org-roam-db-update-on-save t)
+    (defun pgw/org-roam-refresh ()
+      (interactive)
+      (org-roam-db-build-cache :force)
+      (org-roam-buffer--update-maybe :redisplay))
+    (setq org-roam-capture-templates
+          '(
+            ("d" "default" plain "%?" :target
+             (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n")
+             :unnarrowed t)
+            ("p" "person entry" plain (file "~/NextCloud/Documents/org-roam/people/templates/person.org")
+             :target (file "people/${slug}-%<%Y%m%d%H%M%S>.org") :unnarrowed t))))
 #+end_src
 
 ** Ditaa
@@ -2168,17 +2167,16 @@ unless custom-dates is specified"
       #s(hash-table
          size 5
          test equal
-         data ("fallstart" (2021 08 30)
-               "fallend" (2021 12 17)
-               "springstart" (2022 1 10)
-               "springend" (2022 5 13)
-               "noclasses" ((2021 9 6) ;; Labor Day
-                            (2021 11 1) ;; No Classes
-                            (2021 11 2) ;; Election Day, University Holiday
-                            (2021 11 24 2021 11 28) ;; No Classes
-                            (2021 11 25) ;; Thanksgiving, University Holiday
-                            (2022 1 17)  ;; Martin Luther King Jr. Day, University Holiday
-                            (2022 2 26 2022 3 13)) ;; Midterm Recess
+         data ("fallstart" (2022 08 29)
+               "fallend" (2022 12 13)
+               "springstart" (2023 01 09)
+               "springend" (2023 05 01)
+               "noclasses" ((2022 09 05) ;; Labor Day
+                            (2022 10 10 2022 10 11) ;; Fall Break
+                            (2022 11 8) ;; Election Day, University Holiday
+                            (2022 11 23 2021 11 27) ;; Thanksgiving Break
+                            (2023 1 16)  ;; Martin Luther King Jr. Day, University Holiday
+                            (2023 2 25 2023 3 12)) ;; Midterm Recess
                             ;; (2022 5 3 2022 5 6)) ;; Jury week
                             ))))
 
@@ -2211,7 +2209,6 @@ May 13 (Fri) 	Spring Semester Ends
 May 20 (Fri) 	117th Commencement
 #+end_comment
 
-
 *** Sync gcal Bash Script
 
 This runs a bash script which in turn
@@ -2223,7 +2220,7 @@ See [[https://github.com/piercegwang/ohsics_to_org][https://github.com/piercegwa
 (personal
  (defun pgw/sync-canvas-cal ()
    (interactive)
-   (start-process-shell-command "Running syncgcal.sh" nil "bash ~/Documents/github/org_canvas_parser/syncgcal.sh"))
+   (start-process-shell-command "Running syncgcal.sh" nil "bash ~/Documents/org_canvas_parser/syncgcal.sh"))
  (map! :leader "d o" #'pgw/sync-canvas-cal))
 #+end_src
 
@@ -2322,47 +2319,46 @@ See [[https://github.com/piercegwang/ohsics_to_org][https://github.com/piercegwa
 #+end_src
 
 ** Passwords :crypt:
-
-
 -----BEGIN PGP MESSAGE-----
 
-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
-=A1oQ
+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
+jUuAtck0HKM=
+=ciax
 -----END PGP MESSAGE-----
 
 ** Polymode
@@ -2440,7 +2436,7 @@ All configurations here get "tangled" into the ~init.el~ file, telling Doom Emac
 
 #+name: doom-input
 #+begin_src emacs-lisp
-;;chinese
+;; chinese
 ;;japanese
 ;;layout            ; auie,ctsrnm is the superior home row
 #+end_src
@@ -2472,7 +2468,7 @@ ophints           ; highlight the region an operation acts on
 (popup +defaults)   ; tame sudden yet inevitable temporary windows
 ;;tabs              ; a tab bar for Emacs
 ;;treemacs          ; a project drawer, like neotree but cooler
-unicode           ; extended unicode support for various languages
+;;unicode           ; extended unicode support for various languages
 vc-gutter         ; vcs diff in the fringe
 vi-tilde-fringe   ; fringe tildes to mark beyond EOB
 ;;window-select     ; visually switch windows
@@ -2703,9 +2699,6 @@ Everything in this section gets "tangled" into the ~packages.el~ file which allo
            :type git
            :repo "kidd/org-gcal.el")
   :pin "3cc48a989ac859a97d25964c28874317a6e1672a")
-(package! treemacs)
-(package! treemacs-evil)
-(package! treemacs-magit)
 (package! mixed-pitch)
 (package! darkroom)
 ;; (package! bufler)
@@ -2724,7 +2717,7 @@ Everything in this section gets "tangled" into the ~packages.el~ file which allo
 (when IS-MAC
   (package! exec-path-from-shell))
 (package! nov)
-(package! ess)
+;;(package! ess)
 (package! polymode)
 (package! poly-markdown)
 (package! poly-R)
@@ -2740,4 +2733,5 @@ Everything in this section gets "tangled" into the ~packages.el~ file which allo
   :recipe (:host github
            :repo "piercegwang/mu"
            :branch "master"))
+(package! org-download)
 #+end_src

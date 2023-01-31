@@ -1,2 +1,4 @@
+# #+LATEX_HEADER: \usepackage{xeCJK}
 #+LATEX_HEADER: \usepackage{CJKutf8}
 #+LaTeX_HEADER: \begin{CJK}{UTF8}{gbsn}
+#+latex_compiler: xetex
