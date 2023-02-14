@@ -294,7 +294,8 @@ I copied mixed-pitch.el from [[https://gitlab.com/jabranham/mixed-pitch/][this]]
 #+begin_src emacs-lisp
 ;; Tramp setup
 
-(setq tramp-default-method "ssh")
+(setq tramp-default-method "sshx")
+(setq tramp-histfile-override t)
 #+end_src
 
 ** =tab-bar-mode=
@@ -1717,7 +1718,7 @@ CLOSED: [2020-11-24 Tue 00:50]
 (cond ((eq system-type 'darwin) (setq insert-directory-program "/opt/homebrew/Cellar/coreutils/9.1/bin/gls"
                                       trash-directory "~/.Trash"))
       ((eq system-type 'gnu/linux) (setq insert-directory-program "/usr/bin/ls"
-                                         trash-directory "~/local/share/Trash")))
+                                         trash-directory "~/.local/share/Trash/files/")))
 #+end_src
 
 Make moving files easier between two split buffers.
@@ -2436,7 +2437,7 @@ All configurations here get "tangled" into the ~init.el~ file, telling Doom Emac
 
 #+name: doom-input
 #+begin_src emacs-lisp
-;; chinese
+chinese
 ;;japanese
 ;;layout            ; auie,ctsrnm is the superior home row
 #+end_src
