@@ -74,18 +74,18 @@ All configurations here get "tangled" into the main ~config.el~ file.
 
 ** Doom fonts
 
-#+begin_src emacs-lisp :tangle no
-(setq doom-font (font-spec :family "Source Code Pro" :size 14 :height 1.0))
-(setq doom-unicode-font (font-spec :family "Noto Serif SC")
+#+begin_src emacs-lisp :tangle yes
+(setq doom-font (font-spec :family "Source Code Pro" :size 18))
+(setq doom-unicode-font (font-spec :family "Source Han Serif SC")
       doom-big-font (font-spec :family "Ubuntu Mono" :size 26)
-      doom-variable-pitch-font (font-spec :family "Open Sans" :size 12)
+      doom-variable-pitch-font (font-spec :family "DejaVu Sans" :size 16)
       doom-serif-font (font-spec :family "Ubuntu"))
 #+end_src
 
 ** Custom Loads
 
 #+begin_src emacs-lisp
-(add-to-list 'load-path (expand-file-name "~/.doom.d/custom/"))
+(add-to-list 'load-path (concat doom-private-dir "custom/"))
 #+end_src
 
 ** Better defaults
@@ -177,6 +177,7 @@ navigation/swapping commands.
 ** Bookmarks
 #+begin_src emacs-lisp
   (global-set-key (kbd "C-x r D") 'bookmark-delete)
+  (setq bookmark-default-file (concat doom-private-dir "bookmarks/"))
 #+end_src
 
 ** Passwords
@@ -505,6 +506,15 @@ https://stackoverflow.com/questions/2540997/create-more-than-one-eshell-instance
     (switch-to-buffer buffer)))
 #+end_src
 
+*** Get TODO Nodes
+#+begin_src emacs-lisp
+(defun pgw/org-roam-get-todos (backlink-id)
+  (mapcar #'org-roam-node-file
+    (mapcar #'org-roam-backlink-source-node
+            (org-roam-backlinks-get
+            (org-roam-node-from-id backlink-id) :unique t))))
+#+end_src
+
 ** Visuals
 
 #+begin_src emacs-lisp
@@ -569,8 +579,11 @@ Light themes:
 
     ;; Load the theme (doom-one, doom-molokai, etc); keep in mind that each theme
     ;; may have their own settings.
+    ;; (load-theme 'doom-badger t)
+    (load-theme 'doom-1337 t)
+    ;; (load-theme 'doom-material-dark t)
     ;; (load-theme 'doom-outrun-electric t)
-    (load-theme 'doom-acario-dark t)
+    ;; (load-theme 'doom-acario-dark t)
     ;; (load-theme 'doom-challenger-deep t)
     ;; (load-theme 'doom-snazzy t)
     ;; (load-theme 'doom-solarized-dark t)
@@ -691,14 +704,6 @@ CLOSED: [2020-11-29 Sun 11:30]
   (display-battery-mode)
 #+end_src
 
-** Get TODO Nodes
-#+begin_src emacs-lisp
-(defun pgw/org-roam-get-todos ()
-  (mapcar #'org-roam-node-file
-    (mapcar #'org-roam-backlink-source-node
-            (org-roam-backlinks-get
-            (org-roam-node-from-id "ab2c5980-0f5f-4d46-8ad3-8194f67ac39d") :unique t))))
-#+end_src
 ** Org-mode
 :PROPERTIES:
 :CUSTOM_ID: org
@@ -759,6 +764,12 @@ Custom commands, testing sorting strategy variable
            ((org-agenda-span 1)
             (org-agenda-sorting-strategy
              '((agenda habit-down time-up deadline-up)))))
+          ("c" "CRM" agenda ""
+           ((org-agenda-span 1)
+            (org-agenda-sorting-strategy
+             '((agenda habit-down time-up deadline-up)))
+            (org-agenda-files
+             (file-expand-wildcards "~/NextCloud/Documents/org-roam/people/*.org"))))
           ("T" "Todo List" todo "TODO"
            ((org-agenda-sorting-strategy
              '((priority-up)))))
@@ -771,6 +782,15 @@ Custom commands, testing sorting strategy variable
                                     (concat org-directory "/links.org_archive"))))))))
 #+end_src
 
+#+begin_src emacs-lisp
+(work
+  (setq org-agenda-custom-commands
+        '(("A" "General Agenda" agenda ""
+           ((org-agenda-span 1)
+            (org-agenda-sorting-strategy
+             '((agenda habit-down time-up deadline-up))))))))
+#+end_src
+
 **** Files
 #+begin_src emacs-lisp
 (personal
@@ -778,14 +798,14 @@ Custom commands, testing sorting strategy variable
 
  (defun pgw/org-agenda-reload-files ()
    (interactive)
-   (setq org-agenda-files (append (pgw/org-roam-get-todos)))))
+   (setq org-agenda-files (append (pgw/org-roam-get-todos "ab2c5980-0f5f-4d46-8ad3-8194f67ac39d")))))
 
 (work
  (setq org-agenda-files '())
 
  (defun pgw/org-agenda-reload-files ()
    (interactive)
-   (setq org-agenda-files (append (pgw/org-roam-get-todos)))))
+   (setq org-agenda-files (append (pgw/org-roam-get-todos "f376fe6c-fe4f-49b8-9be2-85e67a883e69")))))
 
 (pgw/org-agenda-reload-files)
 #+end_src
@@ -802,8 +822,9 @@ Custom commands, testing sorting strategy variable
 
 #+begin_src emacs-lisp
 (map! :map evil-org-agenda-mode-map
-      :leader "m m l" #'org-agenda-log-mode
-      :leader "m m r" 'pgw/org-agenda-reload-files)
+      :localleader "m m l" #'org-agenda-log-mode
+      :localleader "m m r" #'pgw/org-agenda-reload-files
+      :localleader "f s" #'org-save-all-org-buffers)
 #+end_src
 
 *** Babel
@@ -841,35 +862,34 @@ Custom commands, testing sorting strategy variable
 
 #+begin_src emacs-lisp
 (personal (setq org-directory "~/NextCloud/Documents/org"))
-(work (setq org-directory "~/NextCloud/Documents/org/notes/acacia"))
+(work (setq org-directory "~/NextCloud/projects/iterative_health"))
 #+end_src
 
 *** Crypt
 
 #+begin_src emacs-lisp
-(personal
- (use-package! org-crypt
-   :config
-   (org-crypt-use-before-save-magic)
-   (setq org-tags-exclude-from-inheritance (quote ("crypt")))
-  
-   (setq org-crypt-key "pierce.g.wang@gmail.com")
-   ;; GPG key to use for encryption
-   ;; Either the Key ID or set to nil to use symmetric encryption.
-  
-   (setq auto-save-default nil)
-   ;; Auto-saving does not cooperate with org-crypt.el: so you need
-   ;; to turn it off if you plan to use org-crypt.el quite often.
-   ;; Otherwise, you'll get an (annoying) message each time you
-   ;; start Org.
-  
-   ;; To turn it off only locally, you can insert this:
-   ;;
-   ;; # -*- buffer-auto-save-file-name: nil; -*-
-   (map! :leader
-         (:prefix-map ("k" . "org-crypt")
-          :desc "Org Encrypt Entry" "e" #'org-encrypt-entry
-          :desc "Org Decrypt Entry" "d" #'org-decrypt-entry))))
+(use-package! org-crypt
+  :config
+  (org-crypt-use-before-save-magic)
+  (setq org-tags-exclude-from-inheritance (quote ("crypt")))
+
+  (setq org-crypt-key "pierce.g.wang@gmail.com")
+  ;; GPG key to use for encryption
+  ;; Either the Key ID or set to nil to use symmetric encryption.
+
+  (setq auto-save-default nil)
+  ;; Auto-saving does not cooperate with org-crypt.el: so you need
+  ;; to turn it off if you plan to use org-crypt.el quite often.
+  ;; Otherwise, you'll get an (annoying) message each time you
+  ;; start Org.
+
+  ;; To turn it off only locally, you can insert this:
+  ;;
+  ;; # -*- buffer-auto-save-file-name: nil; -*-
+  (map! :leader
+        (:prefix-map ("k" . "org-crypt")
+         :desc "Org Encrypt Entry" "e" #'org-encrypt-entry
+         :desc "Org Decrypt Entry" "d" #'org-decrypt-entry)))
 #+end_src
 
 *** DOCT Org Capture Template
@@ -983,7 +1003,7 @@ Custom commands, testing sorting strategy variable
                                        "%U"))
                            ("Violin Repertoire" :keys "m"
                             :type entry
-                            :id "89641a25-2cab-4b04-8d36-75c77d4dc855"
+                            :id "e48fe999-3716-425b-8445-fce296c7635a"
                             :template ("* - %?"
                                        "%^{COMPOSER}p"
                                        "%^{ARRANGEMENT}p"
@@ -1041,7 +1061,8 @@ Custom commands, testing sorting strategy variable
 **** ODT
 
 #+begin_src emacs-lisp
-(setq org-odt-styles-file "~/.doom.d/odt/mla.ott")
+(setq org-odt-styles-file (concat doom-private-dir "odt/mla.ott"))
+;; (setq org-odt-styles-file nil)
 #+end_src
 
 *** Export Publishing
@@ -1099,7 +1120,7 @@ Custom commands, testing sorting strategy variable
   (setq org-format-latex-options
         ;; '(:foreground "#000000" :background default ;; light theme
         '(:foreground "#d6d6d4" :background default ;; dark tieme
-                      :scale 1.5
+                      :scale 1.7
                       :html-foreground "Black" :html-background "Transparent"
                       :html-scale 1.0
                       :matchers ("begin" "$1" "$" "$$" "\\(" "\\[")))
@@ -1204,6 +1225,14 @@ Update the `org-id-locations' global hash-table, and update the
          :desc "Remove ID Entry" "D" #'org-id-remove-entry))
 #+end_src
 
+*** Org Note
+
+#+begin_src emacs-lisp
+(map! (:map org-mode-map
+            :localleader
+            :desc "Add a note to the current entry." "z" #'org-add-note))
+#+end_src
+
 *** Org-mode Startup Buffers
 
 #+begin_src emacs-lisp
@@ -1240,6 +1269,11 @@ Related to
  (setq org-reveal-root "file:///Users/piercewang/Documents/projects/revealjs/reveal.js-4.1.0"))
 #+end_src
 
+*** org-mobile
+
+#+begin_src emacs-lisp
+(setq org-mobile-force-id-on-agenda-items nil)
+#+end_src
 
 *** Org Superstar (Bullets revamped)
 #+begin_src emacs-lisp
@@ -1289,6 +1323,8 @@ Related to
 #+begin_src emacs-lisp
 (setq org-tag-persistent-alist '(("noexport" . ?N))
       org-complete-tags-always-offer-all-agenda-tags nil)
+
+(setq org-tags-sort-function 'org-string-collate-lessp)
 #+end_src
 
 *** ​Todo keywords
@@ -1305,7 +1341,6 @@ Related to
   :config
   (setq org-download-screenshot-method "gnome-screenshot"))
 #+end_src
-
 ** org-roam
 
 #+begin_src emacs-lisp
@@ -1320,12 +1355,14 @@ Related to
       (org-roam-db-build-cache :force)
       (org-roam-buffer--update-maybe :redisplay))
     (setq org-roam-capture-templates
-          '(
-            ("d" "default" plain "%?" :target
+          '(("d" "default" plain "%?" :target
              (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n")
              :unnarrowed t)
             ("p" "person entry" plain (file "~/NextCloud/Documents/org-roam/people/templates/person.org")
-             :target (file "people/${slug}-%<%Y%m%d%H%M%S>.org") :unnarrowed t))))
+             :target (file "people/${slug}-%<%Y%m%d%H%M%S>.org") :unnarrowed t)))
+    (setq org-roam-dailies-capture-template
+          '(("d" "default" entry "* %?" :target
+             (file+head "%<%Y-%m-%d>.org" "#+title: %<%Y-%m-%d>\n")))))
 #+end_src
 
 ** Ditaa
@@ -1338,6 +1375,29 @@ Related to
 ** ~Darkroom~ for Writing
 #+begin_src emacs-lisp
 (use-package! darkroom)
+#+end_src
+
+** crdt-mode
+
+#+begin_src emacs-lisp
+(use-package! crdt
+  :config
+  (map! :leader
+        (:prefix-map ("c r" . "crdt")
+         (:prefix-map ("h" . "host")
+                      :desc "Share buffer" "s" #'crdt-share-buffer
+                      :desc "Stop session" "d" #'crdt-stop-session
+                      :desc "Kill user" "k" #'crdt-kill-user)
+         (:prefix-map ("c" . "client")
+                      :desc "Connect" "c" #'crdt-connect
+                      :desc "Disconnect" "d" #'crdt-disconnect
+                      :desc "List buffers" "b" #'crdt-list-buffers
+                      :desc "List sessions" "l" #'crdt-list-sessions
+                      :desc "List users" "u" #'crdt-list-users
+                      :desc "Go to user" "g" #'crdt-goto-user
+                      :desc "Switch to buffer" "<" #'crdt-switch-to-buffer)
+         :desc "Copy url for session" "C" #'crdt-copy-url))
+  (add-hook! 'forms-mode-hook 'evil-emacs-state))
 #+end_src
 
 ** Company mode
@@ -1444,18 +1504,36 @@ Disable automatic completion from company--slows everything down a bit.
 
 ** Backups
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
 (setq backup-directory-alist '(("." . "~/NextCloud/Documents/backup"))
   backup-by-copying t    ; Don't delink hardlinks
   version-control t      ; Use version numbers on backups
   delete-old-versions t  ; Automatically delete excess backups
   kept-new-versions 15   ; how many of the newest versions to keep
   kept-old-versions 5    ; and how many of the old
-  make-backup-files t    ; Use backups
+  make-backup-files nil    ; Use backups
   vc-make-backup-files t ; Make it under vc too
 )
 #+end_src
 
+#+begin_src emacs-lisp
+(let ((backup-dir "~/tmp/emacs/backups")
+      (auto-saves-dir "~/tmp/emacs/auto-saves/"))
+  (dolist (dir (list backup-dir auto-saves-dir))
+    (when (not (file-directory-p dir))
+      (make-directory dir t)))
+  (setq backup-directory-alist `(("." . ,backup-dir))
+        auto-save-file-name-transforms `((".*" ,auto-saves-dir t))
+        auto-save-list-file-prefix (concat auto-saves-dir ".saves-")
+        tramp-backup-directory-alist `((".*" . ,backup-dir))
+        tramp-auto-save-directory auto-saves-dir))
+
+(setq backup-by-copying t    ; Don't delink hardlinks
+      delete-old-versions t  ; Clean up the backups
+      version-control t      ; Use version numbers on backups,
+      kept-new-versions 5    ; keep some new versions
+      kept-old-versions 2)   ; and some old ones, too
+#+end_src
 ** Daemon
 #+begin_src emacs-lisp
   ;;(if 'server-process
@@ -1715,7 +1793,7 @@ CLOSED: [2020-11-24 Tue 00:50]
 #+begin_src emacs-lisp
 (setq delete-by-moving-to-trash t)
 (setq dired-use-ls-dired t)
-(cond ((eq system-type 'darwin) (setq insert-directory-program "/opt/homebrew/Cellar/coreutils/9.1/bin/gls"
+(cond ((eq system-type 'darwin) (setq insert-directory-program "/opt/homebrew/bin/gls"
                                       trash-directory "~/.Trash"))
       ((eq system-type 'gnu/linux) (setq insert-directory-program "/usr/bin/ls"
                                          trash-directory "~/.local/share/Trash/files/")))
@@ -2222,7 +2300,9 @@ See [[https://github.com/piercegwang/ohsics_to_org][https://github.com/piercegwa
  (defun pgw/sync-canvas-cal ()
    (interactive)
    (start-process-shell-command "Running syncgcal.sh" nil "bash ~/Documents/org_canvas_parser/syncgcal.sh"))
- (map! :leader "d o" #'pgw/sync-canvas-cal))
+ (after! org-gcal
+   (map! :leader "d o" #'pgw/sync-canvas-cal)))
+
 #+end_src
 
 ** ~vterm~
@@ -2232,14 +2312,31 @@ See [[https://github.com/piercegwang/ohsics_to_org][https://github.com/piercegwa
   (add-hook! vterm-mode
              (evil-emacs-state 1))
   (add-to-list 'vterm-tramp-shells '("sshx" "/bin/bash"))
-  (setq vterm-shell "bash"))
+  (personal
+   (setq vterm-shell "bash"))
+  (work
+   (setq vterm-shell "zsh")))
 #+end_src
 
 ** Languages
 
+#+begin_src emacs-lisp :tangle no
+(use-package lsp-mode
+  :hook ((rust-mode . lsp-deferred))
+  ;; :commands (lsp lsp-deferred)
+  ;; :config
+  ;; (progn
+  ;;   (lsp-register-client
+  ;;    (make-lsp-client :new-connection (lsp-tramp-connection "clangd-13")
+  ;;                     :major-modes '(c-mode c++-mode)
+  ;;                     :remote? t
+  ;;                     :server-id 'clangd-remote)))
+  )
+#+end_src
+
 *** Python
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
 (add-hook! python-mode
              (add-to-list 'python-shell-completion-native-disabled-interpreters "python3"))
 
@@ -2365,9 +2462,9 @@ jUuAtck0HKM=
 ** Polymode
 
 #+begin_src emacs-lisp
-(use-package! polymode)
-(use-package! poly-markdown)
-(use-package! poly-R)
+;;(use-package! polymode)
+;;(use-package! poly-markdown)
+;;(use-package! poly-R)
 #+end_src
 
 * Doom Modules
@@ -2460,7 +2557,7 @@ doom-quit         ; DOOM quit-message prompts when you quit Emacs
 hl-todo           ; highlight TODO/FIXME/NOTE/DEPRECATED/HACK/REVIEW
 ;;hydra
 ;;indent-guides     ; highlighted indent columns
-ligatures         ; ligatures and symbols to make your code pretty again
+;;ligatures         ; ligatures and symbols to make your code pretty again
 ;;minimap           ; show a map of the code on the side
 modeline          ; snazzy, Atom-inspired modeline, plus API
 ;;nav-flash         ; blink cursor line after big motions
@@ -2514,7 +2611,7 @@ vterm             ; the best terminal emulation in Emacs
 #+begin_src emacs-lisp
 syntax              ; tasing you for every semicolon you forget
 (spell +flyspell) ; tasing you for misspelling mispelling
-grammar           ; tasing grammar mistake every you make
+;;grammar           ; tasing grammar mistake every you make
 #+end_src
 
 #+name: doom-tools
@@ -2561,9 +2658,9 @@ pdf               ; pdf enhancements
 ;;(dart +flutter)   ; paint ui and not much else
 ;;elixir            ; erlang done right
 ;;elm               ; care for a cup of TEA?
-emacs-lisp        ; drown in parentheses
+;;emacs-lisp        ; drown in parentheses
 ;;erlang            ; an elegant language for a more civilized age
-ess               ; emacs speaks statistics
+;;ess               ; emacs speaks statistics
 ;;factor
 ;;faust             ; dsp, but you get to keep your soul
 ;;fsharp            ; ML stands for Microsoft's Language
@@ -2575,7 +2672,7 @@ ess               ; emacs speaks statistics
 ;;idris             ; a language you can depend on
 ;;json              ; At least it ain't XML
 ;;(java +meghanada) ; the poster child for carpal tunnel syndrome
-javascript        ; all(hope(abandon(ye(who(enter(here))))))
+;;javascript        ; all(hope(abandon(ye(who(enter(here))))))
 ;;julia             ; a better, faster MATLAB
 ;;kotlin            ; a better, slicker Java(Script)
 (latex             ; writing papers in Emacs has never been so fun
@@ -2591,7 +2688,7 @@ markdown          ; writing docs for people to ignore
 ;;php               ; perl's insecure younger brother
 ;;plantuml          ; diagrams for confusing people more
 ;;purescript        ; javascript, but functional
-(python +lsp)            ; beautiful is better than ugly
+(python)            ; beautiful is better than ugly
 ;;qt                ; the 'cutest' gui framework ever
 ;;racket            ; a DSL for DSLs
 ;;raku              ; the artist formerly known as perl6
@@ -2620,7 +2717,7 @@ sh                ; she sells {ba,z,fi}sh shells on the C xor
 
 #+name: doom-app
 #+begin_src emacs-lisp
-calendar
+;;calendar
 ;;emms
 ;;everywhere        ; *leave* Emacs!? You must be joking
 ;;irc               ; how neckbeards socialize
@@ -2719,9 +2816,9 @@ Everything in this section gets "tangled" into the ~packages.el~ file which allo
   (package! exec-path-from-shell))
 (package! nov)
 ;;(package! ess)
-(package! polymode)
-(package! poly-markdown)
-(package! poly-R)
+;;(package! polymode)
+;;(package! poly-markdown)
+;;(package! poly-R)
 (package! dap-mode)
 (package! org-contrib
   :recipe (:host nil
@@ -2735,4 +2832,5 @@ Everything in this section gets "tangled" into the ~packages.el~ file which allo
            :repo "piercegwang/mu"
            :branch "master"))
 (package! org-download)
+(package! crdt)
 #+end_src
