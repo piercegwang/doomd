@@ -515,6 +515,60 @@ https://stackoverflow.com/questions/2540997/create-more-than-one-eshell-instance
             (org-roam-node-from-id backlink-id) :unique t))))
 #+end_src
 
+*** Parse Org Roam Title for Person
+
+#+begin_src emacs-lisp
+(defun pgw/roam-parse-person-into-last-name (roam-node)
+  (let ((title (org-roam-node-title roam-node)))
+    (car (split-string title ", "))))
+
+(defun pgw/roam-parse-person-into-first-name (roam-node)
+  (let ((title (org-roam-node-title roam-node))
+        (first-half)
+        (first-name))
+    (setq first-half (car (cdr (split-string title ", "))))
+    (setq first-name (car (split-string first-half " ")))
+    first-name))
+
+(defun pgw/roam-parse-person-into-middle-name (roam-node)
+  (let ((title (org-roam-node-title roam-node))
+        (first-half)
+        (first-name))
+    (setq first-half (car (cdr (split-string title ", "))))
+    (setq middle-name (string-trim-left first-half ".+ "))
+    middle-name))
+
+#+end_src
+
+*** python: snippet-split-args
+#+begin_src emacs-lisp
+(defun pgw/python-snippet-split-args (arg-string)
+  "Split the python argument string ARG-STRING into a tuple of argument names."
+  (let ((snippet-split-arg-arg-regex "\\([[:alnum:]_*]+\\)\\(:[[:blank:]]*[[:alpha:]]*\\)?\\([[:blank:]]*=[[:blank:]]*[[:alnum:]]*\\)?")
+        (snippet-split-arg-separator "[[:blank:]]*,[[:blank:]]*"))
+    (mapcar (lambda (x)
+              (when (string-match snippet-split-arg-arg-regex x)
+                (match-string-no-properties 1 x)))
+            (split-string arg-string snippet-split-arg-separator t))))
+#+end_src
+
+*** python: create docstring from split args
+#+begin_src emacs-lisp
+(defun pgw/python-create-docstring (arg-string)
+  "Split the python argument string ARG-STRING into a tuple of argument names."
+  (let ((split-string (pgw/python-snippet-split-args arg-string))
+        (output-string ""))
+    (dolist (element split-string output-string)
+      (if (string= output-string "")
+          (setq output-string (concat ":param " element ":"))
+        (setq output-string (concat output-string "\n:param " element ":"))))
+    output-string))
+#+end_src
+
+#+begin_src emacs-lisp
+(cons 2 (cons 1 nil))
+#+end_src
+
 ** Visuals
 
 #+begin_src emacs-lisp
@@ -1359,6 +1413,8 @@ Related to
              (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n")
              :unnarrowed t)
             ("p" "person entry" plain (file "~/NextCloud/Documents/org-roam/people/templates/person.org")
+             :target (file "people/${slug}-%<%Y%m%d%H%M%S>.org") :unnarrowed t)
+            ("o" "organization entry" plain (file "~/NextCloud/Documents/org-roam/people/templates/organization.org")
              :target (file "people/${slug}-%<%Y%m%d%H%M%S>.org") :unnarrowed t)))
     (setq org-roam-dailies-capture-template
           '(("d" "default" entry "* %?" :target
