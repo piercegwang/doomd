@@ -536,7 +536,9 @@ https://stackoverflow.com/questions/2540997/create-more-than-one-eshell-instance
         (first-name))
     (setq first-half (car (cdr (split-string title ", "))))
     (setq middle-name (string-trim-left first-half ".+ "))
-    middle-name))
+    (if (string= middle-name first-half)
+        ""
+      middle-name)))
 
 #+end_src
 
