@@ -4,4 +4,10 @@
 # group: Definitions
 # --
 def ${1:methodname}(self, ${2:arg}):
-    ${3:pass}
+    \"\"\"Documentation for $1
+
+    ${2:$(pgw/python-create-docstring yas-text)}
+    :returns: $3
+    :raises keyError: $4
+    \"\"\"
+    ${5:pass}

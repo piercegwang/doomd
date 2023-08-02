@@ -74,7 +74,7 @@ All configurations here get "tangled" into the main ~config.el~ file.
 
 ** Doom fonts
 
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle no
 (setq doom-font (font-spec :family "Source Code Pro" :size 18))
 (setq doom-unicode-font (font-spec :family "Source Han Serif SC")
       doom-big-font (font-spec :family "Ubuntu Mono" :size 26)
@@ -153,7 +153,7 @@ by Tmux's use of =C-b SPC= to rotate windows.
 
 We could also do with adding the missing arrow-key variants of the window
 navigation/swapping commands.
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
 (map! :map evil-window-map
       "SPC" #'rotate-layout
       ;; Navigation
@@ -176,7 +176,6 @@ navigation/swapping commands.
 
 ** Bookmarks
 #+begin_src emacs-lisp
-  (global-set-key (kbd "C-x r D") 'bookmark-delete)
   (setq bookmark-default-file (concat doom-private-dir "bookmarks/"))
 #+end_src
 
@@ -306,12 +305,6 @@ I copied mixed-pitch.el from [[https://gitlab.com/jabranham/mixed-pitch/][this]]
   (setq tab-bar-show nil)
 #+end_src
 
-*** Tab Switching Keybinds                                       :keybinds:
-#+begin_src emacs-lisp
-  (global-set-key (kbd "s-{") (lambda () (interactive) (tab-next -1)))
-  (global-set-key (kbd "s-}") (lambda () (interactive) (tab-next 1)))
-#+end_src
-
 ** Custom Functions
 *** append-to-list
 #+begin_src emacs-lisp
@@ -349,8 +342,8 @@ I copied mixed-pitch.el from [[https://gitlab.com/jabranham/mixed-pitch/][this]]
     (replace-match (number-to-string (1- (string-to-number (match-string 0))))))
 
   ;;; Binding
-  (global-set-key (kbd "C-; C-=") 'increment-number-at-point)
-  (global-set-key (kbd "C-; C--") 'decrement-number-at-point)
+  ;; (global-set-key (kbd "C-; C-=") 'increment-number-at-point)
+  ;; (global-set-key (kbd "C-; C--") 'decrement-number-at-point)
 #+end_src
 
 *** Insert Directory (obsolete?)
@@ -445,8 +438,7 @@ I copied mixed-pitch.el from [[https://gitlab.com/jabranham/mixed-pitch/][this]]
       (let ((word (read-from-minibuffer "Word query: ")))
         (call-process "open" nil nil nil (concat "dict://" word)))
       )
-    (global-set-key (kbd "M-#") 'pgw/lookup-dictionary)
-    )
+    (global-set-key (kbd "M-#") 'pgw/lookup-dictionary))
 #+end_src
 
 *** Test network (internet-up-p)
@@ -467,8 +459,6 @@ Test if network is up and running
                      (org-element-property :path context)
                    nil)))
       (if link (kill-new (concat (org-element-property :type context) ":" link)))))
-
-  (global-set-key (kbd "C-c s-l") 'pgw/org-get-link-at-point)
 #+end_src
 
 *** Make-shell
@@ -518,28 +508,28 @@ https://stackoverflow.com/questions/2540997/create-more-than-one-eshell-instance
 *** Parse Org Roam Title for Person
 
 #+begin_src emacs-lisp
-(defun pgw/roam-parse-person-into-last-name (roam-node)
-  (let ((title (org-roam-node-title roam-node)))
-    (car (split-string title ", "))))
+(after! org-roam
+  (defun pgw/roam-parse-person-into-last-name (roam-node)
+    (let ((title (org-roam-node-title roam-node)))
+      (car (split-string title ", "))))
 
-(defun pgw/roam-parse-person-into-first-name (roam-node)
-  (let ((title (org-roam-node-title roam-node))
-        (first-half)
-        (first-name))
-    (setq first-half (car (cdr (split-string title ", "))))
-    (setq first-name (car (split-string first-half " ")))
-    first-name))
+  (defun pgw/roam-parse-person-into-first-name (roam-node)
+    (let ((title (org-roam-node-title roam-node))
+          (first-half)
+          (first-name))
+      (setq first-half (car (cdr (split-string title ", "))))
+      (setq first-name (car (split-string first-half " ")))
+      first-name))
 
-(defun pgw/roam-parse-person-into-middle-name (roam-node)
-  (let ((title (org-roam-node-title roam-node))
-        (first-half)
-        (first-name))
-    (setq first-half (car (cdr (split-string title ", "))))
-    (setq middle-name (string-trim-left first-half ".+ "))
-    (if (string= middle-name first-half)
-        ""
-      middle-name)))
-
+  (defun pgw/roam-parse-person-into-middle-name (roam-node)
+    (let ((title (org-roam-node-title roam-node))
+          (first-half)
+          (first-name))
+      (setq first-half (car (cdr (split-string title ", "))))
+      (setq middle-name (string-trim-left first-half ".+ "))
+      (if (string= middle-name first-half)
+          ""
+        middle-name))))
 #+end_src
 
 *** python: snippet-split-args
@@ -573,42 +563,6 @@ https://stackoverflow.com/questions/2540997/create-more-than-one-eshell-instance
 
 ** Visuals
 
-#+begin_src emacs-lisp
-  ;(load-theme 'tango-dark t)
-  ;; (load-theme 'monokai)
-  ;; ;
-  ;; Frame
-  (add-to-list 'default-frame-alist '(height . 46))
-  (add-to-list 'default-frame-alist '(width . 146))
-
-  ;; (add-to-list 'default-frame-alist '(ns-transparent-titlebar . t))
-  (add-to-list 'default-frame-alist '(ns-appearance . dark)) ;; assuming you are using a dark theme
-  ;; (setq ns-use-proxy-icon nil)
-  ;; (setq frame-title-format nil)
-  (menu-bar-mode -1)
-  (tool-bar-mode -1)
-  (scroll-bar-mode -1)
-
-  (setq visual-line-fringe-indicators '(left-curly-arrow hollow-square)) ;; '(left-curly-arrow right-curly-arrow) for both left and right
-  ;; Testing freetonik's fringe indicator alist
-  (setq-default fringe-indicator-alist '((truncation left-arrow right-arrow)
-   (continuation nil right-arrow)
-   (overlay-arrow . right-triangle)
-   (up . up-arrow)
-   (down . down-arrow)
-   (top top-left-angle top-right-angle)
-   (bottom bottom-left-angle bottom-right-angle top-right-angle top-left-angle)
-   (top-bottom left-bracket right-bracket top-right-angle top-left-angle)
-   (empty-line . empty-line)
-   (unknown . question-mark)))
-
-#+end_src
-
-*** All the Icons
-#+begin_src emacs-lisp
-  (use-package! all-the-icons)
-#+end_src
-
 *** Doom Theme
 Favorite themes:
 
@@ -636,10 +590,10 @@ Light themes:
     ;; Load the theme (doom-one, doom-molokai, etc); keep in mind that each theme
     ;; may have their own settings.
     ;; (load-theme 'doom-badger t)
-    (load-theme 'doom-1337 t)
+    ;; (load-theme 'doom-1337 t)
     ;; (load-theme 'doom-material-dark t)
     ;; (load-theme 'doom-outrun-electric t)
-    ;; (load-theme 'doom-acario-dark t)
+    (load-theme 'doom-acario-dark t)
     ;; (load-theme 'doom-challenger-deep t)
     ;; (load-theme 'doom-snazzy t)
     ;; (load-theme 'doom-solarized-dark t)
@@ -688,10 +642,10 @@ Make Emacs play nice with my window manager and resizing around other windows.
 *** Line Numbers
 
 #+begin_src emacs-lisp
-  ;; (global-visual-line-mode t)
-  (setq display-line-numbers-type 'visual)
-  ;; (setq-default display-line-numbers 'visual)
-  (set-default 'truncate-lines t)
+;; (global-visual-line-mode t)
+(setq display-line-numbers-type 'visual)
+;; (setq-default display-line-numbers 'visual)
+(set-default 'truncate-lines t)
 #+end_src
 
 ** Windows, Frames, and Workspaces
@@ -1400,27 +1354,27 @@ Related to
 ** org-roam
 
 #+begin_src emacs-lisp
-  (use-package! org-roam
-    :hook (after-init . org-roam-mode)
-    :config
-    (setq org-roam-directory "~/NextCloud/Documents/org-roam/"
-          org-roam-db-location "~/NextCloud/Documents/org-roam.db"
-          org-roam-db-update-on-save t)
-    (defun pgw/org-roam-refresh ()
-      (interactive)
-      (org-roam-db-build-cache :force)
-      (org-roam-buffer--update-maybe :redisplay))
-    (setq org-roam-capture-templates
-          '(("d" "default" plain "%?" :target
-             (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n")
-             :unnarrowed t)
-            ("p" "person entry" plain (file "~/NextCloud/Documents/org-roam/people/templates/person.org")
-             :target (file "people/${slug}-%<%Y%m%d%H%M%S>.org") :unnarrowed t)
-            ("o" "organization entry" plain (file "~/NextCloud/Documents/org-roam/people/templates/organization.org")
-             :target (file "people/${slug}-%<%Y%m%d%H%M%S>.org") :unnarrowed t)))
-    (setq org-roam-dailies-capture-template
-          '(("d" "default" entry "* %?" :target
-             (file+head "%<%Y-%m-%d>.org" "#+title: %<%Y-%m-%d>\n")))))
+(use-package! org-roam
+  :hook (after-init . org-roam-mode)
+  :config
+  (setq org-roam-directory "~/NextCloud/Documents/org-roam/"
+        org-roam-db-location "~/NextCloud/Documents/org-roam.db"
+        org-roam-db-update-on-save t)
+  (defun pgw/org-roam-refresh ()
+    (interactive)
+    (org-roam-db-build-cache :force)
+    (org-roam-buffer--update-maybe :redisplay))
+  (setq org-roam-capture-templates
+        '(("d" "default" plain "%?" :target
+           (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n")
+           :unnarrowed t)
+          ("p" "person entry" plain (file "~/NextCloud/Documents/org-roam/people/templates/person.org")
+           :target (file "people/${slug}-%<%Y%m%d%H%M%S>.org") :unnarrowed t)
+          ("o" "organization entry" plain (file "~/NextCloud/Documents/org-roam/people/templates/organization.org")
+           :target (file "people/${slug}-%<%Y%m%d%H%M%S>.org") :unnarrowed t)))
+  (setq org-roam-dailies-capture-template
+        '(("d" "default" entry "* %?" :target
+           (file+head "%<%Y-%m-%d>.org" "#+title: %<%Y-%m-%d>\n")))))
 #+end_src
 
 ** Ditaa
@@ -1553,13 +1507,6 @@ Disable automatic completion from company--slows everything down a bit.
 ;; (setq shell-file-name "/opt/homebrew/bin/fish")
 #+end_src
 
-** Magit
-#+begin_src emacs-lisp
-  (use-package! magit
-    :config
-    (global-set-key (kbd "C-x g") 'magit-status))
-#+end_src
-
 ** Backups
 
 #+begin_src emacs-lisp :tangle no
@@ -1570,8 +1517,7 @@ Disable automatic completion from company--slows everything down a bit.
   kept-new-versions 15   ; how many of the newest versions to keep
   kept-old-versions 5    ; and how many of the old
   make-backup-files nil    ; Use backups
-  vc-make-backup-files t ; Make it under vc too
-)
+  vc-make-backup-files t) ; Make it under vc too
 #+end_src
 
 #+begin_src emacs-lisp
@@ -1737,116 +1683,6 @@ Insert Org-mode Image
        user-mail-address "pierce.g.wang@gmail.com"))
 #+end_src
 
-** Buffer Mangement
-
-*** DISABLED IBuffer
-CLOSED: [2020-11-24 Tue 00:50]
-#+begin_src emacs-lisp :tangle no
-  (use-package! ibuffer
-    :config
-    (global-set-key (kbd "C-x C-b") 'ibuffer))
-  (setq ibuffer-saved-filter-groups
-        '(("default"
-           ("emacs-config" (or (filename . "/.emacs.d/")
-                               (filename . ".emacs.d/init.el")))
-           ("OHS" (filename . "/Google Drive/OHS/"))
-           ("Org" (filename . "/NextCloud/Documents/org/"))
-           ("planner" (or
-                      (name . "\*Calendar\*")
-                      (name . "\*Org Agenda\*")
-                      (name . "^diary$")))
-           ;; ("Helm" (name . "\*helm.*"))
-           ("Magit" (mode . Magit))
-           ("ERC" (mode . erc-mode))
-           ("Help" (or (name . "\*Help\*")
-                       (name . "\*info\*")
-                       (name . "\*GNU Emacs\*"))))))
-
-  (add-hook! 'ibuffer-mode-hook
-            (lambda ()
-              (ibuffer-switch-to-saved-filter-groups "default")))
-  (define-key ibuffer-mode-map (kbd "P") nil)
-#+end_src
-
-*** DISABLED Bufler - Alphapapa
-
-#+begin_src emacs-lisp :tangle no
-  (use-package! bufler
-    :bind (("C-x C-b" . bufler))
-           ;; ("C-x b" . bufler-switch-buffer))
-    :config
-    (setf bufler-groups
-          (bufler-defgroups
-            (group
-             ;; Subgroup collecting all named workspaces.
-             (auto-workspace))
-            (group
-             ;; Subgroup collecting all `help-mode' and `info-mode' buffers.
-             (group-or "*Help/Info*"
-                       (mode-match "*Help*" (rx bos "help-"))
-                       (mode-match "*Info*" (rx bos "info-"))))
-            (group
-             ;; Subgroup collecting all special buffers (i.e. ones that are not
-             ;; file-backed), except `magit-status-mode' buffers (which are allowed to fall
-             ;; through to other groups, so they end up grouped with their project buffers).
-             (group-and "*Special*"
-                        (lambda (buffer)
-                          (unless (or (funcall (mode-match "Magit" (rx bos "magit-status"))
-                                               buffer)
-                                      (funcall (mode-match "Dired" (rx bos "dired"))
-                                               buffer)
-                                      (funcall (auto-file) buffer))
-                            "*Special*")))
-             (group
-              ;; Subgroup collecting these "special special" buffers
-              ;; separately for convenience.
-              (name-match "**Special**"
-                          (rx bos "*" (or "Messages" "Warnings" "scratch" "Backtrace") "*")))
-             (group
-              ;; Subgroup collecting all other Magit buffers, grouped by directory.
-              (mode-match "*Magit* (non-status)" (rx bos (or "magit" "forge") "-"))
-              (auto-directory))
-             ;; Remaining special buffers are grouped automatically by mode.
-             (auto-mode))
-            ;; All buffers under "~/.emacs.d" (or wherever it is).
-            (dir doom-emacs-dir)
-            (group
-             ;; Subgroup collecting buffers in `org-directory' (or "~/org" if
-             ;; `org-directory' is not yet defined).
-             (dir (if (bound-and-true-p org-directory)
-                      org-directory
-                    "~/org"))
-             (dir "~/NextCloud/Documents/org/notes/")
-             (dir "~/NextCloud/Documents/org/notes/college/essays/" 1)
-             (group
-              ;; Subgroup collecting indirect Org buffers, grouping them by file.
-              ;; This is very useful when used with `org-tree-to-indirect-buffer'.
-              (auto-indirect)
-              (auto-file))
-             ;; Group remaining buffers by whether they're file backed, then by mode.
-             (group-not "*special*" (auto-file))
-             (auto-mode))
-            (group
-             ;; Subgroup for OHS things
-             (dir "~/Google Drive/OHS/")
-             (dir "~/Google Drive/OHS/12th Grade/Classes/" 1)
-             (dir "~/Google Drive/OHS/11th Grade/" 2)
-             ;; Group remaining buffers by whether they're file backed, then by mode.
-             (group-not "*special*" (auto-file))
-             (auto-mode))
-            (dir "/Volumes/" 1)
-            (group
-             ;; Subgroup collecting buffers in a projectile project.
-             (auto-projectile))
-            (group
-             ;; Subgroup collecting buffers in a version-control project,
-             ;; grouping them by directory.
-             (auto-project))
-            ;; Group remaining buffers by directory, then major mode.
-            (auto-directory)
-            (auto-mode))))
-#+end_src
-
 ** Dired
 #+begin_src emacs-lisp
 (setq delete-by-moving-to-trash t)
@@ -1864,25 +1700,26 @@ Make moving files easier between two split buffers.
 
 Remove print option to not accidentally print
 #+begin_src emacs-lisp
-  (define-key dired-mode-map (kbd "P") nil)
+  ;; (define-key dired-mode-map (kbd "P") nil)
 #+end_src
 
 Custom dired open file function
 #+begin_src emacs-lisp
-  (define-key dired-mode-map (kbd "O") 'pgw/dired-open-file)
+  ;; (define-key dired-mode-map (kbd "O") 'pgw/dired-open-file)
 #+end_src
 
 Symlinking
 #+begin_src emacs-lisp
-  (define-key dired-mode-map (kbd "Y") 'dired-do-symlink)
+  ;; (define-key dired-mode-map (kbd "Y") 'dired-do-symlink)
 #+end_src
 
 Move
 
 *** Human readable format for ls switches (=-h=)
 #+begin_src emacs-lisp
+(after! dired
   (setq dired-listing-switches "-alh")
-  (setq dired-actual-switches "-alh")
+  (setq dired-actual-switches "-alh"))
 #+end_src
 
 
@@ -2180,15 +2017,13 @@ The identified problem was that in general, for class schedules, I've used a rep
 
 #+begin_src emacs-lisp :results silent
 (personal
-(defun pgw/date-block (absolute y1 m1 d1 y2 m2 d2)
-  "Block date entry. An adapted version of the `diary-block'
+ (defun pgw/date-block (absolute y1 m1 d1 y2 m2 d2)
+   "Block date entry. An adapted version of the `diary-block'
 function from the diary-lib."
-  (let ((date1 (calendar-absolute-from-gregorian
-                (diary-make-date y1 m1 d1)))
-        (date2 (calendar-absolute-from-gregorian
-                (diary-make-date y2 m2 d2)))
-        (d absolute))
-    (and (<= date1 d) (<= d date2))))
+   (let ((date1 (calendar-absolute-from-gregorian (diary-make-date y1 m1 d1)))
+         (date2 (calendar-absolute-from-gregorian (diary-make-date y2 m2 d2)))
+         (d absolute))
+     (and (<= date1 d) (<= d date2))))
 
 (defun pgw/date-date (absolute year month day)
   "Check for equality of date"
@@ -2320,7 +2155,6 @@ unless custom-dates is specified"
 #+end_src
 
 
-
 Example usage (run in a dedicated file)
 #+begin_src emacs-lisp :tangle no
   (pgw/create-entry "COMSW3134_001_2021_3" '(1) '(1 3) '("14:40-15:55" "14:40-15:55") "417 Int'l Affair")
@@ -2394,18 +2228,14 @@ See [[https://github.com/piercegwang/ohsics_to_org][https://github.com/piercegwa
 
 *** Python
 
-#+begin_src emacs-lisp :tangle no
-(add-hook! python-mode
-             (add-to-list 'python-shell-completion-native-disabled-interpreters "python3"))
-
-#+end_src
-
-#+begin_src emacs-lisp :tangle no
-(use-package! lsp-pyright
-  :ensure t
-  :hook (python-mode . (lambda ()
-                          (require 'lsp-pyright)
-                          (lsp))))  ; or lsp-deferred
+#+begin_src emacs-lisp :tangle yes
+(use-package! elpy
+  :config
+  (elpy-enable)
+  (after! py-autopep8 (add-hook! 'elpy-mood-hook 'py-autopep8-enable-on-save))
+  (add-hook! 'elpy-mode-hook 'flycheck-mode)
+  (setq flycheck-python-flake8-executable "flake8")
+  (setq flycheck-flake8-maximum-line-length 120))
 #+end_src
 
 *** Rust
@@ -2603,6 +2433,7 @@ company           ; the ultimate code completion backend
 ;;helm              ; the *other* search engine for love and life
 ;;ido               ; the other *other* search engine...
 ivy               ; a search engine for love and life
+;;vertico
 #+end_src
 
 #+name: doom-ui
@@ -2610,7 +2441,7 @@ ivy               ; a search engine for love and life
 ;;deft              ; notational velocity for Emacs
 doom              ; what makes DOOM look the way it does
 doom-dashboard    ; a nifty splash screen for Emacs
-doom-quit         ; DOOM quit-message prompts when you quit Emacs
+;;doom-quit         ; DOOM quit-message prompts when you quit Emacs
 ;;(emoji +unicode)  ; 🙂
 hl-todo           ; highlight TODO/FIXME/NOTE/DEPRECATED/HACK/REVIEW
 ;;hydra
@@ -2625,7 +2456,7 @@ ophints           ; highlight the region an operation acts on
 ;;tabs              ; a tab bar for Emacs
 ;;treemacs          ; a project drawer, like neotree but cooler
 ;;unicode           ; extended unicode support for various languages
-vc-gutter         ; vcs diff in the fringe
+(vc-gutter +pretty)        ; vcs diff in the fringe
 vi-tilde-fringe   ; fringe tildes to mark beyond EOB
 ;;window-select     ; visually switch windows
 workspaces        ; tab emulation, persistence & separate workspaces
@@ -2652,7 +2483,7 @@ snippets          ; my elves. They type so I don't have to
 #+begin_src emacs-lisp
 dired             ; making dired pretty [functional]
 electric          ; smarter, keyword-based electric-indent
-;; ibuffer         ; interactive buffer management
+;;ibuffer         ; interactive buffer management
 undo              ; persistent, smarter undo for your inevitable mistakes
 vc                ; version-control and Emacs, sitting in a tree
 #+end_src
@@ -2668,13 +2499,14 @@ vterm             ; the best terminal emulation in Emacs
 #+name: doom-checkers
 #+begin_src emacs-lisp
 syntax              ; tasing you for every semicolon you forget
-(spell +flyspell) ; tasing you for misspelling mispelling
+;;(spell +flyspell) ; tasing you for misspelling mispelling
 ;;grammar           ; tasing grammar mistake every you make
 #+end_src
 
 #+name: doom-tools
 #+begin_src emacs-lisp
 ;;ansible
+;;biblio
 ;;debugger          ; FIXME stepping through code, to help you add bugs
 ;;direnv
 ;;docker
@@ -2682,8 +2514,8 @@ syntax              ; tasing you for every semicolon you forget
 ;;ein               ; tame Jupyter notebooks with emacs
 (eval +overlay)     ; run code, run (also, repls)
 ;;gist              ; interacting with github gists
-;; lookup              ; navigate your code and its documentation
-lsp               ; M-x vscode
+lookup              ; navigate your code and its documentation
+;;lsp               ; M-x vscode
 magit             ; a git porcelain for Emacs
 ;;make              ; run make tasks from Emacs
 ;;pass              ; password manager for nerds
@@ -2693,6 +2525,7 @@ pdf               ; pdf enhancements
 ;;taskrunner        ; taskrunner for all your projects
 ;;terraform         ; infrastructure as code
 ;;tmux              ; an API for interacting with tmux
+;;tree-sitter       ; syntax and parsing, sitting in a tree...
 ;;upload            ; map local to remote projects via ssh/ftp
 #+end_src
 
@@ -2716,8 +2549,8 @@ pdf               ; pdf enhancements
 ;;(dart +flutter)   ; paint ui and not much else
 ;;elixir            ; erlang done right
 ;;elm               ; care for a cup of TEA?
-;;emacs-lisp        ; drown in parentheses
-;;erlang            ; an elegant language for a more civilized age
+emacs-lisp        ; drown in parentheses
+;; erlang            ; an elegant language for a more civilized age
 ;;ess               ; emacs speaks statistics
 ;;factor
 ;;faust             ; dsp, but you get to keep your soul
@@ -2746,14 +2579,14 @@ markdown          ; writing docs for people to ignore
 ;;php               ; perl's insecure younger brother
 ;;plantuml          ; diagrams for confusing people more
 ;;purescript        ; javascript, but functional
-(python)            ; beautiful is better than ugly
+;;(python)            ; beautiful is better than ugly
 ;;qt                ; the 'cutest' gui framework ever
 ;;racket            ; a DSL for DSLs
 ;;raku              ; the artist formerly known as perl6
 ;;rest              ; Emacs as a REST client
 ;;rst               ; ReST in peace
 ;;(ruby +rails)     ; 1.step {|i| p "Ruby is #{i.even? ? 'love' : 'life'}"}
-(rust +lsp)       ; Fe2O3.unwrap().unwrap().unwrap().unwrap()
+;;(rust +lsp)       ; Fe2O3.unwrap().unwrap().unwrap().unwrap()
 ;;scala             ; java, but good
 ;;(scheme +guile)   ; a fully conniving family of lisps
 sh                ; she sells {ba,z,fi}sh shells on the C xor
@@ -2891,4 +2724,10 @@ Everything in this section gets "tangled" into the ~packages.el~ file which allo
            :branch "master"))
 (package! org-download)
 (package! crdt)
+(package! elpy)
+(package! py-autopep8)
+(package! blacken)
+(package! py-isort)
+(package! org
+  :pin "ca873f7")
 #+end_src

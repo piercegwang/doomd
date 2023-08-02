@@ -1,10 +1,12 @@
 # -*- mode: snippet -*-
 # name: Python Docstring
-# key: """
+# key: rdoc
 # --
-"""Documentation for $1
+\"\"\"
+Documentation for $1$0
 
-Args: $2$0
-${2:$(elpy-snippet-docstring-assignments yas-text)}
+Args: $2
+${2:$(pgw/python-create-docstring yas-text)}
 :returns: $3
 :raises keyError: $4
+\"\"\"
