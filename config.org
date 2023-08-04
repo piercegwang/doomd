@@ -2293,6 +2293,18 @@ See [[https://github.com/piercegwang/ohsics_to_org][https://github.com/piercegwa
   (map! :leader "o m" 'mu-open))
 #+end_src
 
+** Social
+
+*** Mastodon
+#+begin_src emacs-lisp
+(use-package! mastodon
+  ;; :hook (mastodon-mode . )
+  :config
+  (evil-set-initial-state 'mastodon-mode 'emacs)
+  (setq mastodon-instance-url "https://emacs.ch"
+        mastodon-active-user "pgwang"))
+#+end_src
+
 ** nov - for reading epub
 
 #+begin_src emacs-lisp
@@ -2730,4 +2742,5 @@ Everything in this section gets "tangled" into the ~packages.el~ file which allo
 (package! py-isort)
 (package! org
   :pin "ca873f7")
+(package! mastodon)
 #+end_src
