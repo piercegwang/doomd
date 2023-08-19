@@ -2228,7 +2228,7 @@ See [[https://github.com/piercegwang/ohsics_to_org][https://github.com/piercegwa
 
 *** Python
 
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle no
 (use-package! elpy
   :config
   (elpy-enable)
@@ -2444,8 +2444,8 @@ chinese
 company           ; the ultimate code completion backend
 ;;helm              ; the *other* search engine for love and life
 ;;ido               ; the other *other* search engine...
-ivy               ; a search engine for love and life
-;;vertico
+;;ivy               ; a search engine for love and life
+vertico
 #+end_src
 
 #+name: doom-ui
@@ -2622,7 +2622,7 @@ sh                ; she sells {ba,z,fi}sh shells on the C xor
 #+begin_src emacs-lisp
 ;;calendar
 ;;emms
-;;everywhere        ; *leave* Emacs!? You must be joking
+everywhere        ; *leave* Emacs!? You must be joking
 ;;irc               ; how neckbeards socialize
 ;;(rss +org)        ; emacs as an RSS reader
 ;;twitter           ; twitter client https://twitter.com/vnought
@@ -2736,11 +2736,12 @@ Everything in this section gets "tangled" into the ~packages.el~ file which allo
            :branch "master"))
 (package! org-download)
 (package! crdt)
-(package! elpy)
-(package! py-autopep8)
-(package! blacken)
-(package! py-isort)
+;;(package! elpy)
+;;(package! py-autopep8)
+;;(package! blacken)
+;;(package! py-isort)
 (package! org
   :pin "ca873f7")
 (package! mastodon)
+(package! org-roam-ui)
 #+end_src
