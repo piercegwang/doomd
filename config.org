@@ -176,7 +176,7 @@ navigation/swapping commands.
 
 ** Bookmarks
 #+begin_src emacs-lisp
-  (setq bookmark-default-file (concat doom-private-dir "bookmarks/"))
+  (setq bookmark-default-file (concat doom-private-dir "bookmarks/*Bookmarks*"))
 #+end_src
 
 ** Passwords
@@ -1380,7 +1380,7 @@ Related to
 ** Ditaa
 
 #+begin_src emacs-lisp
-(cond ((eq system-type 'gnu/linux) (setq org-ditaa-jar-path "/usr/share/ditaa/ditaa.jar"))
+(cond ((eq system-type 'gnu/linux) (setq org-ditaa-jar-path "/etc/profiles/per-user/piercewang/lib/ditaa.jar"))
       ((eq system-type 'darwin) (setq org-ditaa-jar-path "/opt/homebrew/Cellar/ditaa/0.11.0_1/libexec/ditaa-0.11.0-standalone.jar")))
 #+end_src
 
@@ -1502,7 +1502,10 @@ Disable automatic completion from company--slows everything down a bit.
 
 ** Shell
 #+begin_src emacs-lisp
-(personal (setq shell-file-name "/bin/bash"))
+(personal 
+  (let
+    ((shell-path (substring (shell-command-to-string "which zsh") 0 -1)))
+    (setq shell-file-name shell-path)))
 (work (setq shell-file-name "/bin/zsh"))
 ;; (setq shell-file-name "/opt/homebrew/bin/fish")
 #+end_src
@@ -1689,7 +1692,7 @@ Insert Org-mode Image
 (setq dired-use-ls-dired t)
 (cond ((eq system-type 'darwin) (setq insert-directory-program "/opt/homebrew/bin/gls"
                                       trash-directory "~/.Trash"))
-      ((eq system-type 'gnu/linux) (setq insert-directory-program "/usr/bin/ls"
+      ((eq system-type 'gnu/linux) (setq insert-directory-program (substring (shell-command-to-string "which ls") 0 -1)
                                          trash-directory "~/.local/share/Trash/files/")))
 #+end_src
 
@@ -2020,16 +2023,28 @@ The identified problem was that in general, for class schedules, I've used a rep
  (defun pgw/date-block (absolute y1 m1 d1 y2 m2 d2)
    "Block date entry. An adapted version of the `diary-block'
 function from the diary-lib."
-   (let ((date1 (calendar-absolute-from-gregorian (diary-make-date y1 m1 d1)))
-         (date2 (calendar-absolute-from-gregorian (diary-make-date y2 m2 d2)))
+   (let ((date1 (calendar-absolute-from-gregorian (pgw/diary-make-date y1 m1 d1)))
+         (date2 (calendar-absolute-from-gregorian (pgw/diary-make-date y2 m2 d2)))
          (d absolute))
      (and (<= date1 d) (<= d date2))))
 
 (defun pgw/date-date (absolute year month day)
   "Check for equality of date"
-  (equal absolute (calendar-absolute-from-gregorian (diary-make-date year month day))))
+  (equal absolute (calendar-absolute-from-gregorian (pgw/diary-make-date year month day))))
 
-(defun pgw/check-ohs-class (absolute classname semesters days times fallstart fallend springstart springend noclasses)
+(defun pgw/diary-make-date (a b c)
+  "Convert A B C into the internal calendar date form.
+The expected order of the inputs depends on `calendar-date-style',
+e.g. in the European case, A = day, B = month, C = year.  Returns
+a list (MONTH DAY YEAR), i.e. the American style, which is the
+form used internally by the calendar and diary."
+  (cond ((eq calendar-date-style 'iso)  ; YMD
+         (list b c a))
+        ((eq calendar-date-style 'european) ; DMY
+         (list b a c))
+        (t (list a b c))))
+
+(defun pgw/check-class (absolute classname semesters days times fallstart fallend springstart springend noclasses)
   "Returns a list with formatted strings: (classname curdate
 headline). These can then be used to create the headline. The curdate
 is in the form of a list"
@@ -2068,7 +2083,7 @@ optional DESC: string containing a description for the event
 This function uses the variable `pgw/schoolyear-dates' for the value of holidays
 unless custom-dates is specified"
 
-  (let* ((current (calendar-absolute-from-gregorian (diary-make-date 2022 9 5)))
+  (let* ((current (calendar-absolute-from-gregorian (pgw/diary-make-date 2023 9 5)))
          (desc (if desc (setq desc (format "\n%s\n" desc)) (setq desc "")))
          (schoolyear-dates (if custom-dates custom-dates (setq schoolyear-dates pgw/schoolyear-dates)))
          (fallstart (gethash "fallstart" schoolyear-dates))
@@ -2078,9 +2093,14 @@ unless custom-dates is specified"
          (noclasses (gethash "noclasses" schoolyear-dates)))
     (goto-char (point-max))
     (insert (format "\n* %s" classname))
-    (while (pgw/date-block current (nth 0 fallstart) (nth 1 fallstart) (nth 2 fallstart)
-                           (nth 0 springend) (nth 1 springend) (nth 2 springend)) ; Make sure we're within starting and ending dates of school
-      (let ((info (pgw/check-ohs-class current classname semesters days times fallstart fallend springstart springend noclasses)))
+    (message "made it here checkpoint 1")
+    (message (format "date-block result %s" (pgw/date-block current (nth 0 fallstart) (nth 1 fallstart) (nth 2 fallstart)
+                                                            (nth 0 springend) (nth 1 springend) (nth 2 springend))))
+    (while
+        (pgw/date-block current (nth 0 fallstart) (nth 1 fallstart) (nth 2 fallstart)
+                        (nth 0 springend) (nth 1 springend) (nth 2 springend)) ; Make sure we're within starting and ending dates of school
+      (message "made it here checkpoint 2")
+      (let ((info (pgw/check-class current classname semesters days times fallstart fallend springstart springend noclasses)))
         (when info
           (let* ((headline (nth 0 info))
                  (days-of-week '("Sun" "Mon" "Tue" "Wed" "Thu" "Fri" "Sat"))
@@ -2091,8 +2111,7 @@ unless custom-dates is specified"
                  (dayofweek (nth (calendar-day-of-week fulldate) days-of-week))
                  (time (nth 2 info)))
             (goto-char (point-max))
-            ;; (insert (format "\n** %s\n:PROPERTIES:\n:TIMEZONE: UTC\n:END:\n<%d-%02d-%02d %s %s>\n%s"
-            ;;                 headline year month day dayofweek time desc)))))
+            ;; \n** %s\n:PROPERTIES:\n:TIMEZONE: UTC\n:END:\n
             (insert (format "\n** %s\n<%d-%02d-%02d %s %s>\n%s"
                             headline year month day dayofweek time desc)))))
       (setq current (+ current 1)))))
@@ -2118,21 +2137,22 @@ unless custom-dates is specified"
       #s(hash-table
          size 5
          test equal
-         data ("fallstart" (2022 9 5)
-               "fallend" (2022 12 23)
-               "springstart" (2023 1 17)
-               "springend" (2023 5 1)
-               "noclasses" ((2022 9 5) ;; Labor Day
-                            (2022 11 7) ;; No Classes
-                            (2022 11 8) ;; Election Day, University Holiday
-                            (2022 11 23 2022 11 24) ;; No Classes
-                            (2022 11 25) ;; Thanksgiving, University Holiday
-                            (2022 12 13 2022 12 15) ;; Study days
-                            (2022 12 16 2022 12 23) ;; Final Exams
+         data ("fallstart" (2023 9 5)
+               "fallend" (2023 12 22)
+               "springstart" (2024 1 16)
+               "springend" (2024 5 10)
+               "noclasses" (
+                            ;;(2022 9 5) ;; Labor Day
+                            (2023 11 6) ;; Academic Holiday
+                            (2023 11 7) ;; Election Day, University Holiday
+                            (2023 11 22 2023 11 24) ;; No Classes
+                            (2023 11 25) ;; Thanksgiving, University Holiday
+                            (2023 12 12 2023 12 14) ;; Study days
+                            (2023 12 15 2023 12 22) ;; Final Exams
                             ;; Update spring semester entries
-                            (2023 01 16)  ;; Martin Luther King Jr. Day, University Holiday
-                            (2023 03 13 2023 03 17)  ;; Spring Break
-                            (2023 05 02 23 05 12)) ; Reading and Exam Days
+                            (2024 01 15)  ;; Martin Luther King Jr. Day, University Holiday
+                            (2024 03 11 2024 03 15)  ;; Spring Break
+                            (2024 04 30 2024 05 10)) ; Reading and Exam Days
                             )))
 
 (setq pgw/juilliard-schoolyear-dates
@@ -2191,7 +2211,7 @@ See [[https://github.com/piercegwang/ohsics_to_org][https://github.com/piercegwa
 (personal
  (defun pgw/sync-canvas-cal ()
    (interactive)
-   (start-process-shell-command "Running syncgcal.sh" nil "bash ~/Documents/org_canvas_parser/syncgcal.sh"))
+   (start-process-shell-command "Running syncgcal.sh" nil "bash ~/Documents/org_canvas_parser/bin/syncgcal.sh"))
  (after! org-gcal
    (map! :leader "d o" #'pgw/sync-canvas-cal)))
 
@@ -2205,7 +2225,7 @@ See [[https://github.com/piercegwang/ohsics_to_org][https://github.com/piercegwa
              (evil-emacs-state 1))
   (add-to-list 'vterm-tramp-shells '("sshx" "/bin/bash"))
   (personal
-   (setq vterm-shell "bash"))
+   (setq vterm-shell "zsh"))
   (work
    (setq vterm-shell "zsh")))
 #+end_src
@@ -2563,7 +2583,7 @@ pdf               ; pdf enhancements
 ;;elm               ; care for a cup of TEA?
 emacs-lisp        ; drown in parentheses
 ;; erlang            ; an elegant language for a more civilized age
-;;ess               ; emacs speaks statistics
+ess               ; emacs speaks statistics
 ;;factor
 ;;faust             ; dsp, but you get to keep your soul
 ;;fsharp            ; ML stands for Microsoft's Language
@@ -2585,7 +2605,7 @@ ledger            ; be audit you can be
 lua               ; one-based indices? one-based indices
 markdown          ; writing docs for people to ignore
 ;;nim               ; python + lisp at the speed of c
-;;nix               ; I hereby declare "nix geht mehr!"
+nix               ; I hereby declare "nix geht mehr!"
 ;;ocaml             ; an objective camel
 (org +roam2)       ; organize your plain life in plain text
 ;;php               ; perl's insecure younger brother
