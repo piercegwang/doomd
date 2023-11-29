@@ -2,4 +2,4 @@
 # name: Insert SETUPFILE
 # key: <setup
 # --
-#+SETUPFILE: ~/.doom.d/org-mode/templates/$0
+#+SETUPFILE: ~/.config/doom/org-mode/templates/$0

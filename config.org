@@ -75,11 +75,11 @@ All configurations here get "tangled" into the main ~config.el~ file.
 ** Doom fonts
 
 #+begin_src emacs-lisp :tangle no
-(setq doom-font (font-spec :family "Source Code Pro" :size 18))
-(setq doom-unicode-font (font-spec :family "Source Han Serif SC")
-      doom-big-font (font-spec :family "Ubuntu Mono" :size 26)
-      doom-variable-pitch-font (font-spec :family "DejaVu Sans" :size 16)
-      doom-serif-font (font-spec :family "Ubuntu"))
+(setq doom-font (font-spec :family "Source Code Pro" :size 20))
+(setq doom-unicode-font (font-spec :family "Source Code Pro" :size 20)
+      doom-big-font (font-spec :family "Source Code Pro" :size 28)
+      doom-variable-pitch-font (font-spec :family "DejaVu Sans" :size 20)
+      doom-serif-font (font-spec :family "DejaVu Serif"))
 #+end_src
 
 ** Custom Loads
@@ -292,10 +292,14 @@ I copied mixed-pitch.el from [[https://gitlab.com/jabranham/mixed-pitch/][this]]
 
 ** Tramp
 #+begin_src emacs-lisp
-;; Tramp setup
-
-(setq tramp-default-method "sshx")
-(setq tramp-histfile-override t)
+(use-package! tramp
+  :config
+  (setq tramp-default-method "sshx"
+        tramp-histfile-override t)
+  ;; (add-to-list 'tramp-connection-properties
+  ;;              (list (regexp-quote "/sshx:homeserver:")
+  ;;                    "remote-shell" "/etc/profiles/per-user/piercewang/zsh"))
+  )
 #+end_src
 
 ** =tab-bar-mode=
@@ -532,6 +536,15 @@ https://stackoverflow.com/questions/2540997/create-more-than-one-eshell-instance
         middle-name))))
 #+end_src
 
+*** Org roam date
+
+#+begin_src emacs-lisp
+(after! org-roam
+  (defun pgw/year-month-day (roam-node)
+    "Custom function to return date in format: YYYY-MM-DD"
+    (format-time-string "%Y-%m-%d %a")))
+#+end_src
+
 *** python: snippet-split-args
 #+begin_src emacs-lisp
 (defun pgw/python-snippet-split-args (arg-string)
@@ -589,11 +602,11 @@ Light themes:
 
     ;; Load the theme (doom-one, doom-molokai, etc); keep in mind that each theme
     ;; may have their own settings.
-    ;; (load-theme 'doom-badger t)
+    (load-theme 'doom-badger t)
     ;; (load-theme 'doom-1337 t)
     ;; (load-theme 'doom-material-dark t)
     ;; (load-theme 'doom-outrun-electric t)
-    (load-theme 'doom-acario-dark t)
+    ;; (load-theme 'doom-acario-dark t)
     ;; (load-theme 'doom-challenger-deep t)
     ;; (load-theme 'doom-snazzy t)
     ;; (load-theme 'doom-solarized-dark t)
@@ -756,7 +769,9 @@ CLOSED: [2020-11-29 Sun 11:30]
 (setq org-agenda-max-entries nil)
 
 
-(map! :map evil-org-agenda-mode-map "SPC m l" #'org-agenda-log-mode)
+(map! (:map evil-org-agenda-mode-map
+         :localleader
+         :desc "Agenda Log Mode" "l" #'org-agenda-log-mode))
 #+end_src
 
 **** Custom Commands
@@ -772,14 +787,15 @@ Custom commands, testing sorting strategy variable
              (file-expand-wildcards "~/NextCloud/Documents/org/*.org"))))
           ("A" "General Agenda" agenda ""
            ((org-agenda-span 1)
+            (org-deadline-warning-days 14)
             (org-agenda-sorting-strategy
              '((agenda habit-down time-up deadline-up)))))
-          ("c" "CRM" agenda ""
+          ("C" "CRM" agenda ""
            ((org-agenda-span 1)
             (org-agenda-sorting-strategy
-             '((agenda habit-down time-up deadline-up)))
+             '((agenda alpha-up priority-up)))
             (org-agenda-files
-             (file-expand-wildcards "~/NextCloud/Documents/org-roam/people/*.org"))))
+             (pgw/org-roam-get-todos "4c9d2454-e949-4750-9814-1c888263562e"))))
           ("T" "Todo List" todo "TODO"
            ((org-agenda-sorting-strategy
              '((priority-up)))))
@@ -832,9 +848,9 @@ Custom commands, testing sorting strategy variable
 
 #+begin_src emacs-lisp
 (map! :map evil-org-agenda-mode-map
-      :localleader "m m l" #'org-agenda-log-mode
-      :localleader "m m r" #'pgw/org-agenda-reload-files
-      :localleader "f s" #'org-save-all-org-buffers)
+      :localleader :n "m m l" #'org-agenda-log-mode
+      :localleader :n "m m r" #'pgw/org-agenda-reload-files
+      :localleader :n "f s" #'org-save-all-org-buffers)
 #+end_src
 
 *** Babel
@@ -917,12 +933,10 @@ Custom commands, testing sorting strategy variable
                             :file "~/NextCloud/Documents/org/notes.org"
                             :template ("* %?"
                                        "%U"))
-                           ("Link" :keys "l"
-                            :file "~/NextCloud/Documents/org/links.org"
-                            :headline "!Inbox"
-                            :prepend t
-                            :template ("* [[%?%:link][%:description]]"
-                                       "%U"))))
+                           ("Prayer" :keys "p"
+                            :file "~/NextCloud/Documents/org-roam/20230918104128-prayer.org"
+                            :headline "Daily Prayer"
+                            :template ("* %?"))))
                ("Finances" :keys "f"
                 ;; :file "~/NextCloud/Documents/org/finances.org.gpg"
                 :children (("Income" :keys "i"
@@ -1013,7 +1027,7 @@ Custom commands, testing sorting strategy variable
                                        "%U"))
                            ("Violin Repertoire" :keys "m"
                             :type entry
-                            :id "e48fe999-3716-425b-8445-fce296c7635a"
+                            :id "89641a25-2cab-4b04-8d36-75c77d4dc855"
                             :template ("* - %?"
                                        "%^{COMPOSER}p"
                                        "%^{ARRANGEMENT}p"
@@ -1045,7 +1059,7 @@ Custom commands, testing sorting strategy variable
                                        :headline "Other")))
                           ("Violin Repertoire" :keys "m"
                            :type entry
-                           :id "e48fe999-3716-425b-8445-fce296c7635a"
+                           :id "89641a25-2cab-4b04-8d36-75c77d4dc855"
                            :contexts (:in-file "repertoire.org")
                            :template ("* - %?"
                                       "%^{COMPOSER}p"
@@ -1058,7 +1072,7 @@ Custom commands, testing sorting strategy variable
 #+begin_src emacs-lisp
 (map! (:map org-mode-map
          :localleader
-         :desc "Remove ID Entry" "u" #'org-insert-drawer))
+         :desc "Insert drawer" "u" #'org-insert-drawer))
 #+end_src
 
 *** Export
@@ -1071,8 +1085,8 @@ Custom commands, testing sorting strategy variable
 **** ODT
 
 #+begin_src emacs-lisp
-(setq org-odt-styles-file (concat doom-private-dir "odt/mla.ott"))
-;; (setq org-odt-styles-file nil)
+;; (setq org-odt-styles-file (concat doom-private-dir "odt/mla.ott"))
+(setq org-odt-styles-file nil)
 #+end_src
 
 *** Export Publishing
@@ -1119,7 +1133,12 @@ Custom commands, testing sorting strategy variable
     :config
     (add-hook! 'org-mode-hook #'org-cdlatex-mode)
     (add-to-list 'org-tab-first-hook 'org-try-cdlatex-tab)
-    )
+    (add-hook! 'org-cdlatex-mode-hook
+               (lambda ()
+                 (add-to-list 'cdlatex-math-modify-alist-comb '( ?B  "\\mathbb" nil t nil nil))
+                 (add-to-list 'cdlatex-command-alist-comb '("prodl" "Insert \\prod\\limits_{}^{}" "\\prod\\limits_{?}^{}" cdlatex-position-cursor nil nil t))))
+    (add-to-list 'cdlatex-math-modify-alist-comb '( ?B  "\\mathbb" nil t nil nil))
+    (add-to-list 'cdlatex-command-alist-comb '("prodl" "Insert \\prod\\limits_{}^{}" "\\prod\\limits_{?}^{}" cdlatex-position-cursor nil nil t)))
 #+end_src
 
 **** Fragments
@@ -1233,6 +1252,14 @@ Update the `org-id-locations' global hash-table, and update the
 (map! (:map org-mode-map
          :localleader
          :desc "Remove ID Entry" "D" #'org-id-remove-entry))
+#+end_src
+
+*** Org Restart
+
+#+begin_src emacs-lisp
+(map! (:map org-mode-map
+         :localleader
+         :desc "Restart org-mode" "R" #'org-mode-restart))
 #+end_src
 
 *** Org Note
@@ -1351,6 +1378,16 @@ Related to
   :config
   (setq org-download-screenshot-method "gnome-screenshot"))
 #+end_src
+
+*** org-ai
+
+#+begin_src emacs-lisp
+(use-package! org-ai
+  :config
+  (setq org-ai-openai-api-token pgw/openai-key
+        org-ai-default-chat-model "gpt-3.5-turbo-1106"))
+#+end_src
+
 ** org-roam
 
 #+begin_src emacs-lisp
@@ -1510,6 +1547,12 @@ Disable automatic completion from company--slows everything down a bit.
 ;; (setq shell-file-name "/opt/homebrew/bin/fish")
 #+end_src
 
+** Browse URL
+
+#+begin_src emacs-lisp
+(setq browse-url-browser-function 'browse-url-generic
+      browse-url-generic-program "xdg-open")
+#+end_src
 ** Backups
 
 #+begin_src emacs-lisp :tangle no
@@ -1531,9 +1574,7 @@ Disable automatic completion from company--slows everything down a bit.
       (make-directory dir t)))
   (setq backup-directory-alist `(("." . ,backup-dir))
         auto-save-file-name-transforms `((".*" ,auto-saves-dir t))
-        auto-save-list-file-prefix (concat auto-saves-dir ".saves-")
-        tramp-backup-directory-alist `((".*" . ,backup-dir))
-        tramp-auto-save-directory auto-saves-dir))
+        auto-save-list-file-prefix (concat auto-saves-dir ".saves-")))
 
 (setq backup-by-copying t    ; Don't delink hardlinks
       delete-old-versions t  ; Clean up the backups
@@ -1599,6 +1640,13 @@ Also remember, can use <middle mouse button> to see the menu of options.
             )
 #+end_src
 
+** iBuffer
+
+#+begin_src emacs-lisp
+(after! ibuffer
+  (setq ibuffer-old-time 10))
+#+end_src
+
 ** Flyspell mode
 Activate =flyspell-mode= automatically in all school files.
 #+begin_src emacs-lisp
@@ -1646,7 +1694,8 @@ I love Emacs Tetris!
 (personal
   (setq erc-log-channels-directory "~/logs/")
   (setq erc-save-buffer-on-part t)
-  (map! :leader "e e" (lambda () (interactive) (erc :server "irc.freenode.net" :port 6667 :nick "tesrodome" :password passwords_ERC))))
+  ;; (map! :leader "e e" (lambda () (interactive) (erc :server "irc.freenode.net" :port 6667 :nick "tesrodome" :password passwords_ERC))))
+  )
 #+end_src
 
 ** Keybinds
@@ -1725,13 +1774,6 @@ Move
   (setq dired-actual-switches "-alh"))
 #+end_src
 
-
-** browse-url-firefox-program
-Allow the function =browse-url-firefox= to open links in firefox using bin. One could probably also accomplish this using =brew='s version of firefox, but I didn't want to install firefox again.
-
-#+begin_src emacs-lisp
-(personal (setq browse-url-firefox-program "/Applications/Firefox.app/Contents/MacOS/firefox-bin"))
-#+end_src
 
 ** DISABLED mu4e
 CLOSED: [2021-04-25 Sun 23:53]
@@ -2211,10 +2253,8 @@ See [[https://github.com/piercegwang/ohsics_to_org][https://github.com/piercegwa
 (personal
  (defun pgw/sync-canvas-cal ()
    (interactive)
-   (start-process-shell-command "Running syncgcal.sh" nil "bash ~/Documents/org_canvas_parser/bin/syncgcal.sh"))
- (after! org-gcal
-   (map! :leader "d o" #'pgw/sync-canvas-cal)))
-
+   (start-process-shell-command "Running syncgcal.sh" nil "bash ~/Documents/org_canvas_parser/syncgcal.sh"))
+ (after! org-gcal (map! :leader :n "d o" #'pgw/sync-canvas-cal)))
 #+end_src
 
 ** ~vterm~
@@ -2223,7 +2263,7 @@ See [[https://github.com/piercegwang/ohsics_to_org][https://github.com/piercegwa
 (after! vterm
   (add-hook! vterm-mode
              (evil-emacs-state 1))
-  (add-to-list 'vterm-tramp-shells '("sshx" "/bin/bash"))
+  ;; (add-to-list 'vterm-tramp-shells '("sshx" "/bin/zsh"))
   (personal
    (setq vterm-shell "zsh"))
   (work
@@ -2248,7 +2288,7 @@ See [[https://github.com/piercegwang/ohsics_to_org][https://github.com/piercegwa
 
 *** Python
 
-#+begin_src emacs-lisp :tangle no
+#+begin_src emacs-lisp
 (use-package! elpy
   :config
   (elpy-enable)
@@ -2323,6 +2363,11 @@ See [[https://github.com/piercegwang/ohsics_to_org][https://github.com/piercegwa
   (evil-set-initial-state 'mastodon-mode 'emacs)
   (setq mastodon-instance-url "https://emacs.ch"
         mastodon-active-user "pgwang"))
+#+end_src
+
+*** Matrix Client
+#+begin_src emacs-lisp
+(use-package! ement)
 #+end_src
 
 ** nov - for reading epub
@@ -2555,7 +2600,7 @@ pdf               ; pdf enhancements
 ;;prodigy           ; FIXME managing external services & code builders
 ;;rgb               ; creating color strings
 ;;taskrunner        ; taskrunner for all your projects
-;;terraform         ; infrastructure as code
+terraform         ; infrastructure as code
 ;;tmux              ; an API for interacting with tmux
 ;;tree-sitter       ; syntax and parsing, sitting in a tree...
 ;;upload            ; map local to remote projects via ssh/ftp
@@ -2618,7 +2663,7 @@ nix               ; I hereby declare "nix geht mehr!"
 ;;rest              ; Emacs as a REST client
 ;;rst               ; ReST in peace
 ;;(ruby +rails)     ; 1.step {|i| p "Ruby is #{i.even? ? 'love' : 'life'}"}
-;;(rust +lsp)       ; Fe2O3.unwrap().unwrap().unwrap().unwrap()
+(rust +lsp)       ; Fe2O3.unwrap().unwrap().unwrap().unwrap()
 ;;scala             ; java, but good
 ;;(scheme +guile)   ; a fully conniving family of lisps
 sh                ; she sells {ba,z,fi}sh shells on the C xor
@@ -2756,12 +2801,14 @@ Everything in this section gets "tangled" into the ~packages.el~ file which allo
            :branch "master"))
 (package! org-download)
 (package! crdt)
-;;(package! elpy)
-;;(package! py-autopep8)
-;;(package! blacken)
-;;(package! py-isort)
+(package! elpy)
+(package! py-autopep8)
+(package! blacken)
+(package! py-isort)
 (package! org
   :pin "ca873f7")
 (package! mastodon)
 (package! org-roam-ui)
+(package! org-ai)
+(package! ement)
 #+end_src
