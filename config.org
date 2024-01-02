@@ -168,6 +168,12 @@ navigation/swapping commands.
       "C-<right>"      #'+evil/window-move-right)
 #+end_src
 
+** EVIL
+
+#+begin_src emacs-lisp
+(setq evil-shift-width 4)
+#+end_src
+
 ** Allow Local Variables
 
 #+begin_src emacs-lisp
@@ -602,10 +608,10 @@ Light themes:
 
     ;; Load the theme (doom-one, doom-molokai, etc); keep in mind that each theme
     ;; may have their own settings.
-    (load-theme 'doom-badger t)
+    ;; (load-theme 'doom-badger t)
     ;; (load-theme 'doom-1337 t)
     ;; (load-theme 'doom-material-dark t)
-    ;; (load-theme 'doom-outrun-electric t)
+    (load-theme 'doom-outrun-electric t)
     ;; (load-theme 'doom-acario-dark t)
     ;; (load-theme 'doom-challenger-deep t)
     ;; (load-theme 'doom-snazzy t)
@@ -1258,8 +1264,8 @@ Update the `org-id-locations' global hash-table, and update the
 
 #+begin_src emacs-lisp
 (map! (:map org-mode-map
-         :localleader
-         :desc "Restart org-mode" "R" #'org-mode-restart))
+       :localleader
+       :desc "Restart org-mode" "R" #'org-mode-restart))
 #+end_src
 
 *** Org Note
@@ -2263,7 +2269,7 @@ See [[https://github.com/piercegwang/ohsics_to_org][https://github.com/piercegwa
 (after! vterm
   (add-hook! vterm-mode
              (evil-emacs-state 1))
-  ;; (add-to-list 'vterm-tramp-shells '("sshx" "/bin/zsh"))
+  (add-to-list 'vterm-tramp-shells '("sshx" "/bin/bash"))
   (personal
    (setq vterm-shell "zsh"))
   (work
@@ -2811,4 +2817,6 @@ Everything in this section gets "tangled" into the ~packages.el~ file which allo
 (package! org-roam-ui)
 (package! org-ai)
 (package! ement)
+(package! fireplace)
+(package! gdscript-mode)
 #+end_src
