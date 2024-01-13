@@ -580,6 +580,15 @@ https://stackoverflow.com/questions/2540997/create-more-than-one-eshell-instance
 (cons 2 (cons 1 nil))
 #+end_src
 
+*** Find People Files :roam:
+
+#+begin_src emacs-lisp
+(defun get-person-file ()
+  "Query and return a person from my org-roam system."
+  (let ((prompt "Person: "))
+  (org-roam-node-file (org-roam-node-read "" (lambda (node) (string= (org-roam-node-category node) "people")) nil t prompt))))
+#+end_src
+
 ** Visuals
 
 *** Doom Theme
@@ -997,34 +1006,6 @@ Custom commands, testing sorting strategy variable
                                        ":org-gcal:"
                                        "%^{Scheduled time + duration}T%?"
                                        ":END:"))))
-               ("Columbia" :keys "c"
-                :type entry
-                :children (
-                           ("COMSW4118_001_2023_1 - Operating Systems I" :keys "o"
-                            :file "~/NextCloud/Documents/org-roam/20230116175417-columbia_spring_2023_class_assignments.org"
-                            :regexp "id:6f5d02ad-ccce-48ea-a478-6921bd309f7d"
-                            :template ("* NEXT %?"
-                                       "DEADLINE: %^T"))
-                           ("COMSW3251_001_2023_1 - COMPUTATIONAL LINEAR ALGEBRA" :keys "l"
-                            :file "~/NextCloud/Documents/org-roam/20230116175417-columbia_spring_2023_class_assignments.org"
-                            :regexp "id:2cecfc8f-5dcb-4331-bb9e-0d5e188b95de"
-                            :template ("* NEXT %?"
-                                       "DEADLINE: %^T"))
-                           ("CHNSUN2202_002_2023_1 - SECOND YEAR CHINESE II" :keys "c"
-                            :file "~/NextCloud/Documents/org-roam/20230116175417-columbia_spring_2023_class_assignments.org"
-                            :regexp "id:0fd0cc39-5ace-4c23-9650-0ef975ed958a"
-                            :template ("* NEXT %?"
-                                       "DEADLINE: %^T"))
-                           ("PSYCUN1001_001_2023_1 - THE SCIENCE OF PSYCHOLOGY" :keys "p"
-                            :file "~/NextCloud/Documents/org-roam/20230116175417-columbia_spring_2023_class_assignments.org"
-                            :regexp "id:9a197ba7-bb2a-4490-8e20-0ace2e898b51"
-                            :template ("* NEXT %?"
-                                       "DEADLINE: %^T"))
-                           ("COCICC1102_021_2023_1 - CC Section 21 (MW 2:10)" :keys "C"
-                            :file "~/NextCloud/Documents/org-roam/20230116175417-columbia_spring_2023_class_assignments.org"
-                            :regexp "id:9eacd76b-670f-4002-a3ed-9003cd7b4df8"
-                            :template ("* NEXT %?"
-                                       "DEADLINE: %^T"))))
                ("Stuff and Things" :keys "s"
                 :file "~/NextCloud/Documents/org/notes/stuff_and_things/organizing_temp.org"
                 :children (("Database Entry" :keys "i"
@@ -1037,7 +1018,15 @@ Custom commands, testing sorting strategy variable
                             :template ("* - %?"
                                        "%^{COMPOSER}p"
                                        "%^{ARRANGEMENT}p"
-                                       "%^{COMPOSED}p"))))))))
+                                       "%^{COMPOSED}p"))))
+               ("CRM Contact" :keys "c"
+                :type entry
+                :function (lambda () (get-person-file))
+                :template ("* CONTACT %^{title}"
+                           "SCHEDULED: <%(pgw/year-month-day) .+%^{lowrange}d/%^{highrange}d>"
+                           ":PROPERTIES:"
+                           ":STYLE:    habit"
+                           ":END:"))))))
 #+end_src
 
 #+begin_example
@@ -1414,7 +1403,11 @@ Related to
           ("p" "person entry" plain (file "~/NextCloud/Documents/org-roam/people/templates/person.org")
            :target (file "people/${slug}-%<%Y%m%d%H%M%S>.org") :unnarrowed t)
           ("o" "organization entry" plain (file "~/NextCloud/Documents/org-roam/people/templates/organization.org")
-           :target (file "people/${slug}-%<%Y%m%d%H%M%S>.org") :unnarrowed t)))
+           :target (file "people/${slug}-%<%Y%m%d%H%M%S>.org") :unnarrowed t)
+          ("B" "Bible Book" plain (file
+          "~/NextCloud/Documents/org-roam/bible/book_template.org")
+           :target (file "bible/${slug}.org")
+           :unnarrowed t)))
   (setq org-roam-dailies-capture-template
         '(("d" "default" entry "* %?" :target
            (file+head "%<%Y-%m-%d>.org" "#+title: %<%Y-%m-%d>\n")))))
