@@ -82,6 +82,14 @@ All configurations here get "tangled" into the main ~config.el~ file.
       doom-serif-font (font-spec :family "DejaVu Serif"))
 #+end_src
 
+*** Change font size
+
+#+begin_src emacs-lisp
+(map! :n "SPC t +" #'doom/increase-font-size
+      :n "SPC t -" #'doom/decrease-font-size
+      :n "SPC t =" #'doom/reset-font-size)
+#+end_src
+
 ** Custom Loads
 
 #+begin_src emacs-lisp
@@ -313,6 +321,19 @@ I copied mixed-pitch.el from [[https://gitlab.com/jabranham/mixed-pitch/][this]]
 #+begin_src emacs-lisp
   ;; (tab-bar-mode 1)
   (setq tab-bar-show nil)
+#+end_src
+
+** Touch
+
+#+begin_src emacs-lisp :tangle yes
+(defun pgw/test-function (event-info)
+  "Test touchscreen"
+  (interactive "e")
+  (message (format "%s" event-info)))
+
+(global-set-key [touchscreen-begin]  #'pgw/test-function)
+(global-set-key [touchscreen-update] #'pgw/test-function)
+(global-set-key [touchscreen-end]    #'pgw/test-function)
 #+end_src
 
 ** Custom Functions
@@ -620,8 +641,10 @@ Light themes:
     ;; (load-theme 'doom-badger t)
     ;; (load-theme 'doom-1337 t)
     ;; (load-theme 'doom-material-dark t)
-    (load-theme 'doom-outrun-electric t)
+    ;; (load-theme 'doom-outrun-electric t)
     ;; (load-theme 'doom-acario-dark t)
+    (load-theme 'doom-ir-black t)
+    ;; (load-theme 'doom-homage-black t)
     ;; (load-theme 'doom-challenger-deep t)
     ;; (load-theme 'doom-snazzy t)
     ;; (load-theme 'doom-solarized-dark t)
@@ -784,9 +807,9 @@ CLOSED: [2020-11-29 Sun 11:30]
 (setq org-agenda-max-entries nil)
 
 
-(map! (:map evil-org-agenda-mode-map
-         :localleader
-         :desc "Agenda Log Mode" "l" #'org-agenda-log-mode))
+;; (map! (:map evil-org-agenda-mode-map
+;;          :localleader
+;;          :n :desc "Agenda Log Mode" "l" #'org-agenda-log-mode))
 #+end_src
 
 **** Custom Commands
@@ -863,9 +886,10 @@ Custom commands, testing sorting strategy variable
 
 #+begin_src emacs-lisp
 (map! :map evil-org-agenda-mode-map
-      :localleader :n "m m l" #'org-agenda-log-mode
-      :localleader :n "m m r" #'pgw/org-agenda-reload-files
-      :localleader :n "f s" #'org-save-all-org-buffers)
+      (:localleader
+       :n "l" #'org-agenda-log-mode
+       :n "r" #'pgw/org-agenda-reload-files
+       :n "f s" #'org-save-all-org-buffers))
 #+end_src
 
 *** Babel
@@ -1144,7 +1168,7 @@ Custom commands, testing sorting strategy variable
   (setq org-format-latex-options
         ;; '(:foreground "#000000" :background default ;; light theme
         '(:foreground "#d6d6d4" :background default ;; dark tieme
-                      :scale 1.7
+                      :scale 1.4
                       :html-foreground "Black" :html-background "Transparent"
                       :html-scale 1.0
                       :matchers ("begin" "$1" "$" "$$" "\\(" "\\[")))
@@ -1317,6 +1341,15 @@ Related to
 #+end_src
 
 *** Quick Capture
+
+#+begin_src emacs-lisp
+(map! :map org-capture-mode-map
+      (:localleader
+       :n "C c" #'org-capture-finalize
+       :n "C k" #'org-capture-kill
+       :n "C w" #'org-capture-refile))
+#+end_src
+
 **** Helper Functions
 #+begin_src emacs-lisp
 (defun pgw/year-month ()
@@ -1372,15 +1405,6 @@ Related to
 (use-package! org-download
   :config
   (setq org-download-screenshot-method "gnome-screenshot"))
-#+end_src
-
-*** org-ai
-
-#+begin_src emacs-lisp
-(use-package! org-ai
-  :config
-  (setq org-ai-openai-api-token pgw/openai-key
-        org-ai-default-chat-model "gpt-3.5-turbo-1106"))
 #+end_src
 
 ** org-roam
@@ -1629,6 +1653,12 @@ Artist mode is amazing! Configure some quick keybinds...
 #+end_src
 
 Also remember, can use <middle mouse button> to see the menu of options.
+
+** All-the-icons
+
+#+begin_src emacs-lisp
+(use-package! all-the-icons)
+#+end_src
 
 ** Image Mode
 #+begin_src emacs-lisp
@@ -2518,7 +2548,7 @@ vertico
 doom              ; what makes DOOM look the way it does
 doom-dashboard    ; a nifty splash screen for Emacs
 ;;doom-quit         ; DOOM quit-message prompts when you quit Emacs
-;;(emoji +unicode)  ; 🙂
+(emoji +unicode)  ; 🙂
 hl-todo           ; highlight TODO/FIXME/NOTE/DEPRECATED/HACK/REVIEW
 ;;hydra
 ;;indent-guides     ; highlighted indent columns
@@ -2808,8 +2838,8 @@ Everything in this section gets "tangled" into the ~packages.el~ file which allo
   :pin "ca873f7")
 (package! mastodon)
 (package! org-roam-ui)
-(package! org-ai)
 (package! ement)
 (package! fireplace)
 (package! gdscript-mode)
+(package! all-the-icons)
 #+end_src
