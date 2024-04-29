@@ -70,6 +70,10 @@ All configurations here get "tangled" into the main ~config.el~ file.
 (defmacro work (&rest body)
   (if (file-exists-p "~/.work_computer")
     (cons 'progn body)))
+
+(defmacro steamdeck (&rest body)
+  (if (file-exists-p "~/.steam_deck")
+    (cons 'progn body)))
 #+end_src
 
 ** Doom fonts
@@ -82,12 +86,22 @@ All configurations here get "tangled" into the main ~config.el~ file.
       doom-serif-font (font-spec :family "DejaVu Serif"))
 #+end_src
 
+
+#+begin_src emacs-lisp
+(steamdeck
+ (setq doom-font (font-spec :family "Source Code Pro" :size 16))
+ (setq doom-unicode-font (font-spec :family "Source Code Pro" :size 16)
+       doom-big-font (font-spec :family "Source Code Pro" :size 28)
+       doom-variable-pitch-font (font-spec :family "Noto Sans" :size 18)))
+#+end_src
+
 *** Change font size
 
 #+begin_src emacs-lisp
 (map! :n "SPC t +" #'doom/increase-font-size
       :n "SPC t -" #'doom/decrease-font-size
-      :n "SPC t =" #'doom/reset-font-size)
+      :n "SPC t =" #'doom/reset-font-size
+      :n "SPC t 0" #'text-scale-adjust)
 #+end_src
 
 ** Custom Loads
@@ -325,15 +339,26 @@ I copied mixed-pitch.el from [[https://gitlab.com/jabranham/mixed-pitch/][this]]
 
 ** Touch
 
-#+begin_src emacs-lisp :tangle yes
-(defun pgw/test-function (event-info)
+#+begin_src emacs-lisp :tangle no
+(defun pgw/touch-function (input)
   "Test touchscreen"
   (interactive "e")
-  (message (format "%s" event-info)))
+  (message (format "%s" input))
+  (let* ((event-info (car (cdr input)))
+         (tap-id (nth 0 event-info))
+         (window-target (nth 1 event-info))
+         (position (nth 2 event-info)))
+    ;; (if (eq (frame-root-window) window-target)
+    ;;   (progn
+    ;;     (set-window-point window-target position)))
+    (when (window-live-p window-target)
+      (select-window window-target)
+      (set-window-point window-target position))))
 
-(global-set-key [touchscreen-begin]  #'pgw/test-function)
-(global-set-key [touchscreen-update] #'pgw/test-function)
-(global-set-key [touchscreen-end]    #'pgw/test-function)
+
+(global-set-key [touchscreen-begin]  #'pgw/touch-function)
+(global-set-key [touchscreen-update] #'pgw/touch-function)
+(global-set-key [touchscreen-end]    #'pgw/touch-function)
 #+end_src
 
 ** Custom Functions
@@ -711,7 +736,9 @@ Make Emacs play nice with my window manager and resizing around other windows.
 (map! :leader
       :n "TAB b" 'pgw/buffer-to-new-workspace
       :n "TAB H" '+workspace/swap-left
-      :n "TAB L" '+workspace/swap-right)
+      :n "TAB L" '+workspace/swap-right
+      :n "TAB j" '+workspace/switch-right
+      :n "TAB k" '+workspace/switch-left)
 #+end_src
 
 ** ztree (Tool for diffing and merging directories)
@@ -1168,7 +1195,7 @@ Custom commands, testing sorting strategy variable
   (setq org-format-latex-options
         ;; '(:foreground "#000000" :background default ;; light theme
         '(:foreground "#d6d6d4" :background default ;; dark tieme
-                      :scale 1.4
+                      :scale 1.8
                       :html-foreground "Black" :html-background "Transparent"
                       :html-scale 1.0
                       :matchers ("begin" "$1" "$" "$$" "\\(" "\\[")))
