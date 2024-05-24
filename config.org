@@ -204,7 +204,8 @@ navigation/swapping commands.
 
 ** Bookmarks
 #+begin_src emacs-lisp
-  (setq bookmark-default-file (concat doom-private-dir "bookmarks/*Bookmarks*"))
+(personal
+ (setq bookmark-default-file (concat doom-private-dir "bookmarks/bookmarks_personal")))
 #+end_src
 
 ** Passwords
