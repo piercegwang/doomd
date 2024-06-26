@@ -194,6 +194,9 @@ navigation/swapping commands.
 
 #+begin_src emacs-lisp
 (setq evil-shift-width 4)
+(after! evil-escape
+  (setq evil-escape-delay 0.30)
+  (setq evil-escape-key-sequence "fj"))
 #+end_src
 
 ** Allow Local Variables
@@ -589,6 +592,41 @@ https://stackoverflow.com/questions/2540997/create-more-than-one-eshell-instance
         middle-name))))
 #+end_src
 
+*** Org-Roam get backlinks count
+
+#+begin_src emacs-lisp
+(defun pgw/get-backlinks-count ()
+  "Extract id value and append the backlink count (minus 1) to the
+end of the pattern below:
+   `'- [[id:ID][Text]] ::`'"
+  (interactive)
+  (let* ((start (if (use-region-p)
+                   (region-beginning)
+                 (line-beginning-position)))
+        (end (if (use-region-p)
+                 (region-end)
+               (line-end-position)))
+        (text (buffer-substring start end)))
+    (goto-char start)
+    (while (and (<= (point) end) (< (point) (point-max)))
+        (when (re-search-forward "\\[\\[id:\\(.*\\)\\]\\[.*\\]\\] ::" nil t)
+          (let* ((id (substring-no-properties (match-string 1)))
+                 (node (org-roam-node-from-id id))
+                 ;; decrease backlink count by one to account for the link we're
+                 ;; working with
+                 (backlink-count (- (if node
+                                        (length (org-roam-backlinks-get node :unique t))
+                                      0) 1)))
+            ;; (message "ID: %s, Node: %s, Backlinks: %d" id node backlink-count)
+            (save-excursion
+              (goto-char (match-end 0))
+              (kill-line 1)
+              (insert (format " %d\n" backlink-count)))))
+        ;; (beginning-of-line)
+        (next-line 1)
+        )))
+#+end_src
+
 *** Org roam date
 
 #+begin_src emacs-lisp
@@ -664,19 +702,30 @@ Light themes:
 
     ;; Load the theme (doom-one, doom-molokai, etc); keep in mind that each theme
     ;; may have their own settings.
+
+    ;; Dark Themes
+    ;; (load-theme 'doom-nord-aurora t)
+    ;; (load-theme 'doom-ir-black t)
     ;; (load-theme 'doom-badger t)
     ;; (load-theme 'doom-1337 t)
     ;; (load-theme 'doom-material-dark t)
     ;; (load-theme 'doom-outrun-electric t)
     ;; (load-theme 'doom-acario-dark t)
-    (load-theme 'doom-ir-black t)
-    ;; (load-theme 'doom-homage-black t)
+    (load-theme 'doom-homage-black t)
     ;; (load-theme 'doom-challenger-deep t)
     ;; (load-theme 'doom-snazzy t)
     ;; (load-theme 'doom-solarized-dark t)
+    ;; (load-theme 'doom-bluloco-dark t)
+    ;; (load-theme 'doom-ayu-dark t)
+    ;; (load-theme 'doom-meltbus t)
+    ;; (load-theme 'doom-oceanic-next t)
+
+    ;; Light Theme
     ;; (load-theme 'modus-operandi)
     ;; (load-theme 'doom-gruvbox-light)
     ;; (load-theme 'doom-acario-light t) ;; Good one
+    ;; (load-theme 'doom-ayu-light t)
+    ;; (load-theme 'doom-bluloco-light t)
 
     ;; Enable flashing mode-line on errors
     (doom-themes-visual-bell-config)
@@ -1468,8 +1517,8 @@ Related to
 ** Ditaa
 
 #+begin_src emacs-lisp
-(cond ((eq system-type 'gnu/linux) (setq org-ditaa-jar-path "/etc/profiles/per-user/piercewang/lib/ditaa.jar"))
-      ((eq system-type 'darwin) (setq org-ditaa-jar-path "/opt/homebrew/Cellar/ditaa/0.11.0_1/libexec/ditaa-0.11.0-standalone.jar")))
+(cond ((eq system-type 'gnu/linux) (setq! org-ditaa-jar-path "/etc/profiles/per-user/piercewang/lib/ditaa.jar"))
+      ((eq system-type 'darwin) (setq! org-ditaa-jar-path "/opt/homebrew/Cellar/ditaa/0.11.0_1/libexec/ditaa-0.11.0-standalone.jar")))
 #+end_src
 
 ** ~Darkroom~ for Writing
@@ -1831,6 +1880,13 @@ Move
   (setq dired-actual-switches "-alh"))
 #+end_src
 
+*** Add default for ~.xopp~
+
+#+begin_src emacs-lisp :tangle yes
+(after! dired-x
+  (add-to-list 'dired-guess-shell-alist-user
+               '("\\.\\(?:xopp\\)\\'" "xdg-open") t))
+#+end_src
 
 ** DISABLED mu4e
 CLOSED: [2021-04-25 Sun 23:53]
