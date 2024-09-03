@@ -2613,6 +2613,7 @@ All configurations here get "tangled" into the ~init.el~ file, telling Doom Emac
 #+name: doom-input
 #+begin_src emacs-lisp
 chinese
+;;bidi
 ;;japanese
 ;;layout            ; auie,ctsrnm is the superior home row
 #+end_src
@@ -2713,7 +2714,7 @@ pdf               ; pdf enhancements
 ;;prodigy           ; FIXME managing external services & code builders
 ;;rgb               ; creating color strings
 ;;taskrunner        ; taskrunner for all your projects
-terraform         ; infrastructure as code
+;; terraform         ; infrastructure as code
 ;;tmux              ; an API for interacting with tmux
 ;;tree-sitter       ; syntax and parsing, sitting in a tree...
 ;;upload            ; map local to remote projects via ssh/ftp
@@ -2721,7 +2722,7 @@ terraform         ; infrastructure as code
 
 #+name: doom-os
 #+begin_src emacs-lisp
-(:if IS-MAC macos)  ; improve compatibility with macOS
+(:if (featurep :system 'macos) macos)  ; improve compatibility with macOS
 ;;tty               ; improve the terminal Emacs experience
 #+end_src
 
@@ -2872,12 +2873,12 @@ Everything in this section gets "tangled" into the ~packages.el~ file which allo
 ;(unpin! t)
 
 (package! org-pdftools)
-;; (unpin! org-gcal)
-(package! org-gcal
-  :recipe (:host github
-           :type git
-           :repo "kidd/org-gcal.el")
-  :pin "3cc48a989ac859a97d25964c28874317a6e1672a")
+(package! org-gcal)
+;; (package! org-gcal
+;;   :recipe (:host github
+;;            :type git
+;;            :repo "kidd/org-gcal.el")
+;;   :pin "3cc48a989ac859a97d25964c28874317a6e1672a")
 (package! mixed-pitch)
 (package! darkroom)
 ;; (package! bufler)
@@ -2905,7 +2906,8 @@ Everything in this section gets "tangled" into the ~packages.el~ file which allo
   :recipe (:host nil
            :type git
            :repo "https://git.sr.ht/~bzg/org-contrib"
-           :branch "release_0.4"
+           ;; :branch "release_0.4"
+           :branch "release_0.5"
            :files ("lisp/*.elc" "lisp/*.el")))
 ;; (package! ledger-mode)
 (package! mu
@@ -2918,8 +2920,8 @@ Everything in this section gets "tangled" into the ~packages.el~ file which allo
 (package! py-autopep8)
 (package! blacken)
 (package! py-isort)
-(package! org
-  :pin "ca873f7")
+;; (package! org
+;;   :pin "ca873f7")
 (package! mastodon)
 (package! org-roam-ui)
 (package! ement)
