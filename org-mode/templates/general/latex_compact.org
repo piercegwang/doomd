@@ -3,6 +3,7 @@
 #+LATEX_CLASS_OPTIONS: [a4paper,landscape,twocolumn]
 #+LATEX_HEADER: \usepackage[margin=0.10in]{geometry}
 #+LATEX_HEADER: \usepackage{setspace}
+#+LATEX_HEADER: \setlength{\columnseprule}{0.4pt}
 #+LATEX_HEADER: \setstretch{0.05}
 #+LATEX_HEADER: \setlength{\parindent}{0pt}
 #+OPTIONS: toc:nil title:nil author:nil

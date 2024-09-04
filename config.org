@@ -1175,7 +1175,12 @@ Custom commands, testing sorting strategy variable
 **** HTML
 
 #+begin_src emacs-lisp
-  (setq org-html-validation-link nil)
+(setq org-html-validation-link nil)
+#+end_src
+**** Broken Links
+
+#+begin_src emacs-lisp
+(setq org-export-with-broken-links t)
 #+end_src
 
 **** ODT
@@ -2238,7 +2243,7 @@ optional DESC: string containing a description for the event
 This function uses the variable `pgw/schoolyear-dates' for the value of holidays
 unless custom-dates is specified"
 
-  (let* ((current (calendar-absolute-from-gregorian (pgw/diary-make-date 2023 9 5)))
+  (let* ((current (calendar-absolute-from-gregorian (pgw/diary-make-date 2024 08 26)))
          (desc (if desc (setq desc (format "\n%s\n" desc)) (setq desc "")))
          (schoolyear-dates (if custom-dates custom-dates (setq schoolyear-dates pgw/schoolyear-dates)))
          (fallstart (gethash "fallstart" schoolyear-dates))
@@ -2292,6 +2297,24 @@ unless custom-dates is specified"
       #s(hash-table
          size 5
          test equal
+         data ("fallstart" (2024 08 26)
+               "fallend" (2024 12 10)
+               "springstart" (2025 01 13)
+               "springend" (2025 05 16)
+               "noclasses" ((2024 09 02) ;; Labor Day
+                            (2024 10 12 2024 10 15) ;; Fall Break
+                            (2024 11 05) ;; Election Day, University Holiday
+                            (2024 11 27 2024 12 1) ;; Thanksgiving Break
+                            (2025 01 20)  ;; Martin Luther King Jr. Day, University Holiday
+                            (2025 03 1 2025 03 16) ;; Midterm Recess
+                            (2025 05 06 2025 05 09) ;; Jury week
+                            (2025 05 12 2025 05 16) ;; Final Exams
+                            ))))
+
+(setq pgw/juilliard-schoolyear-dates
+      #s(hash-table
+         size 5
+         test equal
          data ("fallstart" (2023 9 5)
                "fallend" (2023 12 22)
                "springstart" (2024 1 16)
@@ -2310,22 +2333,7 @@ unless custom-dates is specified"
                             (2024 04 30 2024 05 10)) ; Reading and Exam Days
                             )))
 
-(setq pgw/juilliard-schoolyear-dates
-      #s(hash-table
-         size 5
-         test equal
-         data ("fallstart" (2022 08 29)
-               "fallend" (2022 12 13)
-               "springstart" (2023 01 09)
-               "springend" (2023 05 01)
-               "noclasses" ((2022 09 05) ;; Labor Day
-                            (2022 10 10 2022 10 11) ;; Fall Break
-                            (2022 11 8) ;; Election Day, University Holiday
-                            (2022 11 23 2021 11 27) ;; Thanksgiving Break
-                            (2023 1 16)  ;; Martin Luther King Jr. Day, University Holiday
-                            (2023 2 25 2023 3 12)) ;; Midterm Recess
-                            ;; (2022 5 3 2022 5 6)) ;; Jury week
-                            ))))
+) ;; end of personal block
 
 #+end_src
 
@@ -2338,21 +2346,31 @@ Example usage (run in a dedicated file)
 #+begin_comment
 Juilliard Schedule:
 
-Aug 30 (Mon) 	Fall Semester Classes Begin
-Sept 1 (Wed) 	Convocation, 4pm
-Sept 6 (Mon) 	Labor Day (school closed)*
-Nov 2 (Tue) 	Election Day (school closed)*
-Nov 24 – Nov 28 (Wed – Sun) 	Thanksgiving Recess
-Dec 1 (Wed) 	Second semester tuition, room and board fees due
-Dec 17 (Fri) 	Fall Semester Ends
-Dec 18 – Jan 9 (Sat – Sun) 	Winter Recess (no classes)
-Jan 10 (Mon) 	Spring Semester Classes Begin
-Jan 17 (Mon) 	Martin Luther King Day (school closed)*
-Feb 25 – Mar 4 (Fri – Fri) 	Entrance Auditions (Dance and Music)
-Feb 26 – Mar 13 (Sat – Sun) 	Midterm Recess
-May 3 – May 6 (Tue – Fri) 	Jury Week (Music)
-May 13 (Fri) 	Spring Semester Ends
-May 20 (Fri) 	117th Commencement
+Aug 26 (Mon)	Fall Semester Classes Begin
+Sept 2 (Mon)	Labor Day (school closed)*
+Oct 12 – Oct 15 (Sat – Tues)	Fall Break
+Nov 5 (Tues)	Election Day (no classes)
+Nov 27 – Dec 1 (Wed – Sun)	Thanksgiving Recess
+Dec 10 (Tues)	Last day of classes
+Dec 11 - Dec 15 (Wed - Sun)	Reading/Performance days (no class meetings)
+Dec 16 – Dec 20 (Mon – Fri)	Final Exams
+Dec 20 (Fri)	Fall Semester Ends
+Dec 21 (Sat)	Residence hall closes at 12 noon. All students must vacate the residence hall.
+Dec 21 – Jan 12 (Sat – Sun)	Winter Recess (no classes)
+Dec 21 – Jan 1 (Sat – Wed)	Offices Closed
+Jan 2 (Thurs)	Staff Returns
+Jan 12 (Sun)	Residence hall opens at 9am
+Jan 13 (Mon)	Spring Semester Classes Begin
+Jan 20 (Mon)	Martin Luther King Day (school closed)*
+Feb 28 – Mar 7 (Fri – Fri)	Entrance Auditions (Dance and Music)
+Mar 1 – Mar 16 (Sat – Sun)	Midterm Recess
+May 6 – May 9 (Tue – Fri)	Jury Week (Music)
+May 12 – May 16 (Mon – Fri)	Final Exams
+May 16 (Fri)	Spring Semester Ends
+May 17 (Sat)	Non-graduating students must vacate residence hall by 8pm
+May 17 (Sat)	Meal plans end for non-graduating seniors. Non-graduating students must vacate the residence hall by 8pm
+May 24 (Sat)	Commencement
+May 25 (Sun)	Residence hall closes at 12 noon. All students must vacate the residence hall.
 #+end_comment
 
 *** Sync gcal Bash Script
