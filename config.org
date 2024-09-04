@@ -15,18 +15,6 @@
 :PROPERTIES:
 :header-args:emacs-lisp: :tangle no :comments no
 :END:
-This config works best with [[https://github.com/d12frosted/homebrew-emacs-plus][emacs-plus]] (28.1)
-#+begin_src sh :tangle no
-  brew tap railwaycat/emacsmacport
-  brew install emacs-mac
-  sudo osascript -e 'tell application "Finder" to make alias file to POSIX file "/usr/local/opt/emacs-mac/Emacs.app" at POSIX file "/Applications"'
-#+end_src
-
-** D
-ependencies
-#+begin_src sh :tangle no
-apt install ripgrep fdclone
-#+end_src
 
 ** Meta
 Every time you edit this file, you'll want to tangle it.
