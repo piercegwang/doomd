@@ -1178,6 +1178,13 @@ Custom commands, testing sorting strategy variable
 (setq org-odt-styles-file nil)
 #+end_src
 
+**** iCalendar
+
+#+begin_src emacs-lisp
+(setq org-icalendar-combined-agenda-file pgw/org-icalendar-export-file)
+(setq org-icalendar-timezone "America/New_York")
+#+end_src
+
 *** Export Publishing
 #+begin_src emacs-lisp
 (personal
@@ -2503,44 +2510,45 @@ See [[https://github.com/piercegwang/ohsics_to_org][https://github.com/piercegwa
 ** Passwords :crypt:
 -----BEGIN PGP MESSAGE-----
 
-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
-jUuAtck0HKM=
-=ciax
+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
+1QYU8v9ESI2HTxGQ+xbWqED8amhey4LLPFNRvA==
+=6iKF
 -----END PGP MESSAGE-----
 
 ** Polymode
@@ -2783,7 +2791,7 @@ nix               ; I hereby declare "nix geht mehr!"
 ;;rest              ; Emacs as a REST client
 ;;rst               ; ReST in peace
 ;;(ruby +rails)     ; 1.step {|i| p "Ruby is #{i.even? ? 'love' : 'life'}"}
-(rust +lsp)       ; Fe2O3.unwrap().unwrap().unwrap().unwrap()
+;;(rust +lsp)       ; Fe2O3.unwrap().unwrap().unwrap().unwrap()
 ;;scala             ; java, but good
 ;;(scheme +guile)   ; a fully conniving family of lisps
 sh                ; she sells {ba,z,fi}sh shells on the C xor
