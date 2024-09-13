@@ -1,2 +1,2 @@
 #+author: Pierce Wang
-#+email: pierce.wang@columbia.edu
+#+email: pierce.g.wang@gmail.com
