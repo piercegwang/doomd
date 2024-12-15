@@ -667,12 +667,13 @@ end of the pattern below:
 *** Doom Theme
 Favorite themes:
 
-1. acario-dark
-2. outrun-electric
-3. challenger-deep
-4. snazzy
-5. molokai
-6. solarized-dark
+1. homage-black
+2. acario-dark
+3. outrun-electric
+4. challenger-deep
+5. snazzy
+6. molokai
+7. solarized-dark
 
 
 + laserwave
@@ -694,12 +695,13 @@ Light themes:
     ;; Dark Themes
     ;; (load-theme 'doom-nord-aurora t)
     ;; (load-theme 'doom-ir-black t)
+    (load-theme 'doom-homage-black t) ;; *
+    ;; (load-theme 'doom-ephemeral t) ;; *
     ;; (load-theme 'doom-badger t)
     ;; (load-theme 'doom-1337 t)
     ;; (load-theme 'doom-material-dark t)
     ;; (load-theme 'doom-outrun-electric t)
     ;; (load-theme 'doom-acario-dark t)
-    (load-theme 'doom-homage-black t)
     ;; (load-theme 'doom-challenger-deep t)
     ;; (load-theme 'doom-snazzy t)
     ;; (load-theme 'doom-solarized-dark t)
@@ -1031,6 +1033,10 @@ Custom commands, testing sorting strategy variable
                 :type entry
                 :template ("* %?")
                 :children (("Flexible Entry" :keys "i")
+                           ("Events Entry" :keys "e"
+                            :file "~/NextCloud/Documents/org-roam/20241215110541-events_inbox.org"
+                            :template ("* %?"
+                                       "%^t"))
                            ("Todo" :keys "t"
                             :template ("* TODO %?"))
                            ("Notes Entry" :keys "n"
@@ -2916,13 +2922,13 @@ Everything in this section gets "tangled" into the ~packages.el~ file which allo
 ;;(package! poly-markdown)
 ;;(package! poly-R)
 (package! dap-mode)
-(package! org-contrib
-  :recipe (:host nil
-           :type git
-           :repo "https://git.sr.ht/~bzg/org-contrib"
-           ;; :branch "release_0.4"
-           :branch "release_0.5"
-           :files ("lisp/*.elc" "lisp/*.el")))
+(package! org-contrib)
+;;  :recipe (:host nil
+;;           :type git
+;;           :repo "https://git.sr.ht/~bzg/org-contrib"
+;;           ;; :branch "release_0.4"
+;;           :branch "release_0.5"
+;;           :files ("lisp/*.elc" "lisp/*.el")))
 ;; (package! ledger-mode)
 (package! mu
   :recipe (:host github

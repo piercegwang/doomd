@@ -1,2 +1,2 @@
-#+author: Pierce Wang (pgw2115)
-#+email: pierce.wang@columbia.edu
+#+author: Pierce Wang
+#+email: pgw@juilliard.edu
