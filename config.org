@@ -1036,7 +1036,8 @@ Custom commands, testing sorting strategy variable
                            ("Events Entry" :keys "e"
                             :file "~/NextCloud/Documents/org-roam/20241215110541-events_inbox.org"
                             :template ("* %?"
-                                       "%^t"))
+                                       "%^t"
+                                       ""))
                            ("Todo" :keys "t"
                             :template ("* TODO %?"))
                            ("Notes Entry" :keys "n"
