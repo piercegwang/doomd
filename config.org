@@ -954,9 +954,9 @@ Custom commands, testing sorting strategy variable
 #+begin_src emacs-lisp
 (map! :map evil-org-agenda-mode-map
       (:localleader
-       :n "l" #'org-agenda-log-mode
-       :n "r" #'pgw/org-agenda-reload-files
-       :n "f s" #'org-save-all-org-buffers))
+       :desc "Toggle Org Agenda Log Mode" "l" #'org-agenda-log-mode
+       :desc "Reload Org Agenda files with Agenda Node" "r" #'pgw/org-agenda-reload-files
+       :desc "Save All Org Buffers" "f s" #'org-save-all-org-buffers))
 #+end_src
 
 *** Babel
