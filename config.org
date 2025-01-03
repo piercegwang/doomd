@@ -1,5 +1,5 @@
 #+title: Doom configuration
-#+author: Pierie Wang
+#+author: Pierce Wang
 #+html_head: <link rel='shortcut icon' type='image/png' href='https://www.gnu.org/software/emacs/favicon.png'>
 #+HTML_HEAD: <link rel="stylesheet" href="https://vanillacss.com/vanilla.css">
 #+property: header-args:emacs-lisp :tangle yes :comments link
