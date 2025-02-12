@@ -694,8 +694,8 @@ Light themes:
 
     ;; Dark Themes
     ;; (load-theme 'doom-nord-aurora t)
-    ;; (load-theme 'doom-ir-black t)
-    (load-theme 'doom-homage-black t) ;; *
+    (load-theme 'doom-ir-black t)
+    ;; (load-theme 'doom-homage-black t) ;; *
     ;; (load-theme 'doom-ephemeral t) ;; *
     ;; (load-theme 'doom-badger t)
     ;; (load-theme 'doom-1337 t)
@@ -762,6 +762,14 @@ Make Emacs play nice with my window manager and resizing around other windows.
 (setq display-line-numbers-type 'visual)
 ;; (setq-default display-line-numbers 'visual)
 (set-default 'truncate-lines t)
+#+end_src
+
+*** zen mode line numbers
+
+add display-line-numbers to writeroom mode hook
+
+#+begin_src emacs-lisp
+(add-hook! writeroom-mode 'display-line-numbers-mode)
 #+end_src
 
 ** Windows, Frames, and Workspaces
@@ -952,11 +960,12 @@ Custom commands, testing sorting strategy variable
 **** Keybindings :keybinds:
 
 #+begin_src emacs-lisp
-(map! :map evil-org-agenda-mode-map
+(after! org-agenda-mode
+  (map! :map evil-org-agenda-mode-map
       (:localleader
        :desc "Toggle Org Agenda Log Mode" "l" #'org-agenda-log-mode
        :desc "Reload Org Agenda files with Agenda Node" "r" #'pgw/org-agenda-reload-files
-       :desc "Save All Org Buffers" "f s" #'org-save-all-org-buffers))
+       :desc "Save All Org Buffers" "f s" #'org-save-all-org-buffers)))
 #+end_src
 
 *** Babel
@@ -1111,6 +1120,13 @@ Custom commands, testing sorting strategy variable
                            ("Violin Repertoire" :keys "m"
                             :type entry
                             :id "89641a25-2cab-4b04-8d36-75c77d4dc855"
+                            :template ("* - %?"
+                                       "%^{COMPOSER}p"
+                                       "%^{ARRANGEMENT}p"
+                                       "%^{COMPOSED}p"))
+                           ("Repertoire Wishlist" :keys "w"
+                            :type entry
+                            :id "3f538210-a3ab-4e3f-8c1c-fe5c08d3a2f3"
                             :template ("* - %?"
                                        "%^{COMPOSER}p"
                                        "%^{ARRANGEMENT}p"
