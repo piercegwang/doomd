@@ -769,7 +769,7 @@ Make Emacs play nice with my window manager and resizing around other windows.
 add display-line-numbers to writeroom mode hook
 
 #+begin_src emacs-lisp
-(add-hook! writeroom-mode 'display-line-numbers-mode)
+(add-hook! writeroom-mode (display-line-numbers-mode 'toggle))
 #+end_src
 
 ** Windows, Frames, and Workspaces
