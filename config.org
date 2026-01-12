@@ -544,86 +544,6 @@ https://stackoverflow.com/questions/2540997/create-more-than-one-eshell-instance
     (switch-to-buffer buffer)))
 #+end_src
 
-*** Get TODO Nodes
-#+begin_src emacs-lisp
-(defun pgw/org-roam-get-todos (backlink-id)
-  (mapcar #'org-roam-node-file
-    (mapcar #'org-roam-backlink-source-node
-            (org-roam-backlinks-get
-            (org-roam-node-from-id backlink-id) :unique t))))
-#+end_src
-
-*** Parse Org Roam Title for Person
-
-#+begin_src emacs-lisp
-(after! org-roam
-  (defun pgw/roam-parse-person-into-last-name (roam-node)
-    (let ((title (org-roam-node-title roam-node)))
-      (car (split-string title ", "))))
-
-  (defun pgw/roam-parse-person-into-first-name (roam-node)
-    (let ((title (org-roam-node-title roam-node))
-          (first-half)
-          (first-name))
-      (setq first-half (car (cdr (split-string title ", "))))
-      (setq first-name (car (split-string first-half " ")))
-      first-name))
-
-  (defun pgw/roam-parse-person-into-middle-name (roam-node)
-    (let ((title (org-roam-node-title roam-node))
-          (first-half)
-          (first-name))
-      (setq first-half (car (cdr (split-string title ", "))))
-      (setq middle-name (string-trim-left first-half ".+ "))
-      (if (string= middle-name first-half)
-          ""
-        middle-name))))
-#+end_src
-
-*** Org-Roam get backlinks count
-
-#+begin_src emacs-lisp
-(defun pgw/get-backlinks-count ()
-  "Extract id value and append the backlink count (minus 1) to the
-end of the pattern below:
-   `'- [[id:ID][Text]] ::`'"
-  (interactive)
-  (let* ((start (if (use-region-p)
-                   (region-beginning)
-                 (line-beginning-position)))
-        (end (if (use-region-p)
-                 (region-end)
-               (line-end-position)))
-        (text (buffer-substring start end)))
-    (goto-char start)
-    (while (and (<= (point) end) (< (point) (point-max)))
-        (when (re-search-forward "\\[\\[id:\\(.*\\)\\]\\[.*\\]\\] ::" nil t)
-          (let* ((id (substring-no-properties (match-string 1)))
-                 (node (org-roam-node-from-id id))
-                 ;; decrease backlink count by one to account for the link we're
-                 ;; working with
-                 (backlink-count (- (if node
-                                        (length (org-roam-backlinks-get node :unique t))
-                                      0) 1)))
-            ;; (message "ID: %s, Node: %s, Backlinks: %d" id node backlink-count)
-            (save-excursion
-              (goto-char (match-end 0))
-              (kill-line 1)
-              (insert (format " %d\n" backlink-count)))))
-        ;; (beginning-of-line)
-        (next-line 1)
-        )))
-#+end_src
-
-*** Org roam date
-
-#+begin_src emacs-lisp
-(after! org-roam
-  (defun pgw/year-month-day (roam-node)
-    "Custom function to return date in format: YYYY-MM-DD"
-    (format-time-string "%Y-%m-%d %a")))
-#+end_src
-
 *** python: snippet-split-args
 #+begin_src emacs-lisp
 (defun pgw/python-snippet-split-args (arg-string)
@@ -651,15 +571,6 @@ end of the pattern below:
 
 #+begin_src emacs-lisp
 (cons 2 (cons 1 nil))
-#+end_src
-
-*** Find People Files :roam:
-
-#+begin_src emacs-lisp
-(defun get-person-file ()
-  "Query and return a person from my org-roam system."
-  (let ((prompt "Person: "))
-  (org-roam-node-file (org-roam-node-read "" (lambda (node) (string= (org-roam-node-category node) "people")) nil t prompt))))
 #+end_src
 
 ** Visuals
@@ -694,8 +605,8 @@ Light themes:
 
     ;; Dark Themes
     ;; (load-theme 'doom-nord-aurora t)
-    (load-theme 'doom-ir-black t)
-    ;; (load-theme 'doom-homage-black t) ;; *
+    ;; (load-theme 'doom-ir-black t)
+    (load-theme 'doom-homage-black t) ;; *
     ;; (load-theme 'doom-ephemeral t) ;; *
     ;; (load-theme 'doom-badger t)
     ;; (load-theme 'doom-1337 t)
@@ -806,38 +717,147 @@ add display-line-numbers to writeroom mode hook
 
 Still figuring this out, just switched to powerline!
 
-*** DISABLED Smart Mode Line
-CLOSED: [2020-11-29 Sun 11:30]
-#+begin_src emacs-lisp :tangle no
-  (use-package! smart-mode-line
-    :config
-    (setq rm-blacklist '(" hl-p" " WK" " yas" " Undo-Tree" " hs")
-          ;; sml/theme 'light
-          sml/name-width 30
-          )
-    (add-to-list 'sml/replacer-regexp-list '("^~/Google Drive/OHS/\\([0-9]\\{2\\}\\)th Grade/Classes/Semester [0-9]/\\([0-9A-Z]*\\)/" ":\\2:"))
-    (add-hook! 'after-init-hook 'sml/setup)
-    )
-#+end_src
-
 *** Other Configuration
 #+begin_src emacs-lisp
   (size-indication-mode 1)
   (line-number-mode -1)
 #+end_src
 
-*** DISABLED Time display
-CLOSED: [2020-11-29 Sun 11:30]
-#+begin_src emacs-lisp :tangle no
-  (setq display-time-format "%a %m/%d %H:%M")
-  (display-time-mode)
+** org-roam
+
+#+begin_src emacs-lisp
+(use-package! org-roam
+  :hook (after-init . org-roam-mode)
+  :config
+  (setq org-roam-directory "~/NextCloud/Documents/org-roam/"
+        org-roam-db-location "~/NextCloud/Documents/org-roam.db"
+        org-roam-db-update-on-save t)
+  (defun pgw/org-roam-refresh ()
+    (interactive)
+    (org-roam-db-build-cache :force)
+    (org-roam-buffer--update-maybe :redisplay))
+  (setq org-roam-capture-templates
+        '(("d" "default" plain "%?" :target
+           (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n")
+           :unnarrowed t)
+          ("p" "person entry" plain (file "~/NextCloud/Documents/org-roam/people/templates/person.org")
+           :target (file "people/${slug}-%<%Y%m%d%H%M%S>.org") :unnarrowed t)
+          ("o" "organization entry" plain (file "~/NextCloud/Documents/org-roam/people/templates/organization.org")
+           :target (file "people/${slug}-%<%Y%m%d%H%M%S>.org") :unnarrowed t)
+          ("B" "Bible Book" plain (file
+          "~/NextCloud/Documents/org-roam/bible/book_template.org")
+           :target (file "bible/${slug}.org")
+           :unnarrowed t)))
+  (setq org-roam-dailies-capture-templates
+        '(("d" "default" entry "* %?\n%U" :target
+           (file+head "%<%Y-%m-%d>.org" "#+title: [%<%Y-%m-%d %a>]\n")))))
 #+end_src
 
-*** DISABLED Battery display
-CLOSED: [2020-11-29 Sun 11:30]
+*** Get Roam Nodes
+#+begin_src emacs-lisp
+(defun pgw/org-roam-get-files-from-node (backlink-id)
+  (mapcar #'org-roam-node-file
+    (mapcar #'org-roam-backlink-source-node
+            (org-roam-backlinks-get
+            (org-roam-node-from-id backlink-id) :unique t))))
+#+end_src
+
 #+begin_src emacs-lisp :tangle no
-  (setq battery-mode-line-format " [%b%p%%]")
-  (display-battery-mode)
+(mapcar #'org-roam-backlink-source-node
+            (org-roam-backlinks-get
+            (org-roam-node-from-id "a7e76c50-1b58-40f4-8f5b-38ae0f5be32f") :unique t))
+#+end_src
+
+*** Parse Org Roam Title for Person
+
+#+begin_src emacs-lisp
+(after! org-roam
+  (defun pgw/roam-parse-person-into-last-name (roam-node)
+    (let ((title (org-roam-node-title roam-node)))
+      (car (split-string title ", "))))
+
+  (defun pgw/roam-parse-person-into-first-name (roam-node)
+    (let ((title (org-roam-node-title roam-node))
+          (first-half)
+          (first-name))
+      (setq first-half (car (cdr (split-string title ", "))))
+      (setq first-name (car (split-string first-half " ")))
+      first-name))
+
+  (defun pgw/roam-parse-person-into-middle-name (roam-node)
+    (let ((title (org-roam-node-title roam-node))
+          (first-half)
+          (first-name))
+      (setq first-half (car (cdr (split-string title ", "))))
+      (setq middle-name (string-trim-left first-half ".+ "))
+      (if (string= middle-name first-half)
+          ""
+        middle-name))))
+#+end_src
+
+*** Org-Roam get backlinks count
+
+#+begin_src emacs-lisp
+(defun pgw/get-backlinks-count ()
+  "Extract id value and append the backlink count (minus 1) to the
+end of the pattern below:
+   `'- [[id:ID][Text]] ::`'"
+  (interactive)
+  (let* ((start (if (use-region-p)
+                   (region-beginning)
+                 (line-beginning-position)))
+        (end (if (use-region-p)
+                 (region-end)
+               (line-end-position)))
+        (text (buffer-substring start end)))
+    (goto-char start)
+    (while (and (<= (point) end) (< (point) (point-max)))
+        (when (re-search-forward "\\[\\[id:\\(.*\\)\\]\\[.*\\]\\] ::" nil t)
+          (let* ((id (substring-no-properties (match-string 1)))
+                 (node (org-roam-node-from-id id))
+                 ;; decrease backlink count by one to account for the link we're
+                 ;; working with
+                 (backlink-count (- (if node
+                                        (length (org-roam-backlinks-get node :unique t))
+                                      0) 1)))
+            ;; (message "ID: %s, Node: %s, Backlinks: %d" id node backlink-count)
+            (save-excursion
+              (goto-char (match-end 0))
+              (kill-line 1)
+              (insert (format " %d\n" backlink-count)))))
+        ;; (beginning-of-line)
+        (next-line 1)
+        )))
+#+end_src
+
+*** Org roam date
+
+#+begin_src emacs-lisp
+(after! org-roam
+  (defun pgw/year-month-day ()
+    "Custom function to return date in format: YYYY-MM-DD"
+    (format-time-string "%Y-%m-%d %a")))
+#+end_src
+
+*** Find People Files :roam:
+
+#+begin_src emacs-lisp
+(defun get-person-file ()
+  "Query and return a person from my org-roam system."
+  (interactive)
+  (let ((prompt "Person: "))
+  (org-roam-node-file (org-roam-node-read "" (lambda (node) (string= (org-roam-node-category node) "people")) nil t prompt))))
+#+end_src
+
+
+** Consult-org-roam
+
+#+begin_src emacs-lisp
+(after! org-roam
+  (use-package! consult-org-roam
+    :config
+    (map! :leader
+          :desc "Org Roam Find Backlinks" "n r b" #'consult-org-roam-backlinks)))
 #+end_src
 
 ** Org-mode
@@ -908,7 +928,7 @@ Custom commands, testing sorting strategy variable
             (org-agenda-sorting-strategy
              '((agenda alpha-up priority-up)))
             (org-agenda-files
-             (pgw/org-roam-get-todos "4c9d2454-e949-4750-9814-1c888263562e"))))
+             (pgw/org-roam-get-files-from-node "4c9d2454-e949-4750-9814-1c888263562e"))))
           ("T" "Todo List" todo "TODO"
            ((org-agenda-sorting-strategy
              '((priority-up)))))
@@ -937,14 +957,21 @@ Custom commands, testing sorting strategy variable
 
  (defun pgw/org-agenda-reload-files ()
    (interactive)
-   (setq org-agenda-files (append (pgw/org-roam-get-todos "ab2c5980-0f5f-4d46-8ad3-8194f67ac39d")))))
+   (let ((files (pgw/org-roam-get-files-from-node "ab2c5980-0f5f-4d46-8ad3-8194f67ac39d")))
+     (setq org-agenda-files files)
+     (let ((ignore-file "~/NextCloud/Documents/org-roam/.orgzlyignore"))
+       (with-temp-buffer
+         (insert (concat "*" "\n"))
+         (dolist (file files)
+           (insert (concat "!" (file-name-nondirectory file) "\n")))
+         (write-file ignore-file))))))
 
 (work
  (setq org-agenda-files '())
 
  (defun pgw/org-agenda-reload-files ()
    (interactive)
-   (setq org-agenda-files (append (pgw/org-roam-get-todos "f376fe6c-fe4f-49b8-9be2-85e67a883e69")))))
+   (setq org-agenda-files (append (pgw/org-roam-get-files-from-node "f376fe6c-fe4f-49b8-9be2-85e67a883e69")))))
 
 (pgw/org-agenda-reload-files)
 #+end_src
@@ -975,8 +1002,8 @@ Custom commands, testing sorting strategy variable
   (org-babel-do-load-languages 'org-babel-load-languages
                                '((python . t)
                                  (c . t)
-                                 (ditaa . t)
-                                 (ledger . t))))
+                                 (ditaa . t))))
+                                 ;; (ledger . t))))
 
 #+end_src
 
@@ -1407,7 +1434,7 @@ Related to
 *** Org Refile
 
 #+begin_src emacs-lisp
-;; (personal (setq pgw/refile-targets (pgw/org-roam-get-todos)))
+;; (personal (setq pgw/refile-targets (pgw/org-roam-get-files-from-node)))
 #+end_src
 *** Org Refile:
 #+begin_src emacs-lisp
@@ -1505,36 +1532,6 @@ Related to
 (use-package! org-download
   :config
   (setq org-download-screenshot-method "gnome-screenshot"))
-#+end_src
-
-** org-roam
-
-#+begin_src emacs-lisp
-(use-package! org-roam
-  :hook (after-init . org-roam-mode)
-  :config
-  (setq org-roam-directory "~/NextCloud/Documents/org-roam/"
-        org-roam-db-location "~/NextCloud/Documents/org-roam.db"
-        org-roam-db-update-on-save t)
-  (defun pgw/org-roam-refresh ()
-    (interactive)
-    (org-roam-db-build-cache :force)
-    (org-roam-buffer--update-maybe :redisplay))
-  (setq org-roam-capture-templates
-        '(("d" "default" plain "%?" :target
-           (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n")
-           :unnarrowed t)
-          ("p" "person entry" plain (file "~/NextCloud/Documents/org-roam/people/templates/person.org")
-           :target (file "people/${slug}-%<%Y%m%d%H%M%S>.org") :unnarrowed t)
-          ("o" "organization entry" plain (file "~/NextCloud/Documents/org-roam/people/templates/organization.org")
-           :target (file "people/${slug}-%<%Y%m%d%H%M%S>.org") :unnarrowed t)
-          ("B" "Bible Book" plain (file
-          "~/NextCloud/Documents/org-roam/bible/book_template.org")
-           :target (file "bible/${slug}.org")
-           :unnarrowed t)))
-  (setq org-roam-dailies-capture-template
-        '(("d" "default" entry "* %?" :target
-           (file+head "%<%Y-%m-%d>.org" "#+title: %<%Y-%m-%d>\n")))))
 #+end_src
 
 ** Ditaa
@@ -2261,7 +2258,7 @@ optional DESC: string containing a description for the event
 This function uses the variable `pgw/schoolyear-dates' for the value of holidays
 unless custom-dates is specified"
 
-  (let* ((current (calendar-absolute-from-gregorian (pgw/diary-make-date 2024 08 26)))
+  (let* ((current (calendar-absolute-from-gregorian (pgw/diary-make-date 2025 08 25)))
          (desc (if desc (setq desc (format "\n%s\n" desc)) (setq desc "")))
          (schoolyear-dates (if custom-dates custom-dates (setq schoolyear-dates pgw/schoolyear-dates)))
          (fallstart (gethash "fallstart" schoolyear-dates))
@@ -2315,19 +2312,39 @@ unless custom-dates is specified"
       #s(hash-table
          size 5
          test equal
-         data ("fallstart" (2024 08 26)
-               "fallend" (2024 12 10)
-               "springstart" (2025 01 13)
-               "springend" (2025 05 16)
-               "noclasses" ((2024 09 02) ;; Labor Day
-                            (2024 10 12 2024 10 15) ;; Fall Break
-                            (2024 11 05) ;; Election Day, University Holiday
-                            (2024 11 27 2024 12 1) ;; Thanksgiving Break
-                            (2025 01 20)  ;; Martin Luther King Jr. Day, University Holiday
-                            (2025 03 1 2025 03 16) ;; Midterm Recess
-                            (2025 05 06 2025 05 09) ;; Jury week
-                            (2025 05 12 2025 05 16) ;; Final Exams
+         data ("fallstart" (2025 08 25)
+               "fallend" (2025 12 19)
+               "springstart" (2026 01 12)
+               "springend" (2026 05 15)
+               "noclasses" ((2025 09 01) ;; Labor Day
+                            (2025 10 11 2025 10 14) ;; Fall Break
+                            (2025 11 04) ;; Election Day, University Holiday
+                            (2025 11 26 2025 11 30) ;; Thanksgiving Break
+                            (2025 12 10 2025 12 14) ;; Reading/Performance Days
+                            (2025 12 15 2025 12 19) ;; Final Exams
+                            (2026 01 19)  ;; Martin Luther King Jr. Day, University Holiday
+                            (2026 02 28 2026 03 15) ;; Midterm Recess
+                            (2026 05 05 2026 05 08) ;; Jury week
+                            (2026 05 12 2026 05 16) ;; Final Exams
                             ))))
+
+;; Aug 25 (Mon)	Fall Semester Classes Begin
+;; Sept 1 (Mon)	Labor Day (Diamond Building closed)
+;; Oct 11 – Oct 14 (Sat – Tue)	Fall Break
+;; Nov 4 (Tue)	Election Day (no classes)
+;; Nov 26 – Nov 30 (Wed – Sun)	Thanksgiving Recess
+;; Dec 9 (Tue)	Last day of classes
+;; Dec 10 - Dec 14 (Wed - Sun)	Reading/Performance days (no class meetings)
+;; Dec 15 – Dec 19 (Mon – Fri)	Final Exams
+;; Dec 19 (Fri)	Fall Semester Ends
+;; Dec 20 – Jan 11 (Sat – Sun)	Winter Recess (no classes)
+;; Jan 12 (Mon)	Spring Semester Classes Begin
+;; Jan 19 (Mon)	Martin Luther King Day (Diamond Building closed)
+;; Feb 28 – Mar 15 (Sat – Sun)	Midterm Recess
+;; May 5 – May 8 (Tue – Fri)	Jury Week (Music)
+;; May 11 – May 15 (Mon – Fri)	Final Exams
+;; May 15 (Fri)	Spring Semester Ends
+;; May 22 (Fri)	Commencement
 
 (setq pgw/juilliard-schoolyear-dates
       #s(hash-table
@@ -2437,7 +2454,7 @@ See [[https://github.com/piercegwang/ohsics_to_org][https://github.com/piercegwa
 
 *** Python
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
 (use-package! elpy
   :config
   (elpy-enable)
@@ -2797,7 +2814,7 @@ ess               ; emacs speaks statistics
 (latex             ; writing papers in Emacs has never been so fun
  +cdlatex)
 ;;lean              ; for folks with too much to prove
-ledger            ; be audit you can be
+;;ledger            ; be audit you can be
 lua               ; one-based indices? one-based indices
 markdown          ; writing docs for people to ignore
 ;;nim               ; python + lisp at the speed of c
@@ -2807,7 +2824,7 @@ nix               ; I hereby declare "nix geht mehr!"
 ;;php               ; perl's insecure younger brother
 ;;plantuml          ; diagrams for confusing people more
 ;;purescript        ; javascript, but functional
-;;(python)            ; beautiful is better than ugly
+(python)            ; beautiful is better than ugly
 ;;qt                ; the 'cutest' gui framework ever
 ;;racket            ; a DSL for DSLs
 ;;raku              ; the artist formerly known as perl6
@@ -2953,7 +2970,7 @@ Everything in this section gets "tangled" into the ~packages.el~ file which allo
            :branch "master"))
 (package! org-download)
 (package! crdt)
-(package! elpy)
+;; (package! elpy)
 (package! py-autopep8)
 (package! blacken)
 (package! py-isort)
@@ -2965,4 +2982,5 @@ Everything in this section gets "tangled" into the ~packages.el~ file which allo
 (package! fireplace)
 (package! gdscript-mode)
 (package! all-the-icons)
+(package! consult-org-roam)
 #+end_src
