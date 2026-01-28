@@ -1087,7 +1087,7 @@ Custom commands, testing sorting strategy variable
                ("Finances" :keys "f"
                 ;; :file "~/NextCloud/Documents/org/finances.org.gpg"
                 :children (("Income" :keys "i"
-                            :file "~/NextCloud/Documents/org-roam/20220802062356-2022_income.org.org"
+                            :file "~/NextCloud/Documents/org-roam/20260128130243-ledger_accounting.org"
                             :headline "Inbox"
                             :template ("* %?"
                                        ":PROPERTIES:"
@@ -1098,14 +1098,14 @@ Custom commands, testing sorting strategy variable
                                        "%^{amount}p"
                                        "%^{beforetax}p"
                                        "%^{category}p"))
-                           ("Transaction (Generic - Chase College)" :keys "t"
-                            :file "~/NextCloud/Documents/org-roam/20220802062356-2022_income.org"
-                            :headline "Expenses"
+                           ("Transaction (Chase Freedom Credit Card [8246])" :keys "t"
+                            :file "~/NextCloud/Documents/org-roam/20260128144717-2026_finances.org"
+                            :prepend t
                             :template ("* %U"
                                        "#+begin_src ledger :results silent"
                                        "%(format-time-string \"%Y/%m/%d\") * %^{Specific Transaction Name}"
                                        "%?"
-                                       "    assets:%^{Source|bank:chase college|bank:nordstrom|venmo|cash}"
+                                       "    assets:%^{Source|bank:venmo|bank:chase:college|bank:chase:freedom credit|bank:alliant:checking|bank:alliant:savings}"
                                        "#+end_src"))))
                ("Events" :keys "e"
                 :type entry
@@ -2814,7 +2814,7 @@ ess               ; emacs speaks statistics
 (latex             ; writing papers in Emacs has never been so fun
  +cdlatex)
 ;;lean              ; for folks with too much to prove
-;;ledger            ; be audit you can be
+ledger            ; be audit you can be
 lua               ; one-based indices? one-based indices
 markdown          ; writing docs for people to ignore
 ;;nim               ; python + lisp at the speed of c
