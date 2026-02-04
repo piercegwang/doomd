@@ -1085,28 +1085,17 @@ Custom commands, testing sorting strategy variable
                             :headline "Daily Prayer"
                             :template ("* %?"))))
                ("Finances" :keys "f"
-                ;; :file "~/NextCloud/Documents/org/finances.org.gpg"
-                :children (("Income" :keys "i"
-                            :file "~/NextCloud/Documents/org-roam/20260128130243-ledger_accounting.org"
-                            :headline "Inbox"
-                            :template ("* %?"
-                                       ":PROPERTIES:"
-                                       ":DATE: %U"
-                                       ":period_start: %^u"
-                                       ":period_end: %^u"
-                                       ":END:"
-                                       "%^{amount}p"
-                                       "%^{beforetax}p"
-                                       "%^{category}p"))
-                           ("Transaction (Chase Freedom Credit Card [8246])" :keys "t"
+                :children (("Transaction" :keys "t"
                             :file "~/NextCloud/Documents/org-roam/20260128144717-2026_finances.org"
                             :prepend t
                             :template ("* %U"
+                                       ""
                                        "#+begin_src ledger :results silent"
                                        "%(format-time-string \"%Y/%m/%d\") * %^{Specific Transaction Name}"
-                                       "%?"
+                                       "    %?"
                                        "    assets:%^{Source|bank:venmo|bank:chase:college|bank:chase:freedom credit|bank:alliant:checking|bank:alliant:savings}"
-                                       "#+end_src"))))
+                                       "#+end_src"
+                                       ""))))
                ("Events" :keys "e"
                 :type entry
                 :children (("Emacs Entry (Not Synced)" :keys "f"
@@ -1578,8 +1567,10 @@ Disable automatic completion from company--slows everything down a bit.
 
 ** Ledger Mode
 
-#+begin_src emacs-lisp :tangle no
-(after! ledger-mode)
+#+begin_src emacs-lisp :tangle yes
+(after! ledger-mode
+  :config
+  (setq ledger-binary-path "hledger"))
 #+end_src
 
 ** LaTeX
