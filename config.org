@@ -922,7 +922,7 @@ Custom commands, testing sorting strategy variable
            ((org-agenda-span 1)
             (org-deadline-warning-days 14)
             (org-agenda-sorting-strategy
-             '((agenda habit-down time-up deadline-up)))))
+             '((agenda habit-down time-up deadline-up todo-state-down)))))
           ("C" "CRM" agenda ""
            ((org-agenda-span 1)
             (org-agenda-sorting-strategy
@@ -1088,12 +1088,11 @@ Custom commands, testing sorting strategy variable
                 :children (("Transaction" :keys "t"
                             :file "~/NextCloud/Documents/org-roam/20260128144717-2026_finances.org"
                             :prepend t
-                            :template ("* %U"
-                                       ""
+                            :template ("* %u"
                                        "#+begin_src ledger :results silent"
                                        "%(format-time-string \"%Y/%m/%d\") * %^{Specific Transaction Name}"
                                        "    %?"
-                                       "    assets:%^{Source|bank:venmo|bank:chase:college|bank:chase:freedom credit|bank:alliant:checking|bank:alliant:savings}"
+                                       "    assets:%^{Source||bank:venmo|bank:chase:college|bank:chase:freedom credit|bank:alliant:checking|bank:alliant:savings|bank:schwab ira|bank:schwab ira:cash}"
                                        "#+end_src"
                                        ""))))
                ("Events" :keys "e"
