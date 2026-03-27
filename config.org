@@ -928,7 +928,7 @@ Custom commands, testing sorting strategy variable
             (org-deadline-warning-days 14)
             (org-agenda-start-with-log-mode t)
             (org-agenda-sorting-strategy
-             '((agenda habit-down time-up deadline-up todo-state-down)))
+             '((agenda habit-down time-up deadline-up)))
             (org-agenda-files
              (pgw/org-roam-get-files-from-node "064d1366-c07a-4e3e-8cca-b51ee6c83808"))))
           ("C" "CRM" agenda ""
