@@ -921,6 +921,7 @@ Custom commands, testing sorting strategy variable
           ("g" "General Agenda" agenda ""
            ((org-agenda-span 1)
             (org-deadline-warning-days 14)
+            (org-agenda-start-with-log-mode t)
             (org-agenda-sorting-strategy
              '((agenda habit-down time-up deadline-up todo-state-down)))))
           ("v" "Violin Repertoire" agenda ""
@@ -928,7 +929,7 @@ Custom commands, testing sorting strategy variable
             (org-deadline-warning-days 14)
             (org-agenda-start-with-log-mode t)
             (org-agenda-sorting-strategy
-             '((agenda habit-down time-up deadline-up)))
+             '((agenda habit-down time-up deadline-up priority-down)))
             (org-agenda-files
              (pgw/org-roam-get-files-from-node "064d1366-c07a-4e3e-8cca-b51ee6c83808"))))
           ("C" "CRM" agenda ""
@@ -1146,14 +1147,16 @@ Custom commands, testing sorting strategy variable
                             :template ("* - %?"
                                        "%^{COMPOSER}p"
                                        "%^{ARRANGEMENT}p"
-                                       "%^{COMPOSED}p"))
+                                       "%^{COMPOSED}p"
+                                       "%^{STYLE|habit}p"))
                            ("Repertoire Wishlist" :keys "w"
                             :type entry
                             :id "3f538210-a3ab-4e3f-8c1c-fe5c08d3a2f3"
                             :template ("* - %?"
                                        "%^{COMPOSER}p"
                                        "%^{ARRANGEMENT}p"
-                                       "%^{COMPOSED}p"))))
+                                       "%^{COMPOSED}p"
+                                       "%^{STYLE|habit}p"))))
                ("CRM Contact" :keys "c"
                 :type entry
                 :function (lambda () (get-person-file))
