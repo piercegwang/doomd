@@ -1016,6 +1016,12 @@ Custom commands, testing sorting strategy variable
 
 #+end_src
 
+*** Shift Select
+
+#+begin_src emacs-lisp
+(setq org-support-shift-select 'nil)
+#+end_src
+
 *** Changing Defaults
 
 #+begin_src emacs-lisp
@@ -1405,6 +1411,15 @@ Update the `org-id-locations' global hash-table, and update the
 (map! (:map org-mode-map
        :localleader
        :desc "Restart org-mode" "R" #'org-mode-restart))
+#+end_src
+
+*** Org Evil Map - C-c
+
+#+begin_src emacs-lisp
+(map! (:map org-mode-map
+       :localleader
+       :desc "C-c C-c" "C" #'org-ctrl-c-ctrl-c
+       :desc "C-c C-c" "RET" #'org-ctrl-c-ctrl-c))
 #+end_src
 
 *** Org Note
