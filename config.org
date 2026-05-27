@@ -1109,7 +1109,51 @@ Custom commands, testing sorting strategy variable
                                        "    %?"
                                        "    assets:%^{Source||bank:venmo|bank:chase:college|bank:chase:freedom credit|bank:alliant:checking|bank:alliant:savings|bank:schwab ira|bank:schwab ira:cash}"
                                        "#+end_src"
-                                       ""))))
+                                       ""))
+                           ("Tithe" :keys "T"
+                            :file "~/NextCloud/Documents/org-roam/20260128144717-2026_finances.org"
+                            :prepend t
+                            :template ("* %u"
+                                       "#+begin_src ledger :results silent"
+                                       "%(format-time-string \"%Y/%m/%d\") * Tithe at Redeemer LSQ"
+                                       "    liabilities:tithe:redeemer lsq  $%?"
+                                       "    assets:bank:chase:freedom credit"
+                                       "#+end_src"
+                                       ""))
+                           ("Refill Omni" :keys "O"
+                            :file "~/NextCloud/Documents/org-roam/20260128144717-2026_finances.org"
+                            :prepend t
+                            :template ("* %u"
+                                       "#+begin_src ledger :results silent"
+                                       "%(format-time-string \"%Y/%m/%d\") * Refill OMNY Card - 230355060085554226"
+                                       "    expenses:travel:mta                         $140%?"
+                                       "    assets:bank:chase:freedom credit"
+                                       "#+end_src"
+                                       ""))
+                           ("Income" :keys "i"
+                            :type entry
+                            :children (("Acacia Income" :keys "a"
+                                        :file "~/NextCloud/Documents/org-roam/20260128144717-2026_finances.org"
+                                        :prepend t
+                                        :template ("* %u"
+                                                   "Bank Entry: %^{Bank Entry}"
+                                                   "#+begin_src ledger :results silent"
+                                                   "%(format-time-string \"%Y/%m/%d\") * Acacia Work"
+                                                   "    income:work:acacia  -$%?"
+                                                   "    assets:bank:alliant:checking"
+                                                   "#+end_src"
+                                                   ""))
+                                       ("Juilliard Income" :keys "j"
+                                        :file "~/NextCloud/Documents/org-roam/20260128144717-2026_finances.org"
+                                        :prepend t
+                                        :template ("* %u"
+                                                   "Bank Entry: %^{Bank Entry}"
+                                                   "#+begin_src ledger :results silent"
+                                                   "%(format-time-string \"%Y/%m/%d\") * Juilliard Work"
+                                                   "    income:work:juilliard  -$%?"
+                                                   "    assets:bank:alliant:checking"
+                                                   "#+end_src"
+                                                   ""))))))
                ("Events" :keys "e"
                 :type entry
                 :children (("Emacs Entry (Not Synced)" :keys "f"
