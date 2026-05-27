@@ -1592,6 +1592,21 @@ Related to
   (setq org-download-screenshot-method "gnome-screenshot"))
 #+end_src
 
+*** Anki editing
+
+Requires AnkiConnect plugin for Anki: https://ankiweb.net/shared/info/2055492159
+
+#+begin_src emacs-lisp
+(use-package! anki-editor
+  :config
+  ; I like making decks
+  (setq anki-editor-create-decks 't)
+  (map! :map org-mode-map
+        (:localleader
+         :n "w a" #'anki-editor-ui))) ; w for wanki(?) or perhaps "music whistory"
+#+end_src
+
+
 ** Ditaa
 
 #+begin_src emacs-lisp
@@ -3043,4 +3058,5 @@ Everything in this section gets "tangled" into the ~packages.el~ file which allo
 (package! gdscript-mode)
 (package! all-the-icons)
 (package! consult-org-roam)
+(package! anki-editor)
 #+end_src
