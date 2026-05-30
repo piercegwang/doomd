@@ -1075,180 +1075,58 @@ Custom commands, testing sorting strategy variable
          :desc "Org Decrypt Entry" "d" #'org-decrypt-entry)))
 #+end_src
 
-*** DOCT Org Capture Template
-#+begin_src emacs-lisp
-(personal
- (setq org-capture-templates
-       (doct '(("Inboxes" :keys "i"
-                :file "~/NextCloud/Documents/org-roam/20220808093519-todo_inbox.org"
-                :type entry
-                :template ("* %?")
-                :children (("Flexible Entry" :keys "i")
-                           ("Events Entry" :keys "e"
-                            :file "~/NextCloud/Documents/org-roam/20241215110541-events_inbox.org"
-                            :template ("* %?"
-                                       "%^t"
-                                       ""))
-                           ("Todo" :keys "t"
-                            :template ("* TODO %?"))
-                           ("Notes Entry" :keys "n"
-                            :file "~/NextCloud/Documents/org/notes.org"
-                            :template ("* %?"
-                                       "%U"))
-                           ("Prayer" :keys "p"
-                            :file "~/NextCloud/Documents/org-roam/20230918104128-prayer.org"
-                            :headline "Daily Prayer"
-                            :template ("* %?"))))
-               ("Finances" :keys "f"
-                :children (("Transaction" :keys "t"
-                            :file "~/NextCloud/Documents/org-roam/20260128144717-2026_finances.org"
-                            :prepend t
-                            :template ("* %u"
-                                       "#+begin_src ledger :results silent"
-                                       "%(format-time-string \"%Y/%m/%d\") * %^{Specific Transaction Name}"
-                                       "    %?"
-                                       "    assets:%^{Source||bank:venmo|bank:chase:college|bank:chase:freedom credit|bank:alliant:checking|bank:alliant:savings|bank:schwab ira|bank:schwab ira:cash}"
-                                       "#+end_src"
-                                       ""))
-                           ("Tithe" :keys "T"
-                            :file "~/NextCloud/Documents/org-roam/20260128144717-2026_finances.org"
-                            :prepend t
-                            :template ("* %u"
-                                       "#+begin_src ledger :results silent"
-                                       "%(format-time-string \"%Y/%m/%d\") * Tithe at Redeemer LSQ"
-                                       "    liabilities:tithe:redeemer lsq  $%?"
-                                       "    assets:bank:chase:freedom credit"
-                                       "#+end_src"
-                                       ""))
-                           ("Refill Omni" :keys "O"
-                            :file "~/NextCloud/Documents/org-roam/20260128144717-2026_finances.org"
-                            :prepend t
-                            :template ("* %u"
-                                       "#+begin_src ledger :results silent"
-                                       "%(format-time-string \"%Y/%m/%d\") * Refill OMNY Card - 230355060085554226"
-                                       "    expenses:travel:mta                         $140%?"
-                                       "    assets:bank:chase:freedom credit"
-                                       "#+end_src"
-                                       ""))
-                           ("Income" :keys "i"
-                            :type entry
-                            :children (("Acacia Income" :keys "a"
-                                        :file "~/NextCloud/Documents/org-roam/20260128144717-2026_finances.org"
-                                        :prepend t
-                                        :template ("* %u"
-                                                   "Bank Entry: %^{Bank Entry}"
-                                                   "#+begin_src ledger :results silent"
-                                                   "%(format-time-string \"%Y/%m/%d\") * Acacia Work"
-                                                   "    income:work:acacia  -$%?"
-                                                   "    assets:bank:alliant:checking"
-                                                   "#+end_src"
-                                                   ""))
-                                       ("Juilliard Income" :keys "j"
-                                        :file "~/NextCloud/Documents/org-roam/20260128144717-2026_finances.org"
-                                        :prepend t
-                                        :template ("* %u"
-                                                   "Bank Entry: %^{Bank Entry}"
-                                                   "#+begin_src ledger :results silent"
-                                                   "%(format-time-string \"%Y/%m/%d\") * Juilliard Work"
-                                                   "    income:work:juilliard  -$%?"
-                                                   "    assets:bank:alliant:checking"
-                                                   "#+end_src"
-                                                   ""))))))
-               ("Events" :keys "e"
-                :type entry
-                :children (("Emacs Entry (Not Synced)" :keys "f"
-                            :file "~/NextCloud/Documents/org-roam/20220817093640-emacs_calendar.org")
-                           ("Emacs Calendar" :keys "e"
-                            :file "~/NextCloud/Documents/org-roam/20220817093640-emacs_calendar.org"
-                            :template ("* %^{Title of event}"
-                                       ":PROPERTIES:"
-                                       ":calendar-id: ihfv2u5n9uf5ksj5484vbe7mj4@group.calendar.google.com"
-                                       ":END:"
-                                       ":org-gcal:"
-                                       "%^{Scheduled time + duration}T%?"
-                                       ":END:"))
-                           ("Main Calendar" :keys "g"
-                            :file "~/NextCloud/Documents/org-roam/20220817093328-main_google_calendar.org"
-                            :template ("* %^{Title of event}"
-                                       ":PROPERTIES:"
-                                       ":calendar-id: pierce.g.wang@gmail.com"
-                                       ":END:"
-                                       ":org-gcal:"
-                                       "%^{Scheduled time + duration}T%?"
-                                       ":END:"))
-                           ("MMS Calendar" :keys "m"
-                            :file "~/NextCloud/Documents/org-roam/20220903112443-morningside_music_society_calendar.org"
-                            :template ("* %^{Title of event}"
-                                       ":PROPERTIES:"
-                                       ":calendar-id: morningsidemusicsociety@gmail.com"
-                                       ":END:"
-                                       ":org-gcal:"
-                                       "%^{Scheduled time + duration}T%?"
-                                       ":END:"))))
-               ("Stuff and Things" :keys "s"
-                :file "~/NextCloud/Documents/org/notes/stuff_and_things/organizing_temp.org"
-                :children (("Database Entry" :keys "i"
-                            :type entry
-                            :template ("* DECIDE %?"
-                                       "%U"))
-                           ("Violin Repertoire" :keys "m"
-                            :type entry
-                            :id "89641a25-2cab-4b04-8d36-75c77d4dc855"
-                            :template ("* - %?"
-                                       "%^{COMPOSER}p"
-                                       "%^{ARRANGEMENT}p"
-                                       "%^{COMPOSED}p"
-                                       "%^{STYLE|habit}p"))
-                           ("Repertoire Wishlist" :keys "w"
-                            :type entry
-                            :id "3f538210-a3ab-4e3f-8c1c-fe5c08d3a2f3"
-                            :template ("* - %?"
-                                       "%^{COMPOSER}p"
-                                       "%^{ARRANGEMENT}p"
-                                       "%^{COMPOSED}p"
-                                       "%^{STYLE|habit}p"))))
-               ("CRM Contact" :keys "c"
-                :type entry
-                :function (lambda () (get-person-file))
-                :template ("* CONTACT %^{title}"
-                           "SCHEDULED: <%(pgw/year-month-day) .+%^{lowrange}d/%^{highrange}d>"
-                           ":PROPERTIES:"
-                           ":STYLE:    habit"
-                           ":END:"))))))
-#+end_src
+*** DOCT Org Capture Template :crypt:
+-----BEGIN PGP MESSAGE-----
 
-#+begin_example
-("Stuff and Things" :keys "s"
-               :file "~/NextCloud/Documents/org/notes/stuff_and_things/organizing_temp.org"
-               :children (("Database Entry" :keys "i"
-                           :type entry
-                           :template ("* DECIDE %?"
-                           "%U"))
-                          ("Packing for College" :keys "p"
-                           :type entry
-                           :file "~/NextCloud/Documents/org-roam/temporary/20210805114431-packing_for_college.org"
-                           :contexts (:in-file "20210805114431-packing_for_college.org")
-                           :template ("* DONE Item"
-                                      "%^{TYPE}p"
-                                      "%^{QUANTITY}p"
-                                      "%^{COLOR}p"
-                                      "%^{FIT}p"
-                                      "%^{NOTES}p")
-                           :children (("Shirts" :keys "s"
-                                       :headline "Shirts")
-                                      ("Pants" :keys "p"
-                                       :headline "Pants")
-                                      ("Other" :keys "o"
-                                       :headline "Other")))
-                          ("Violin Repertoire" :keys "m"
-                           :type entry
-                           :id "89641a25-2cab-4b04-8d36-75c77d4dc855"
-                           :contexts (:in-file "repertoire.org")
-                           :template ("* - %?"
-                                      "%^{COMPOSER}p"
-                                      "%^{ARRANGEMENT}p"
-                                      "%^{COMPOSED}p"))))
-#+end_example
+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
+=GVYw
+-----END PGP MESSAGE-----
 
 *** Drawers
 
